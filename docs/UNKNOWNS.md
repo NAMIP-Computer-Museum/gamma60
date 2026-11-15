@@ -35,6 +35,7 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 | U-27 | Statut du pupitre | élément [ONDE, table B61] / « pas un élément d'E/S » [B61 p.47] | élément de classe 0, hors limite des 40 E/S | — |
 | U-28 | Mnémoniques anglais (B61) de GE / RE (RNE ← X ; mémoire[X] ← RNE) | décrites en COURS p.53-60 ; absentes de la table B61 p.62-66 | LE / PE, par analogie GB→LB, RI→PI, RA→PA, RB→PB (G→L, R→P) | `directives.yaml` |
 | U-29 | Mnémoniques français (COURS) de DESK, TRAN, tambour (hors DAO), unisélecteur, cartes, imprimante, bande perforée, clichés ; lien TRT [COURS] ↔ TCD / TDC [B61] | présents dans COURS (p.83-154) mais non relevés | langue `fr` absente : l'assembleur accepte la forme `en` (avertissement en mode diagnostic) | `directives.yaml` |
+| U-30 | Adresses des registres I1/I2 (B/C, tête et queue de la chaîne de reprise) de chaque élément réel | « en Mémoire Centrale à des adresses spécialisées » [ONDE §2] ; adresses non données | une table de 2 catènes par numéro d'élément, en début de mémoire, hors zone allouable aux UT | `data/configs/*.yaml` (à créer au J0) |
 
 ## Pistes documentaires
 - Bosset, ICIP 1959 (logique interne) ; Duverger 1958 et 1961 ; brochure Bull de programmation

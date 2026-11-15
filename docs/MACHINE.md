@@ -35,10 +35,10 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 |---|---|---|
 | Technologie | tores de ferrite, sélection par demi-courant | ONDE |
 | Taille | 1 à 8 blocs [COURS, BPD] ou 2 à 8 [B61, ONDE] de 4 096 catènes | |
-| Capacités (B61) | 2 blocs : 8 192 catènes ; 4 : 16 384 ; 8 : 32 768 | B61 p.12 |
+| Capacités (B61) | 2 blocs : 8 192 catènes ; 4 : 16 384 ; 8 : 32 768 | B61 p.11 |
 | Bloc | 24 niveaux (+3 de clé) de 64 × 64 tores ; contrôle de sélection | B61 p.10 ; ONDE |
 | Cycle / accès | 10 µs [B61, ONDE] ; 11 µs [COURS, BPD] (?) | |
-| Débit | un catène par cycle pour toute la machine | B61 p.12 |
+| Débit | un catène par cycle pour toute la machine | B61 p.11 |
 | Registre Z | passage obligé de tout catène (31 positions selon ONDE) | COURS p.5 ; ONDE p.21 |
 
 ## 3. Catène, codages, clés
@@ -64,8 +64,18 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 
 - 2 catènes : signe (1 b) + 1er chiffre d'exposant (3 b) ; 2e chiffre d'exposant (4 b) ;
   10 chiffres DCB de mantisse (4 dans la 1re catène, 6 dans la 2e). [B61 p.18]
-- Exposant biaisé de 40 (stocké 0-79). Virgule flottante (normalisée) ou virgule programmée
-  (exposant entre 40 : 10 décimales, et 50 : 0 décimale). [B61 p.18]
+- Signe : bit 24 de la 1re catène, 0 = +, 1 = − (signe et valeur absolue). Chiffre des
+  dizaines de l'exposant en binaire (0-7, bits 23-21), chiffre des unités en DCB (0-9,
+  bits 20-17). [B61 p.18]
+- Exposant biaisé de 40 (stocké E = 0-79, exposant réel E − 40) pour éviter les exposants
+  négatifs. Mantisse m1…m10 lue comme la fraction 0.m1…m10 :
+  valeur = ± 0.m1…m10 × 10^(E − 40). [B61 p.18]
+- Virgule flottante (normalisée) : exposant choisi pour que 0,1 ≤ mantisse < 1 (m1 ≠ 0),
+  normalisation automatique par ARIT. Virgule programmée : exposant entre 40 et 50 ; nombre
+  de décimales (« position de la virgule », 10 à 0) = 50 − E. [B61 p.18]
+- Exemples [B61 p.18] : + 0,00482 = `+ 39 0482 | 000000` (non normalisé) ; + 325,42 en
+  flottant = `+ 43 3254 | 200000` ; + 4832 = `+ 50 0000 | 004832` (virgule en position 0)
+  ou `+ 45 0483 | 200000` (position 5).
 
 ## 5. Unité centrale
 
@@ -134,6 +144,11 @@ profil (`data/directives.yaml`, `ISA.md` §7).
   (≤ 20 éléments, 2 au plus) ; 8 voies dans l'UC, 5 utilisées en standard.
 - c0 : pupitre (et LOGI selon ONDE ; c1 selon MAI ?) ; c1 : ARIT, COMP, TRAN ; c2 : tambours,
   unisélecteurs ; c3 : cartes, imprimantes ; c4 : bande perforée, machines à écrire.
+- Répartition « suivant leurs performances et le degré d'urgence de leurs demandes de
+  transfert ». ONDE annonce « 4 classes » mais en décrit 5 (0 à 4). [ONDE §3]
+- Classe 3 : le Multiplexeur intercale sur le canal les catènes des éléments lents (cartes,
+  imprimantes) ; classe 4 : éléments à très faible débit, raccordés par ce multiplexeur ou
+  par un multiplexeur spécialisé. [ONDE §3.4-3.5]
 
 ### 6.4 Éléments partageables et d'E/S [AVG p.59 ; B61 p.42]
 - Cartes, bande perforée, imprimantes, bandes : attribués à une seule UT, pas de chaîne de
@@ -160,6 +175,10 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 - **Éléments virtuels** : PROT/LIBE sur une catène-image ; bit 24 = indice d'occupation,
   bits 1-15 = tête de chaîne (errata COURS p.31) ; 2e catène-image = queue. [COURS p.27-31 ;
   B61 p.25]
+  Comparaison (contexte) : le sémaphore de Dijkstra (1968) associe aussi une liste d'attente
+  à une variable partagée (opérations P/V), mais l'ordre de sortie de la liste y est
+  explicitement indéfini [DIJ68 p.345, note 2] ; la chaîne d'un élément virtuel est FIFO
+  [COURS p.27-31].
 
 ## 8. Éléments un par un
 
@@ -178,6 +197,7 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 
 ### LOGI [B61 p.39-40 ; COURS p.111-121]
 - Registres K et L, 24 b, à décalage série ; résultat dans L ; 4 RAC.
+- Opère en série, « ce qui conduit à un opérateur très simple ». [ONDE §3.1]
 - Chargement de K et L par deux directives avec décalage circulaire à droite de V positions.
 - Qualitatif : L > K, L < K, L = K, inclusion, exclusion, réunion tout à 1.
 - Temps (cycles MR) : réception d'une directive 6 ; ADD 12 ; SOU 24 ; MUL 6 + 12n (n = nombre
@@ -186,6 +206,7 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 ### COMP [B61 p.36-37 ; COURS p.73-78]
 - Zones de 1 à 255 catènes, binaire pur, poids fort d'abord ; deux registres d'opérande, un
   registre de longueur ; 3 RAC spécialisés (0 variable ; 1, 2 bornes ou 2e terme).
+- Travaille en parallèle, comme ARIT. [ONDE §3.2]
 - Fonctions secondaires : seul transfert MC → MC ; effacement de zone.
 - Temps : B61 30 / 50 / 10 µs par catène ; COURS 5+3L, 5+5L, 2+L, 2+3L cycles.
 - Incidents : 16-17 décomptage, 18-19 comparaison, 20-21 transfert, 22 directive décodée
@@ -194,6 +215,10 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 ### TRAN (TRAD) [B61 p.37-39 ; COURS p.83-110]
 - Transcodage, mise en page, condensation/expansion, transposition ligne → colonne des cartes,
   mise en forme semi-logarithmique.
+- Six sous-ensembles qui se comportent comme des éléments indépendants, chacun avec ses propres
+  demandes de transfert (chaînes de priorité locales) : matrice de transposition, matrice
+  d'interprétation des codes (MIC), entrée, sortie, directive, cliché. La MIC est regarnie par
+  programme selon le code voulu (Bull, IBM, interne). [ONDE §3.2]
 - Registres d'entrée, de sortie S, directive + catène qualitatif, index, décompteur ;
   datum de reprise de 4 mémoires en MC.
 - MIC : 256 adresses [B61] / 128 × 20 b [COURS] / 128 × 21 b [ONDE] (?) ; matrice de
@@ -209,7 +234,8 @@ profil (`data/directives.yaml`, `ISA.md` §7).
   piste × 256 + position (0-199), adresses discontinues. Jusqu'à 4 tambours.
 
 ### Unisélecteurs et dérouleurs (MATA / DERU) [B61 p.13, p.26, p.53-55 ; COURS p.137-151]
-- L'élément est l'unisélecteur (≤ 10, 2 groupes de 5, 24 dérouleurs par groupe, 48 au total) ;
+- L'élément est l'unisélecteur (≤ 10, 2 groupes de 5, 24 dérouleurs par groupe, 48 au total ;
+  un dérouleur peut être desservi par 2 ou 3 unisélecteurs [ONDE §3.3]) ;
   câblage : U1, U2 → dérouleurs 1-12 ; U3 → 5-16 ; U4, U5 → 13-24. Petits Gamma 60 :
   3 unisélecteurs, 6-8 dérouleurs ; la plupart : 5 et 12-18.
 - Bande mylar 12,7 mm, 8 pistes : catène sur 6 pistes × 4 colonnes ; clé sur la 7e (en face
@@ -251,6 +277,13 @@ profil (`data/directives.yaml`, `ISA.md` §7).
   incidents) ; GGU : noyau ≈ 3 800 mots, topogrammes, implantation fixe ou variable, mise en
   attente des UT, jobs (D3).
 - UT = programme assemblé (code C) puis distribué (D2), valeurs figées ; phases (overlays).
+- Contenu de la MC : outre les programmes et données, les registres I1/I2 (B/C) de chaque
+  élément « en Mémoire Centrale à des adresses spécialisées » [ONDE §2] (adresses : U-30) ;
+  les catènes-image des éléments virtuels, à des adresses choisies par le programmeur (ex. 1 000
+  et 1 001) [COURS p.27-31] ; les catènes vierges dans le code [COURS p.24-31] ; les mémoires de
+  manœuvre, placées à la fin du sous-programme [COURS p.47-49] ; la zone MC associée à chaque
+  opération d'E/S [AVG p.59 ; B61 p.42]. Hors MC : RAI, RAC (matrices de l'UC), registres A et B,
+  registres du DP. [B61 p.22-23 ; COURS p.14]
 
 ## 10. Contrôles [B61 p.26, p.35 ; ONDE]
 Clé sur tous les transferts ; mod 7 dans ARIT ; parité TRAN et bande perforée ; double lecture

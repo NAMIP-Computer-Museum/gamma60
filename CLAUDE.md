@@ -16,6 +16,8 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - `docs/SOURCES.md` — bibliographie ; PDF dans `archives/docs/`,
   texte extrait dans `refs/txt/` pour chercher (grep) dans les sources.
 - `docs/diagrams/` — modèle SysML v7 (PlantUML) ; `docs/` fait foi en cas de désaccord.
+- `wiki/` — présentation en anglais, dérivée de `docs/` (qui fait foi) ; navigable depuis le
+  dépôt, liens relatifs. Un fait nouveau va d'abord dans `docs/`, avec sa source.
 - `data/` — tables : `encoding`, `directives`, `qualitative`, `timings`, `priorities`,
   `profiles`, `charset` (code interne 6 bits + code carte), `configs/`.
 - `archives/` — sources versionnées : `docs/` (PDF), `photos/` (photos de pages citées),
@@ -46,7 +48,10 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 
 ## Conventions
 - Python ≥ 3.11, paquet `src/gamma60/`, tests `pytest`, lint `ruff`.
-- Code, identifiants et commentaires en anglais ; documentation en français.
+- Code, identifiants et commentaires en anglais ; documentation de référence (`docs/*.md`)
+  en français ; wiki (`wiki/`) en anglais. Tout élément localisé (mnémoniques,
+  codes complémentaires, lettres des RAC…) est donné dans les deux langues du code B,
+  `en` (B61) et `fr` (COURS), par exemple `L` / `G` ; orthographe supposée marquée (U-xx).
 - Registres nommés comme dans le cours : RNE, RAPA, RAPP, REDP, RSDP, A, B, RAI (+ indice
   d'occupation), RAC, registres B/C de chaîne de reprise, RLN.
 - Éléments nommés par les mnémoniques B61 (ARIT, LOGI, TRAN, COMP, DRUM, CARR, CARP, PRIN,

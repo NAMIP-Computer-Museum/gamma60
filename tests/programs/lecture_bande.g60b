@@ -12,5 +12,5 @@ START:  PROT        IMAGE              ; engager l'élément virtuel (zone TAMPO
         LIBE        IMAGE              ; libérer l'élément virtuel
         VIERGE
         STOP
-IMAGE:   ZONE 1                        ; image de l'élément virtuel
+IMAGE:   ZONE 2                        ; images de l'élément virtuel (occupation + tête, queue) [COURS p.27-31]
 TAMPON:  ZONE 128

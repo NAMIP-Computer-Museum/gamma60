@@ -23,3 +23,30 @@
 Environ 16 à 20 machines (16 répertoriées par AVG). Clients connus : voir MACHINE.md et
 SOURCES.md. Génération : « 2e génération » est une classification rétrospective, absente des
 documents d'époque.
+
+## Installations clients
+
+Source principale : graphique « Calendrier des installations clients »
+(`archives/images/Gamma60-calendrier.jpg`, origine à documenter — probablement AVG, qui
+répertorie 16 machines). Années **lues sur le graphique** (précision ≈ ½ an) ; « ? » = marqué
+inconnu sur le graphique. Noms tels qu'écrits sur le graphique (développement des sigles non
+sourcé).
+
+| Client | Commande | Livraison | Disponibilité | Retour | Autres sources |
+|---|---|---|---|---|---|
+| AGVie | 1957 | — | 1960 | 1962 | « 26 juin 1957 » associé à AGVie [AVG] |
+| EDF | 1957 | 1960 | 1960 | 1964 | première livraison, EDF Paris [FEB] |
+| CNEP | 1957 | 1961 | 1962 | 1969 | |
+| UNION I | 1957 | 1961 | 1963 | 1969 | |
+| SNCF | 1958 | 1960 | 1960 | 1966 | livrée en nov. 1960, paie en service le 15 avr. 1961 [FEB] ; salle à la gare d'Auteuil (`Gamma60-SNCF-Auteuil-2.jpg`, légende) |
+| RTT I | 1958 | 1960 | 1961 | 1974 | contrat déc. 1958, fin de service 1974 [RTT] ; inauguration à la Régie des T.T., rue Lebeau, Bruxelles, par le ministre des P.T.T. M. Busieau : facturation des abonnés du téléphone (≈ 600 000 comptes, 850 000 communications par mois) [*La Meuse*, 6 juil. 1961, `Gamma60-RTT-1961.jpg`] |
+| URBAINE SEINE | 1959 | 1961 | 1961 | 1970 | |
+| GMF | 1960 | 1962 | 1962 | 1973 | |
+| CREDITO ITALIANO | 1960 | 1961 | 1961 | ? (≈ 1971) | |
+| CEA | 1960 | 1961 | 1962 | 1964 | |
+| BANCA LAVORO | ? | 1962 | 1963 | ? (≈ 1971) | installation à Rome (`Gamma60-Rome.jpg`, légende « Banca del Lavoro à Rome ») |
+| PRINTEMPS | 1961 | — | 1962 | 1965 | |
+| HBNPC | 1961 | 1962 | 1963 | 1970 | |
+| TLF | 1962 | 1963 | 1964 | 1972 | |
+| MITSUBISHI | 1963 | 1965 | 1965 | 1972 | |
+| RTT II | 1964 | — | 1966 | 1974 | |
