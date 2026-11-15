@@ -1,15 +1,13 @@
 #!/usr/bin/env sh
-# Télécharge les sources publiques dans refs/pdf et extrait leur texte dans refs/txt.
-# Usage : sh tools/fetch_refs.sh   (nécessite curl et pdftotext / poppler-utils)
+# Extrait le texte des PDF d'archive (archives/docs/) dans refs/txt/, sous le même nom.
+# Aucun téléchargement : les PDF sont versionnés dans archives/docs/.
+# Un .txt déjà présent n'est jamais écrasé (certains ont un meilleur OCR que pdftotext).
+# Usage : sh tools/fetch_refs.sh   (nécessite pdftotext / poppler-utils)
 set -e
 cd "$(dirname "$0")/.."
-mkdir -p refs/pdf refs/txt refs/photos
-get() { [ -f "refs/pdf/$1" ] || curl -L --fail -o "refs/pdf/$1" "$2" || echo "ÉCHEC : $1 ($2)"; }
-get onde-electrique-1960-davous-bataille-harrand.pdf http://www.feb-patrimoine.com/projet/gamma60/gamma60_bataille2.pdf
-get tumlin-smotherman-evaluation-design-gamma60.pdf  https://db.aconit.org/dbmedia_0/pdf_10/10174.pdf
-# Nakala (B61, BPD) et ACM : téléchargement manuel conseillé depuis les liens de docs/SOURCES.md
-for f in refs/pdf/*.pdf; do
+mkdir -p refs/txt refs/photos
+for f in archives/docs/*.pdf; do
   t="refs/txt/$(basename "${f%.pdf}").txt"
-  [ -f "$t" ] || pdftotext -layout "$f" "$t"
+  [ -f "$t" ] || pdftotext -q -layout "$f" "$t" || echo "ÉCHEC : $f"
 done
-echo "Terminé. Voir docs/SOURCES.md pour les documents à récupérer à la main."
+echo "Terminé. Liste des sources : docs/SOURCES.md."

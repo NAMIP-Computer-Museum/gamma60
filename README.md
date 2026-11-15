@@ -7,5 +7,5 @@ primitives de type fork/join (SIMU, coupures de jonction) dans son jeu d'instruc
 - Spécification : `docs/` (commencer par `docs/MACHINE.md`, puis `docs/ISA.md`).
 - Tables modifiables : `data/` (dont le code interne des caractères : `data/charset.yaml`).
 - Programmes de référence : `tests/programs/` (dont un programme d'époque publié par le NAM-IP).
-- Sources : `docs/SOURCES.md`. Les documents vont dans `refs/` (non versionné) ;
-  `tools/fetch_refs.sh` télécharge ceux qui sont publics.
+- Sources : `docs/SOURCES.md`. Les PDF sont dans `archives/docs/` ;
+  `tools/fetch_refs.sh` en extrait le texte dans `refs/txt/` (non versionné).

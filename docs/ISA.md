@@ -1,7 +1,7 @@
 # Jeu d'instructions du Gamma 60 (code B, codage code A)
 
 Source principale : B61, chapitre III et tables « The Gamma 60 code B table of instructions »
-(PDF `refs/pdf/bull-1961-gamma60-data-processing-system.pdf`, pages 62 à 66 ; images dans
+(PDF `archives/docs/Bull-1961-Gamma60-Data-Processing-System.pdf`, pages 62 à 66 ; images dans
 `refs/photos/bull-1961-tables-p-62.png` … `-66.png`). Vérifier sur les images en cas de doute :
 l'OCR des tables est inutilisable.
 

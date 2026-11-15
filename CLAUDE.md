@@ -13,7 +13,8 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - `docs/EMULATOR_DESIGN.md` — architecture logicielle ; `docs/TOOLCHAIN.md` — chaîne d'outils.
 - `docs/ROADMAP.md` — jalons et critères d'acceptation. Travailler jalon par jalon.
 - `docs/HARDWARE.md`, `docs/HISTORY.md` — contexte (non nécessaire à l'émulation).
-- `docs/SOURCES.md` — bibliographie ; `refs/txt/` pour chercher (grep) dans les sources.
+- `docs/SOURCES.md` — bibliographie ; PDF dans `archives/docs/`,
+  texte extrait dans `refs/txt/` pour chercher (grep) dans les sources.
 - `docs/diagrams/` — modèle SysML v7 (PlantUML) ; `docs/` fait foi en cas de désaccord.
 - `data/` — tables : `encoding`, `directives`, `qualitative`, `timings`, `priorities`,
   `profiles`, `charset` (code interne 6 bits + code carte), `configs/`.
@@ -34,7 +35,7 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
    erronée ») et `diagnostic` (contrôles modernes : préfixe 1110, chevauchement d'UT, JOIN
    jamais atteint, catène vierge manquante…).
 8. **Tests obligatoires** ; les programmes de `tests/programs/` doivent toujours passer.
-9. Toute affirmation ajoutée dans `docs/` cite sa source (fichier de `refs/` + page/§).
+9. Toute affirmation ajoutée dans `docs/` cite sa source (fichier de `archives/docs/` ou `refs/photos/` + page/§).
 
 ## Conventions
 - Python ≥ 3.11, paquet `src/gamma60/`, tests `pytest`, lint `ruff`.
@@ -51,4 +52,5 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 ## Méthode de travail
 - Avant un jalon : relire ROADMAP.md, proposer un plan, attendre validation.
 - Après un jalon : mettre à jour ROADMAP.md, UNKNOWNS.md et, si besoin, les diagrammes.
-- `refs/` n'est pas versionné (droits d'auteur) : résumer et citer, ne jamais recopier.
+- `refs/` (texte extrait, photos de pages) n'est pas versionné : résumer et citer les sources,
+  ne jamais les recopier.
