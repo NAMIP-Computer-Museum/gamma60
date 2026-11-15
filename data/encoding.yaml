@@ -1,0 +1,23 @@
+# Codage des instructions en code A — source COURS p.33-52 (préfixes et champs).
+# Les valeurs des sous-codes marquées synthetic: true sont RECONSTRUITES (U-01) :
+# stables, documentées, à remplacer dès qu'une source les donne.
+bits: {numbering: "1 = poids faible (droite) ... 24 = poids fort (gauche)"}
+address_function: {d_bit: 17, s_bit: 16, order: "d puis s", negative_offset: "complément à 32768"}
+types:
+  branch:      {tk: "00",   tk_bits: [24, 23], fields: {condition: [22, 18], d: 17, s: 16, x: [15, 1]},
+                conditions: {never: 0, bits_of_A: [1, 24], always: 31}}
+  cut:         {tk: "01",   tk_bits: [24, 23], fields: {kind: [22, 20], join_m: [19, 18], d: 17, s: 16, x: [15, 1]}}
+  central:     {tk: "10",   tk_bits: [24, 23], fields: {directive: [22, 18], d: 17, s: 16, x: [15, 1]}}
+  address:     {tk: "110",  tk_bits: [24, 22], fields: {op: [21, 20], car: [19, 18], d: 17, s: 16, x: [15, 1]}}
+  element_directive:
+               {tk: "1111", tk_bits: [24, 21],
+                with_free_variable: {type: [20, 18], d: 17, s: 16, x: [15, 1]},
+                without_free_variable: {characteristic: [20, 1]}}
+  undocumented: {tk: "1110", note: "non documenté (U-24)"}
+blank_catena_rule: "7 bits de gauche à 0 => exécuté comme branchement « jamais » (COURS p.42)"
+synthetic_subcodes:
+  synthetic: true
+  cut_kind: {normal: 0, no_release: 1, no_busy_check: 2, PROT: 3, LIBE: 4, SIMU: 5, STOP: 6}
+  address_op: {L: 0, P: 1, A: 2, S: 3}
+  central_directive: {PI: 0, GE: 1, RE: 2, TA: 3, PA: 4, TB: 5, PB: 6, LB: 7, AB: 8, SB: 9,
+                      CB: 10, SQ: 11, SI: 12, SA: 13, SN: 14, RR: 15, FO: 16, FZ: 17, IC: 18, CP: 19}

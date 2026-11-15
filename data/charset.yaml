@@ -1,0 +1,73 @@
+# Code interne alphanumérique du Gamma 60 (6 bits, 60 caractères)
+# Source : B61, table « GAMMA 60 CODE », p.16 (refs/photos/b61-p16-code-interne.png)
+# Code = 2 bits de colonne (forts) + 4 bits de ligne (faibles).
+# Vérifié par les exemples du texte : B = 000010, U = 010101, L = 001100 ; chiffres = 10 + DCB.
+# card : rangées perforées dans la colonne de carte (code carte Bull à 3 perforations max).
+# 4 codes inutilisés : 011100 à 011111.
+version: 1
+source: B61 p.16
+characters:
+  - {code: '000000', value: 0, char: 'space', card: []}
+  - {code: '000001', value: 1, char: 'A', card: [7, 11]}
+  - {code: '000010', value: 2, char: 'B', card: [7, 0]}
+  - {code: '000011', value: 3, char: 'C', card: [7, 1]}
+  - {code: '000100', value: 4, char: 'D', card: [7, 2]}
+  - {code: '000101', value: 5, char: 'E', card: [7, 3]}
+  - {code: '000110', value: 6, char: 'F', card: [7, 4]}
+  - {code: '000111', value: 7, char: 'G', card: [7, 5]}
+  - {code: '001000', value: 8, char: 'H', card: [7, 6]}
+  - {code: '001001', value: 9, char: 'I', card: [8, 12]}
+  - {code: '001010', value: 10, char: 'J', card: [8, 11]}
+  - {code: '001011', value: 11, char: 'K', card: [8, 0]}
+  - {code: '001100', value: 12, char: 'L', card: [8, 1]}
+  - {code: '001101', value: 13, char: 'M', card: [8, 2]}
+  - {code: '001110', value: 14, char: 'N', card: [8, 3]}
+  - {code: '001111', value: 15, char: 'O', card: [7, 12]}
+  - {code: '010000', value: 16, char: 'P', card: [8, 4]}
+  - {code: '010001', value: 17, char: 'Q', card: [8, 5]}
+  - {code: '010010', value: 18, char: 'R', card: [8, 6]}
+  - {code: '010011', value: 19, char: 'S', card: [9, 11]}
+  - {code: '010100', value: 20, char: 'T', card: [9, 0]}
+  - {code: '010101', value: 21, char: 'U', card: [9, 1]}
+  - {code: '010110', value: 22, char: 'V', card: [9, 2]}
+  - {code: '010111', value: 23, char: 'W', card: [9, 3]}
+  - {code: '011000', value: 24, char: 'X', card: [9, 4]}
+  - {code: '011001', value: 25, char: 'Y', card: [9, 5]}
+  - {code: '011010', value: 26, char: 'Z', card: [9, 6]}
+  - {code: '011011', value: 27, char: '.', card: [11]}
+  - {code: '011100', value: 28, char: null, card: null, note: inutilisé}
+  - {code: '011101', value: 29, char: null, card: null, note: inutilisé}
+  - {code: '011110', value: 30, char: null, card: null, note: inutilisé}
+  - {code: '011111', value: 31, char: null, card: null, note: inutilisé}
+  - {code: '100000', value: 32, char: '0', card: [0]}
+  - {code: '100001', value: 33, char: '1', card: [1]}
+  - {code: '100010', value: 34, char: '2', card: [2]}
+  - {code: '100011', value: 35, char: '3', card: [3]}
+  - {code: '100100', value: 36, char: '4', card: [4]}
+  - {code: '100101', value: 37, char: '5', card: [5]}
+  - {code: '100110', value: 38, char: '6', card: [6]}
+  - {code: '100111', value: 39, char: '7', card: [7]}
+  - {code: '101000', value: 40, char: '8', card: [8]}
+  - {code: '101001', value: 41, char: '9', card: [9]}
+  - {code: '101010', value: 42, char: '*', card: [12], note: "glyphe peu net sur le scan : astérisque probable"}
+  - {code: '101011', value: 43, char: ',', card: [9, 8, 11]}
+  - {code: '101100', value: 44, char: '◊', card: [9, 12]}
+  - {code: '101101', value: 45, char: '-', card: [9, 8], note: "tiret court (trait d'union probable), distinct du « moins » 11-1010"}
+  - {code: '101110', value: 46, char: '£', card: [9, 7, 11]}
+  - {code: '101111', value: 47, char: '$', card: [9, 7, 12]}
+  - {code: '110000', value: 48, char: 'Δ', card: [9, 7, 0]}
+  - {code: '110001', value: 49, char: ':', card: [9, 7, 1]}
+  - {code: '110010', value: 50, char: '''', card: [9, 7, 2]}
+  - {code: '110011', value: 51, char: '×', card: [9, 7, 3]}
+  - {code: '110100', value: 52, char: '%', card: [9, 7, 4]}
+  - {code: '110101', value: 53, char: '<', card: [9, 7, 5]}
+  - {code: '110110', value: 54, char: '>', card: [9, 7, 6]}
+  - {code: '110111', value: 55, char: '/', card: [9, 7]}
+  - {code: '111000', value: 56, char: '(', card: [9, 8, 0]}
+  - {code: '111001', value: 57, char: ')', card: [9, 8, 1]}
+  - {code: '111010', value: 58, char: '−', card: [9, 8, 2], note: "tiret long : signe moins probable"}
+  - {code: '111011', value: 59, char: '+', card: [9, 8, 3]}
+  - {code: '111100', value: 60, char: '≠', card: [9, 8, 4]}
+  - {code: '111101', value: 61, char: 'Π', card: [9, 8, 5]}
+  - {code: '111110', value: 62, char: 'Σ', card: [9, 8, 6]}
+  - {code: '111111', value: 63, char: '□', card: [9, 8, 12]}

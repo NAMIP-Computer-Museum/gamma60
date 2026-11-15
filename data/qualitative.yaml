@@ -1,0 +1,39 @@
+# Profils du catène qualitatif (24 positions ; plusieurs bits à 1 possibles).
+# Transmis au registre A quand le DP sert l'élément (COURS p.6, p.15 ; B61 p.23).
+general: {24: "intervention humaine / regroupement des incidents", 23: "incident réparable par programme"}
+arithmetic:   # COURS p.65, p.72 ; B61 p.35
+  1: ">"
+  2: "<"
+  3: "="
+  4: ">="
+  5: "<="
+  6: "!="
+  7: "résultat = 0"
+  8: "résultat < 0"
+  9: "résultat > 0"
+  overflow: "incident (position non lisible dans le scan)"
+comparator:   # COURS p.77-78 ; B61 p.36
+  two_bounds: {1: "x > p et q", 2: "x < p et q", 3: "p <= x <= q", 4: "x = p", 5: "x = q",
+               6: "p < x < q", 7: "x nul", 8: "x tout à 1"}
+  simple: {1: ">", 2: "<", 3: "=", 4_10: "≥, ≤, ≠ et tests nul / tout à 1 des opérandes (OCR partiel)"}
+  incidents: {16_17: "décomptage de longueur", 18_19: "comparaison", 20_21: "transfert canal",
+              22: "directive décodée erronée", 23: "longueur > 255", 24: "regroupement"}
+uniselector:  # COURS p.138-151
+  16: "interdiction d'écriture (avec 23) — p.144 donne 15 (?)"
+  18: "mauvaise lecture / mauvais enregistrement (avec 23)"
+  19: "bloc-marque lu (avec 23)"
+  20: "approche fin de bande, ~5 m (avec 23)"
+  21: "dérouleur occupé (avec 23)"
+  "24+23+17": "incident circuits unisélecteur"
+  "24+22+17": "incident mécanique / électrique dérouleur"
+card_reader_punch:  # COURS p.128
+  low_positions: "carte passée sous b1, b2, L→P, bloc de perforation, b5 ; fin de fichier (numéros illisibles)"
+  "23+22": "bourrage éjection"
+  "23+21": "bourrage piste"
+  "23+18|19|20": "incidents technologiques"
+  24: "tous incidents (magasin vide, case pleine…)"
+printer: {sheet_reference: "contact « référence de feuille » (position non donnée)"}
+register_A_by_central:
+  CB: {1_6: "comme ARIT"}
+  DI: {14: "compteur arrivé à zéro", 15: "sinon"}
+transcoder: {CQ: "le cliché CQ écrit un caractère choisi dans le qualitatif (B61)"}

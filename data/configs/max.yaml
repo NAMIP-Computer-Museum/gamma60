@@ -1,0 +1,37 @@
+name: maximum
+memory_blocks: 8
+elements:
+  arithmetic: 1
+  logical: 1
+  comparator: 1
+  transcoder: 1
+  drum: 4
+  uniselector: 10
+  tape_units: 48
+  printer: 8
+  card_reader: 4
+  card_reader_punch: 4
+  paper_tape_reader: 4
+  desk: 1
+limits:
+  io_elements_max: 40
+  card_tracks_max: 12
+  multiplexers_max: 2
+uniselector_wiring:
+  source: B61 p.54
+  U1:
+  - 1
+  - 12
+  U2:
+  - 1
+  - 12
+  U3:
+  - 5
+  - 16
+  U4:
+  - 13
+  - 24
+  U5:
+  - 13
+  - 24
+  group_2: 'U6-U10 : même schéma sur les dérouleurs 25-48 (hypothèse)'

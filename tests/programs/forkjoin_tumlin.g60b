@@ -1,0 +1,32 @@
+; a = b*c ; d = d+e ; f = a*d  — exemple de Tumlin & Smotherman, notation B61
+; T.O.  C.C.  X            A.F.
+START:  SIMU        I2           R     ; fork : la suite (I1) et I2 en parallèle
+        VIERGE
+I1:     ARIT                           ; coupure sur ARIT
+        VIERGE
+        L     0     B                  ; CAR0 <- b
+        L     1     C                  ; CAR1 <- c
+        L     2     A                  ; CAR2 <- a
+        MUL   N     - 0 1 2            ; a = b x c (flottant normalisé, U-05)
+        31          I3           R     ; branchement toujours -> I3
+I2:     ARIT
+        VIERGE
+        L     0     D
+        L     1     E
+        L     2     D
+        ADD   N     - 0 1 2            ; d = d + e
+        31          I3           R
+I3:     ARIT  1                        ; JOIN : 1 condition supplémentaire (2 branches)
+        VIERGE                         ; sert aussi de compteur d'appels
+        L     0     A
+        L     1     D
+        L     2     F
+        MUL   N     - 0 1 2            ; f = a x d
+        STOP
+; --- données (nombres semi-logarithmiques, 2 catènes chacun)
+B:      NUM   +3
+C:      NUM   +4
+D:      NUM   +5
+E:      NUM   +6
+A:      NUM   +0
+F:      NUM   +0

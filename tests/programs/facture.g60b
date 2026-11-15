@@ -1,0 +1,44 @@
+; Ligne de facture : 3 branches indépendantes puis jonction (exemple du dialogue de conception)
+;  - DRUM : lire la fiche client (piste fixe)
+;  - TRAN : convertir la carte de commande (cartes Bull -> forme traitement)
+;  - ARIT : montant = quantité x prix, virgule fixe à 2 décimales
+START:  SIMU        BR2          R
+        VIERGE
+        SIMU        BR3          R
+        VIERGE
+BR1:    DRUM        1                  ; tambour n°1 (partageable : chaîne de reprise)
+        VIERGE
+        L     0     FICHE              ; CAR0 <- zone MC de destination
+        DAO         17400              ; adresse d'origine sur le tambour
+        TDC         20                 ; tambour -> MC, 20 catènes
+        31          JOIN         R
+BR2:    TRAN
+        VIERGE
+        L     0     CARTE              ; CAR0 : source
+        L     1     LIBELLE            ; CAR1 : destination
+        L     2     CLICHE             ; CAR2 : cliché
+        BCP   N     1                  ; phase : cartes Bull -> forme traitement (partie 1 de la MIC)
+        RCL                            ; lancer le cliché
+        31          JOIN         R
+BR3:    ARIT
+        VIERGE
+        L     0     QTE
+        L     1     PRIX
+        L     2     MONTANT
+        MUL   P     2 0 1 2            ; virgule fixe, 2 décimales (U-05)
+        31          JOIN         R
+JOIN:   COMP  2                        ; JOIN : 2 conditions supplémentaires (3 branches)
+        VIERGE
+        L     0     MONTANT
+        L     1     PLAFOND
+        OWC   1     2                  ; comparaison simple sur 2 catènes
+        STOP
+; --- données
+QTE:     NUM  +15
+PRIX:    NUM  +2.50
+MONTANT: NUM  +0
+PLAFOND: NUM  +1000
+FICHE:   ZONE 20
+CARTE:   ZONE 27                       ; image brute d'une carte (à préciser)
+LIBELLE: ZONE 20
+CLICHE:  ZONE 4                        ; contenu à définir au jalon J7

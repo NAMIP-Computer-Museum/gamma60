@@ -1,0 +1,15 @@
+; Lecture d'un bloc de bande par une UT, via un élément virtuel protégeant la zone tampon
+; Règles (L'Aventure Gamma 60 p.59) : dérouleur attribué à une seule UT, une seule opération,
+; zone de MC associée et disponible.
+START:  PROT        IMAGE              ; engager l'élément virtuel (zone TAMPON)
+        VIERGE
+        MATA        1                  ; coupure sur l'unisélecteur n°1
+        VIERGE
+        REF         3                  ; préparatoire : lecture avant, dérouleur n°3
+        L     0     TAMPON             ; CAR0 <- début de zone
+        TRA                            ; exécution : lire un bloc avec transfert
+        LIBE        IMAGE              ; libérer l'élément virtuel
+        VIERGE
+        STOP
+IMAGE:   ZONE 1                        ; image de l'élément virtuel
+TAMPON:  ZONE 128

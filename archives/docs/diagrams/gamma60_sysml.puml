@@ -1,0 +1,860 @@
+' =====================================================================
+'  Bull Gamma 60 — Modèle SysML (rendu PlantUML) — v7
+'  v7 : ajoute les détails relus dans B61 : code interne des caractères et code carte,
+'  format des bandes, câblage des unisélecteurs, cartes, imprimante, bande perforée,
+'  pupitre (statut discuté), exception de priorité du lecteur de cartes.
+'  v6 : intègre le « Cours de programmation Gamma 60 » (Bull, ~1958-59,
+'  noté COURS, pages imprimées) en plus de B61 (1961), ONDE (1960), BPD.
+'   - indice d'occupation = attribut explicite des éléments réels et virtuels
+'   - registres du Distributeur de Programme (RNE, RAPA, RAPP, REDP, RSDP,
+'     chaîne propre) ; adresse de retour (RSDP → RI)
+'   - codage du code A par préfixe TK (00 B, 01 C, 10 D centrale, 110 A,
+'     1111 D élément) et champs propres à chaque type
+'   - états repos / activité (attente, opération) du cours ; directives
+'     préparatoires et opératoires ; coupures spéciales
+'   - algorithme d'exploitation d'une coupure ; cycle d'instruction
+'   - profils de catène qualitatif ; catène-image ; profils de machine
+'  (?) = inconnu ou sources contradictoires (voir docs/UNKNOWNS.md)
+' =====================================================================
+
+' ---------------------------------------------------------------------
+'  1. bdd — structure
+' ---------------------------------------------------------------------
+@startuml gamma60_bdd_structure
+skinparam defaultFontName "DejaVu Sans"
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 14
+skinparam ranksep 50
+skinparam class {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam class<<system>> {
+  BackgroundColor #E8EEF7
+}
+skinparam class<<v6>> {
+  BackgroundColor #E8F5E9
+  BorderColor #2E7D32
+}
+skinparam class<<v7>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+}
+skinparam class<<io>> {
+  BackgroundColor #FFF8F0
+  BorderColor #C46A00
+}
+skinparam package {
+  BorderColor #777777
+}
+hide circle
+hide empty methods
+hide empty fields
+hide <<v6>> stereotype
+hide <<v7>> stereotype
+hide <<io>> stereotype
+
+title bdd [Package] Gamma60 [Structure] — v7 (COURS + B61)
+
+class "Gamma 60" as G60 <<system>> {
+  .. values ..
+  {field} profil : ProfilMachine (COURS | B61)
+  {field} catène : 24 b + 3 b de clé
+  {field} ≤ 128 éléments (RNE sur 7 b)
+}
+
+package "Unité centrale" {
+  class "«block» MémoireRapide (MC)" as MC {
+    {field} 1 à 8 blocs × 4 096 catènes
+    {field} cycle 11 µs (COURS) / 10 µs (B61)
+    {field} registre Z : passage de tout catène
+    {field} circuits XY : sélection d'adresse
+  }
+  class "«block» DistributeurDeProgramme (DP)" as DP <<v6>> {
+    .. registres ..
+    {field} RNE : n° de l'élément servi (7 b ; 15 ? p.14)
+    {field} RAPA : adresse de l'instruction lue (15 b)
+    {field} RAPP : RAPA + 1 (15 b)
+    {field} REDP : registre d'entrée (24 b)
+    {field} RSDP : registre de sortie (24 b) ; reçoit RAPP
+    {field}   à chaque branchement (adresse de retour)
+    {field} chaîneDP : 2 registres (tête, queue)
+    .. operations ..
+    {method} servirDI() : circuits de priorité
+    {method} décoder(TK) · exécuter A, B, D centrale
+    {method} exploiterCoupure() (voir act_coupure)
+    {method} envoyerDirective() : RAI ← RAPP
+  }
+  class "«block» DistributeurDeTransferts" as DT {
+    {field} 1 transfert par cycle mémoire
+    {field} priorité selon la nature de l'élément
+    {field} quantités avant instructions (même nature)
+    {field} sauf : DP avant COMP s'il alimente un
+    {field}   lecteur de cartes (COURS p.6)
+    {method} servirDTQ() · RAC ← RAC ± 1
+  }
+  class "«block» MatriceIAR (MAP)" as MAP <<v6>> {
+    {field} 128 × [ RAI 15 b + clé + occupé ×2 ]
+    {field} registre Z de la matrice
+    {field} adressée par RNE
+  }
+  class "«block» MatriceRAC (MAQ)" as MAQ {
+    {field} 128 RAC de 15 b, 1 à 4 par élément
+    {field} chargés directement par le DP
+  }
+  class "«block» RegistreA (analyse)" as RA <<v6>> {
+    {field} 24 b ; reçoit le catène qualitatif
+    {field} de l'élément servi ; testé par B 01-24
+    {field} écrit aussi par TA, CB (1-6), DI (14-15)
+  }
+  class "«block» RegistreB (opérateur)" as RB {
+    {field} 24 b ; calcul sur les 15 b droits
+    {field} TB RB GB AB SB CB SQ SI
+  }
+}
+
+package "Liaisons" {
+  class "«block» Canaux" as CAN <<v6>> {
+    {field} 1 ligne DI par élément (signal)
+    {field} 1 ligne DTQ par élément (signal)
+    {field} 1 canal distributeur d'instructions
+    {field} 1 canal distributeur de quantités
+    {field} 1 canal collecteur de quantités
+  }
+  class "«block» CircuitsDArmoire / Multiplexeur" as CA {
+    {field} 1 ensemble par classe ; multiplexeur c3-c4
+  }
+}
+
+abstract class "«block» Élément" as EL <<v6>> {
+  .. values ..
+  {field} numéro : 0..127 (tambours à partir de 100)
+  {field} classe : 0..4
+  {field} occupé : Booléen
+  {field}   stocké dans MatriceIAR, dédoublé
+  {field} RAI : 15 b (dans MatriceIAR)
+  {field} RAC[0..3] : 15 b (dans MatriceRAC)
+  {field} RLN : registre de liaison (1 catène)
+  {field} catèneQualitatif : 24 b
+  {field} ligneDI, ligneDTQ : signaux
+  .. état dérivé ..
+  {field} repos = ¬occupé
+  {field} attente = occupé ∧ ligneDI
+  {field} opération = occupé ∧ ¬ligneDI
+}
+
+abstract class "«block» ÉlémentPartageable" as ELP {
+  {field} chaîne de reprise : registres B (tête)
+  {field}   et C (queue), en MC
+  {field} séquence : n instructions complètes
+}
+
+abstract class "«block» ÉlémentES" as ELES <<io>> {
+  {field} attribué à une seule UT
+  {field} pas de chaîne de reprise
+  {field} une opération par appel
+}
+
+package "Éléments de traitement" {
+  class "ARIT" as ARIT <<v6>> {
+    {field} P, S (effacé avant op.), O : 2 catènes
+    {field} 4 RAC banalisés
+    {field} CC1 : P | N | A (arrondi)
+  }
+  class "LOGI" as LOGI {
+    {field} K, L : 24 b à décalage
+    {field} 4 RAC banalisés
+  }
+  class "COMP" as COMP <<v6>> {
+    {field} 2 registres d'opérande (1 catène)
+    {field} registre de longueur (≤ 255)
+    {field} 3 RAC spécialisés
+  }
+  class "TRAD / TRAN" as TRAN <<v6>> {
+    {field} registres d'entrée, de sortie S,
+    {field}   directive + catène qualitatif
+    {field} index, décompteur de longueur
+    {field} MIC 128 × 20 b (COURS) ?
+    {field} matrice de transposition
+    {field} datum de reprise : 4 mémoires en MC
+  }
+  class "TAMB / DRUM" as DRUM <<v6>> {
+    {field} RAE : piste × 256 + position (0-199)
+    {field} 204 catènes/piste physique, 98 µs/catène
+    {field} partageable
+  }
+}
+
+package "Entrées-sorties" {
+  class "«block» Unisélecteur (MATA)" as UNI <<v7>> {
+    {field} l'élément ; ≤ 10 (2 groupes de 5)
+    {field} câblage : U1, U2 → dérouleurs 1-12
+    {field}   U3 → 5-16 ; U4, U5 → 13-24 (B61 p.54)
+    {field} registre de longueur de bloc
+  }
+  class "«block» Dérouleur (DERU, appareil)" as DERU <<v7>> {
+    {field} 8 pistes : catène sur 6 pistes × 4 col.
+    {field}   clé sur la 7e, parité par colonne sur la 8e
+    {field} bloc 16-4 095 catènes, longueur en tête et fin
+    {field} espaces 2 cm · 27,5 catènes/cm · 1,90 m/s
+    {field} 190 µs/catène (moy. 230) [B61] ; 266 [COURS]
+    {field} mémoires : interdiction d'écriture, occupation
+  }
+  class "«block» Cartes (LECT/CARR, PECT/CARP)" as CARD <<v7>> {
+    {field} 300 cartes/min · H1 3 000 · S 800 vierges
+    {field} RS1/RS2 double lecture · RS5 contrôle perfo
+    {field} cases Sp1, Sp2 (700) · réception 2 800
+  }
+  class "«block» Imprimante (IMPR/PRIN)" as IMP <<v7>> {
+    {field} 120 pos. · 59 car. · 300 lignes/min
+    {field} double entraînement indépendant
+    {field} saut contrôlé (référence de feuille → qualitatif)
+    {field} tampon d'une ligne
+  }
+  class "«block» Bande perforée (LEBA/TAPR, PEBA/TAPP)" as PT <<v7>> {
+    {field} lecteur 300 car/s, 2 sens, imparité (8 pistes)
+    {field} perforateur 25 car/s non contrôlé
+    {field} 3 caractères par catène
+  }
+}
+
+class "«block» Pupitre (DESK)" as DESK <<v7>> {
+  {field} machine à écrire + bande (journal)
+  {field} gestion résidente de la machine à écrire
+  {field} seule interruption prioritaire
+  {field} statut : élément (ONDE, table B61)
+  {field}   / « pas un élément d'E/S » (B61 p.47) ?
+}
+
+package "Éléments virtuels (en MC)" {
+  class "«block» ÉlémentVirtuel" as UV <<v6>> {
+    {field} catèneImage1 :
+    {field}   bit 24 = occupé (indice d'occupation)
+    {field}   bits 1-15 = tête de chaîne
+    {field} catèneImage2 : queue de chaîne
+    {field} pris par PROT, rendu par LIBE
+  }
+}
+
+G60 *-- "1" MC
+G60 *-- "1" DP
+G60 *-- "1" DT
+G60 *-- "1" MAP
+G60 *-- "1" MAQ
+G60 *-- "1" RA
+G60 *-- "1" RB
+G60 *-- "1" CAN
+G60 *-- "5" CA
+G60 *-- "1..128" EL
+
+EL <|-- ELP
+EL <|-- ELES
+ELP <|-- ARIT
+ELP <|-- LOGI
+ELP <|-- COMP
+ELP <|-- TRAN
+ELP <|-- DRUM
+UV ..> ELP : « même mécanisme\nde chaîne de reprise »
+ELES <|-- UNI
+ELES <|-- CARD
+ELES <|-- IMP
+ELES <|-- PT
+UNI "2..3" o-- "0..12" DERU : dessert >
+EL <|-- DESK
+
+DP --> RA
+DP --> RB
+DP --> MAP : RNE sélectionne
+DP --> MAQ
+DT --> MAQ
+MAP ..> EL : « RAI, occupé »
+MAQ ..> EL : « RAC »
+
+note as N1
+  <b>Légende</b> : <color:#2E7D32>vert</color> = v6 (COURS) · <color:#1565C0>bleu</color> = v7 (relecture B61)
+  <color:#C46A00>orange</color> = éléments d'E/S non partageables
+  L'élément virtuel n'est pas un élément réel :
+  pas de RAI ni de RAC ; ses états se réduisent
+  à occupé / libre (bit 24 de l'image 1).
+end note
+@enduml
+
+' ---------------------------------------------------------------------
+'  2. bdd — formats et jeu d'instructions
+' ---------------------------------------------------------------------
+@startuml gamma60_bdd_types
+skinparam defaultFontName "DejaVu Sans"
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam nodesep 20
+skinparam ranksep 36
+skinparam class {
+  BackgroundColor #F3F3F3
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam class<<v6>> {
+  BackgroundColor #E8F5E9
+  BorderColor #2E7D32
+}
+skinparam class<<v7>> {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+}
+skinparam class<<constraint>> {
+  BackgroundColor #FFF1E0
+  BorderColor #C46A00
+}
+hide circle
+hide empty methods
+hide <<v6>> stereotype
+hide <<v7>> stereotype
+
+title bdd [Package] Gamma60 [Formats et jeu d'instructions] — v7
+
+class "«valueType» Catène" as CAT {
+  {field} bits 1 (droite) … 24 (gauche) + 3 b de clé
+  {field} instruction | 6 chiffres DCB | 4 car. de 6 b
+  {field} | binaire 24 b | catène qualitatif
+}
+
+abstract class "«valueType» InstructionCodeA" as IA <<v6>> {
+  {field} TK (code préfixe, bits de gauche) :
+  {field}   00 B · 01 C · 10 D centrale
+  {field}   110 A · 1111 D élément · 1110 (?)
+  {field} FA : bit 17 = d (différentiel), bit 16 = s
+  {field} X : bits 15-1 (0-32 767)
+}
+
+class "B : branchement" as IB <<v6>> {
+  {field} 24-23 : 00
+  {field} 22-18 : condition (0 jamais, 1-24, 31 toujours)
+  {field} 17-16 : d s · 15-1 : adresse de saut
+  {field} effet : RSDP ← RAPP (adresse de retour)
+}
+class "C : coupure" as IC <<v6>> {
+  {field} 24-23 : 01
+  {field} 22-20 : sorte (7) : normale, sans libération,
+  {field}   sans test d'occupation, PROT, LIBE, SIMU, STOP
+  {field} 19-18 : m = conditions de JOIN (0-3)
+  {field} 17-16 : d s · 15-1 : n° élément ou adresse
+}
+class "D centrale" as IDC <<v6>> {
+  {field} 24-23 : 10
+  {field} 22-18 : directive (32 codes, 20 utilisés)
+  {field} 17-16 : d s · 15-1 : X
+}
+class "A : adresse" as IAD <<v6>> {
+  {field} 24-22 : 110
+  {field} 21-20 : G/L, R/P, A, S
+  {field} 19-18 : n° de RAC (0-3)
+  {field} 17-16 : d s · 15-1 : adresse ou quantité
+}
+class "D élément" as IDE <<v6>> {
+  {field} 24-21 : 1111
+  {field} avec variable libre : 20-18 type (≤ 8),
+  {field}   17-16 d s, 15-1 X
+  {field} sans variable libre : 20-1 propres à l'élément
+  {field} rôle : préparatoire | opératoire
+}
+
+class "«valueType» InstructionCodeB" as CB {
+  {field} 13 car. : T.O. 4 · C.C. 2 · X 5 · F.A. 2
+  {field} F.A. : R (ligne relative) | M (mémoire de
+  {field}   manœuvre) → bit d ; S → bit s
+}
+
+enum "DirectivesCentrales (COURS / B61)" as DC <<v6>> {
+  {field} RI/PI · GE · RE · TA · RA/PA · TB · RB/PB
+  {field} GB/LB · AB · SB · CB · SQ · SI
+  {field} FT/SA · FJ/SN · FI/RR · FU/FO · FZ · DI/IC · PC/CP
+}
+
+enum "DirectivesARIT (COURS / B61)" as DA <<v6>> {
+  {field} ADD · SOU/SUB · MUL · DIV · DIR · TER/TRA
+  {field} MPD/MPT · DPD/DPT · ISI/RSI · PVA/AVA
+  {field} CVA/CAV · CAL · ARR/ROF
+  {field} X = V, O1, O2, R ; sans progression Z U D T / Z F S T
+}
+
+class "«valueType» CatèneVierge" as CV <<v6>> {
+  {field} après chaque coupure (branche ordinaire pour SIMU)
+  {field} bits 1-15 : lien vers la séquence suivante
+  {field} bits 19-18 : compteur d'appels du JOIN
+  {field} exécutée : vaut un branchement « jamais »
+}
+
+class "«valueType» CatèneQualitatif" as CQ <<v6>> {
+  {field} 24 indicateurs ; plusieurs bits à 1 possibles
+  {field} 24 : intervention humaine / tous incidents
+  {field} 23 : incident réparable par programme
+  {field} ARIT : 1-6 > < = ≥ ≤ ≠ ; 7-9 = 0, < 0, > 0
+  {field} COMP 2 bornes : 1-8 ; incidents 16-23 (22 : directive erronée)
+  {field} bandes : 16 protégé, 18 lecture/écriture, 19 bloc-marque,
+  {field}   20 fin de bande proche, 21 dérouleur occupé
+}
+
+class "«valueType» ProfilMachine" as PM <<v6>> {
+  .. COURS (~1958-59) ..
+  {field} cycle 11 µs ; clé = reste mod 7 des 24 b
+  {field} mnémoniques françaises ; ARIT 100/300/600 µs
+  {field} JOIN noté dans le X de la catène vierge
+  .. B61 (1961) ..
+  {field} cycle 10 µs ; clé = parité (9 b) + mod 3 (15 b)
+  {field} mnémoniques anglaises ; ARIT 200/350/550 µs
+  {field} JOIN noté dans le C.C. de la coupure
+}
+
+class "«constraint» Règles" as R <<constraint>> {
+  {field} {instruction complète : C, A*, (B | D centrale)*, D élément}
+  {field} {le DP ne se libère qu'à une coupure ou une directive d'élément}
+  {field} {1 catène vierge après chaque coupure}
+  {field} {SIMU en cascade : chaque branche commence par une coupure}
+}
+
+CAT <|-- IA
+IA <|-- IB
+IA <|-- IC
+IA <|-- IDC
+IA <|-- IAD
+IA <|-- IDE
+CB - IA : transposition
+IDC ..> DC
+IDE ..> DA
+IC ..> CV : suivie de
+CQ --|> CAT
+
+class "«valueType» CaractèreInterne" as CI <<v7>> {
+  {field} 6 bits = colonne (2 b) + ligne (4 b)
+  {field} 60 caractères : 26 lettres, 10 chiffres,
+  {field}   23 signes, espace ; 4 codes inutilisés
+  {field} chiffres = 10 + DCB ; lettres avant chiffres
+  {field} table : data/charset.yaml
+}
+class "«valueType» CodeCarte" as CC <<v7>> {
+  {field} colonne de carte, ≤ 3 perforations
+  {field} chiffre : 1 trou ; lettre : zone 7/8/9 + 1 rangée
+  {field} O = 7-12, I = 8-12 (distincts de 0 et 1)
+  {field} signes : 9-7-x, 9-8-x
+  {field} converti par TRAN (table MIC)
+}
+class "«valueType» BlocBande" as BB <<v7>> {
+  {field} catène de longueur (bits) en tête
+  {field} 16 à 4 095 catènes de données
+  {field} catène de longueur en fin
+  {field} bloc-marque : 16 catènes à 0
+}
+CAT o-- "4" CI : contient
+CI .. CC : « TRAN »
+BB o-- "16..4095" CAT
+@enduml
+
+' ---- 3. ibd ----
+@startuml gamma60_ibd
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam nodesep 35
+skinparam ranksep 60
+skinparam ArrowColor #333333
+skinparam rectangle {
+  BorderColor #333333
+}
+skinparam component {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+}
+
+title ibd [Block] Gamma 60 [Flux, liaisons et arbitrages] — v7
+
+rectangle "mc : MémoireCentrale — 1 catène / 10 µs" as MCbox #FFF6E0 {
+  component "programmes (code A)\n+ données + zones d'E/S" as prog
+  component "chaînes de reprise\n(2 registres / élément)\n+ catènes vierges" as chains
+  component "GGZ / GGU\n+ images d'éléments virtuels" as soft
+}
+
+rectangle "uc : UnitéCentrale" as UCbox #E8EEF7 {
+  component "dp : DistributeurDeProgramme\nRNE · RAPA/RAPP · REDP/RSDP · chaîne propre\ncircuits de priorité des DI" as dp
+  component "dt : DistributeurDeTransferts\nDTQ : priorité par nature d'élément" as dd
+  component "MAP : 128 × (RAI + occupé ×2)\nMAQ : 128 RAC" as mat #E8F5E9
+  component "registre A (analyse)\nregistre B (opérateur)" as regs #E3F2FD
+}
+
+rectangle "liaisons" as LIA {
+  component "canal de distribution\n(MC → éléments)" as cdi
+  component "canal de collecte\n(éléments → MC)" as cco
+  component "bus d'instructions\n(DP → éléments)" as bi #E3F2FD
+}
+
+rectangle "éléments (via circuits d'armoire par classe)" as ELS #FAFAFA {
+  rectangle "c3 + c4 (multiplexeur)" as K3 {
+    component "CARR / CARP · PRIN\nTAPR / TAPP" as es
+  }
+  rectangle "c2" as K2 {
+    component "DRUM ×1-4" as drum
+    component "MATA ×≤10 → dérouleurs" as mata
+  }
+  rectangle "c1" as K1 {
+    component "ARIT (P, S, O)" as arit
+    component "COMP" as comp
+    component "TRAN (MIC)" as tran
+  }
+  rectangle "c0" as K0 {
+    component "DESK" as desk
+    component "LOGI (K, L) ?" as logi
+  }
+}
+
+MCbox <-[#1F4E9C,thickness=3]down-> dd : 1 catène / cycle
+dp <-[#1F4E9C,thickness=2]right-> dd : DTD du DP\n(lecture des instructions)
+dp -right- mat
+dp -down- regs
+dd -down- mat : CAR ± 1
+
+dd -[#2E7D32,thickness=2]down-> cdi
+cco -[#2E7D32,thickness=2]up-> dd
+cdi -[#2E7D32,thickness=2]down-> ELS : données
+ELS -[#2E7D32,thickness=2]up-> cco : résultats
+dp -[#5E35B1,thickness=2]down-> bi
+bi -[#5E35B1,thickness=2]down-> ELS : directives\n+ adresses
+
+ELS .[#8E6C00]up.> dd : «signal» DTQ (1 ligne / élément)
+ELS .[#B23B3B]up.> dp : «signal» DI (1 ligne / élément)\ncatène qualitatif → A
+desk .[#B23B3B,thickness=2]up.> dp : interruption\nprioritaire
+
+note right of dd
+  <b>DTQ</b> : 1 transfert par cycle ;
+  ordre préétabli selon la nature de
+  l'élément (tambour avant ARIT) ; pour une même
+  nature, quantités avant instructions (COURS p.6)
+end note
+note left of dp
+  <b>DI</b> : choix par priorité ; RNE ← n°,
+  CQ → registre A, RAPA ← RAI ; puis C / A / B /
+  D centrales jusqu'à une directive d'élément
+  (RAI ← RAPP) ou une coupure
+end note
+@enduml
+' ---------------------------------------------------------------------
+'  4. stm — états d'un élément réel (COURS p.13-17)
+' ---------------------------------------------------------------------
+@startuml gamma60_stm_element
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam state {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+}
+
+title stm [Élément réel] Repos / activité (attente, opération) — v7 (COURS p.13-17)
+
+[*] --> Repos
+state Repos : occupé = 0\n(aucune séquence)
+
+state "Activité (occupé = 1, RAI significatif)" as Act {
+  state "Attente (ligne DI levée)" as Att {
+    state Demande : en file des circuits\nde priorité du DP
+    state Servi : RNE ← n° ; CQ → registre A\nRAPA ← RAI ; le DP lit A, B,\nD centrales sans se libérer
+    [*] --> Demande
+    Demande --> Servi : élu par priorité
+  }
+  state "Opération (ligne DI baissée)" as Op {
+    state Autonome : programme local câblé\npositionne le catène qualitatif
+    state AttenteDTQ : ligne DTQ levée
+    state Transfert : 1 catène via RLN\nRAC ± 1
+    [*] --> Autonome
+    Autonome --> AttenteDTQ : catène à lire / écrire
+    AttenteDTQ --> Transfert : servi par le DT
+    Transfert --> Autonome
+  }
+}
+
+Repos --> Demande : coupure le citant [occupé = 0]\n/ RAI ← adresse suivant la coupure ; occupé ← 1
+Servi --> Op : directive opératoire\n/ RAI ← RAPP
+Servi --> Demande : directive préparatoire\n(renseignement seulement) / RAI ← RAPP
+Servi --> Demande : coupure vers un autre élément\n[chaîne de reprise non vide]\n/ RAI ← tête ; tête ← lien de la catène vierge
+Servi --> Repos : STOP ou coupure vers un autre\nélément [chaîne vide] / occupé ← 0
+Op --> Demande : fin de directive
+
+note right of Servi
+  Coupure « sans libération » (C.C. A) :
+  l'élément demandeur n'est ni libéré
+  ni repris sur sa chaîne (programmes
+  d'incident, COURS p.39).
+end note
+note left of Repos
+  Une coupure qui trouve l'élément occupé
+  ne change pas son état : la séquence est
+  accrochée à sa chaîne de reprise.
+end note
+@enduml
+
+' ---------------------------------------------------------------------
+'  5. act — cycle d'instruction du Distributeur de Programme
+' ---------------------------------------------------------------------
+@startuml gamma60_act_cycle
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam activity {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+  DiamondBackgroundColor #E8F5E9
+}
+
+title act [DP] Cycle d'instruction (COURS p.14-17, p.33-44) — v7
+
+start
+:choisir une DI par priorité;
+:RNE ← n° de l'élément
+catène qualitatif → registre A
+RAPA ← RAI de l'élément;
+repeat
+  :lire le catène à RAPA (DTQ du DP)
+  → REDP ; RAPP ← RAPA + 1;
+  :appliquer FA : d (bit 17) puis s (bit 16);
+  if (TK ?) then (00 : B)
+    if (condition ?) then (31, ou bit n de A = 1)
+      :RSDP ← RAPP ; RAPA ← X;
+    else (00, ou bit n de A = 0)
+      :RSDP ← RAPP ; RAPA ← RAPP;
+    endif
+  elseif (110 : A) then
+    :RAC[n] de l'élément du RNE ← G | R | A | S (X)
+    RAPA ← RAPP;
+  elseif (10 : D centrale) then
+    :exécuter (registres A, B, mémoire)
+    RAPA ← RAPP;
+  elseif (01 : C) then
+    :exploiter la coupure
+    (voir act_coupure);
+    break
+  else (1111 : D élément)
+    :envoyer la directive par le canal
+    distributeur d'instructions,
+    RAI ← RAPP ; ligne DI baissée;
+    break
+  endif
+repeat while (instruction complète inachevée)
+:DP libre : chaîne propre d'abord,
+puis nouvelle DI par priorité;
+stop
+@enduml
+
+' ---------------------------------------------------------------------
+'  6. act — exploitation d'une coupure (COURS p.35-39)
+' ---------------------------------------------------------------------
+@startuml gamma60_act_coupure
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam activity {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+  DiamondBackgroundColor #E8F5E9
+}
+
+title act [DP] Exploitation d'une coupure sur élément réel — v7 (COURS p.35-39)
+
+start
+if (JOIN incomplet ? (m > 0 et compteur < m)) then (oui)
+  :compteur + 1 (bits 19-18 de la catène vierge)
+  aucun élément n'est activé;
+else (non)
+  :si m > 0 : compteur remis à 0 (?);
+  if (coupure « sans test d'occupation » (B) ?) then (oui)
+    :RAI de l'élément cité ← adresse suivante;
+  else (non)
+    if (élément cité occupé ?) then (oui)
+      :accrocher la séquence à sa chaîne
+      (registre C + lien dans la catène vierge);
+    else (non)
+      :RAI ← adresse suivante ; occupé ← 1;
+    endif
+  endif
+endif
+:vider la chaîne propre du DP
+(séquences SIMU, LIBE);
+if (coupure « sans libération » (A) ?) then (oui)
+else (non)
+  if (chaîne de l'élément demandeur vide ?) then (oui)
+    :occupé ← 0 (repos);
+  else (non)
+    :RAI ← tête de sa chaîne,
+    tête ← lien de la catène vierge;
+  endif
+endif
+:servir une nouvelle DI par priorité;
+stop
+note right
+  L'ordre des étapes suit COURS p.38.
+  La place exacte du test de JOIN et la
+  remise à zéro du compteur sont des
+  hypothèses (?).
+end note
+@enduml
+
+' ---------------------------------------------------------------------
+'  7. obj — chaînes de reprise et élément virtuel (COURS p.24-31)
+' ---------------------------------------------------------------------
+@startuml gamma60_obj_chaines
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam object {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+}
+skinparam ArrowColor #333333
+
+title Instantané : chaîne de reprise d'ARIT et élément virtuel — v7
+
+object "arit : élément (MatriceIAR)" as arit {
+  occupé = 1 (×2)
+  RAI = 0749 (séquence en cours)
+}
+object "registre B d'ARIT (MC) : tête" as rb {
+  → vierge de S1
+}
+object "registre C d'ARIT (MC) : queue" as rc {
+  → vierge de S3
+}
+object "S1 : catène vierge" as s1 #E8F5E9 {
+  bits 1-15 : → vierge de S2
+  bits 19-18 : compteur JOIN = 0
+}
+object "S2 : catène vierge" as s2 #E8F5E9 {
+  bits 1-15 : → vierge de S3
+}
+object "S3 : catène vierge" as s3 #E8F5E9 {
+  bits 1-15 : 0 (fin)
+}
+object "image 1 (adresse 1000)" as im1 #FFF1E0 {
+  bit 24 : occupé = 1
+  bits 1-15 : tête = 0201
+}
+object "image 2 (adresse 1001)" as im2 #FFF1E0 {
+  bits 1-15 : queue = 0301
+}
+object "chaîne propre du DP" as dpc #E8EEF7 {
+  tête, queue : séquences SIMU / LIBE
+}
+
+arit -- rb
+arit -- rc
+rb --> s1
+s1 --> s2
+s2 --> s3
+rc --> s3
+im1 --> im2 : même mécanisme
+
+note bottom of s3
+  Ajout de S4 : vierge(S3) ← vierge(S4) ; C ← vierge(S4)
+  Libération d'ARIT : RAI ← tête ; tête ← lien de vierge(S1)
+  Élément virtuel 1000 : PROT pose l'indice en bit 24 ;
+  les séquences en attente (0201, 0301…) se chaînent
+  dans les bits 1-15 (errata du COURS, p.31).
+end note
+@enduml
+
+' ---- 8. act fork/join ----
+@startuml gamma60_act_forkjoin
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam activity {
+  BackgroundColor #FDFDFD
+  BorderColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+}
+
+title act [Programme] FORK / JOIN en code B (mnémoniques B61)\na = b×c ; d = d+e ; f = a×d — v7
+
+start
+:SIMU   I2 R  + catène vierge
+(lance la suite I1 et la branche I2);
+fork
+  partition "I1" {
+    :ARIT  + catène vierge
+    L 0 B · L 1 C · L 2 A
+    MUL N - 0 1 2   (a = b × c);
+    :31  I3 R   (toujours);
+  }
+fork again
+  partition "I2" {
+    :ARIT  + catène vierge
+    L 0 D · L 1 E · L 2 D
+    ADD N - 0 1 2   (d = d + e);
+    :31  I3 R   (toujours);
+  }
+end fork
+note right
+  **I3 : ARIT, C.C. = 1**
+  1 condition supplémentaire :
+  la coupure n'agit qu'au 2e appel ;
+  la catène vierge compte les appels
+end note
+:ARIT 1  (m = 01, bits 19-18)  + catène vierge
+L 0 A · L 1 D · L 2 F
+MUL N - 0 1 2   (f = a × d);
+:STOP;
+stop
+
+legend right
+  Format code B : T.O. · C.C. · X · A.F.
+  X des directives ARIT = dp O1 O2 R (CAR 0-3).
+  Un seul ARIT : I1 et I2 se succèdent
+  dans sa chaîne de reprise (sans gain).
+  C.C.1 = N (normalisée) ; P et A existent (COURS).
+endlegend
+@enduml
+' ---- 9. sd E/S ----
+@startuml gamma60_sd_es
+skinparam defaultFontName "DejaVu Sans"
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 10
+skinparam note {
+  BackgroundColor #FFFDE7
+}
+
+title sd [Interaction] Lecture d'un bloc de bande (B61 p.53-55 ; ONDE §2.2) — v7
+
+participant "GGZ" as ggz #FFF1E0
+participant "UT" as ut
+participant "dp" as dp #E8EEF7
+participant "image élément\nvirtuel (MC)" as img #FFF1E0
+participant "MATA 1\n(unisélecteur)" as mata #FFF8F0
+participant "dérouleur 3" as deru #FFF8F0
+participant "dd" as dd #E3F2FD
+participant "mc" as mc #FFF6E0
+
+ggz -> ggz : attribuer(dérouleur 3, UT)
+ut -> dp : PROT IMAGE (+ vierge)
+dp -> img : « occupé » (sinon chaîne de reprise)
+ut -> dp : MATA 1 (+ vierge) : IAR ← suite
+mata -> dp : DTI
+dp -> mata : catène qualitatif demandé
+mata -> dp : catène qualitatif → registre A\n(positions 16 et 21 du dérouleur connecté)
+dp -> mata : REF 3 (préparatoire : lecture avant, dérouleur 3)
+note over dp, mata : U-18 : « une seule opération par appel »\nvs préparatoire + exécution
+mata -> dp : DTI (préparation faite)
+dp -> dp : L 0 TAMPON (CAR0)
+dp -> mata : TRA (exécution : lire un bloc avec transfert)
+activate mata
+mata -> deru : connexion temporaire
+note over mata, deru : bloc : catène de longueur, données,\ncatène de longueur ; espace de 2 cm entre blocs
+loop chaque catène (≈190 µs)
+  mata -> dd : DTD (n° élément, CAR0)
+  dd -> mc : écrire à CAR0 ; CAR0 + 1
+end
+mata -> dp : DTI (fin de bloc, indicateurs)
+deactivate mata
+dp -> img : LIBE IMAGE (libre)
+dp -> ut : STOP ou suite de la séquence
+@enduml

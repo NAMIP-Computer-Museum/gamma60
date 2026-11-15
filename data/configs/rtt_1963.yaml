@@ -1,0 +1,16 @@
+# Configuration de la RTT belge en 1963 (source : RTT / histoireinform).
+name: RTT Bruxelles 1963
+memory_blocks: 4               # 16 384 catènes
+classes: {logical: 0}          # U-09
+elements:
+  arithmetic: 1
+  logical: 1
+  comparator: 1
+  transcoder: 1
+  drum: 1
+  uniselector: 3               # étendu ensuite à 5
+  tape_units: 18               # étendu ensuite à 23-24
+  printer: 6                   # 300 l/min, double entraînement
+  card_reader: 2
+  paper_tape_reader: 3
+  desk: 1

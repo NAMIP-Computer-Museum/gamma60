@@ -1,0 +1,13 @@
+# Ordres de priorité — U-03, U-04, U-16. Premier = plus prioritaire.
+dtd:
+  sources: ["B61 p.24 : préétabli selon la nature ; tambour > ARIT",
+            "COURS p.6 : à nature égale, quantités avant instructions ; DP avant COMP quand il alimente un lecteur de cartes"]
+  status: hypothesis
+  order: [drum, uniselector, card_reader, card_reader_punch, printer,
+          paper_tape_reader, paper_tape_punch, transcoder, comparator,
+          arithmetic, logical, desk]
+  program_distributor_fetch: "rang de l'élément servi, juste après ses propres demandes de quantités"
+dti:
+  source: "B61 p.24 ; MAI : classes à priorité décroissante"
+  status: hypothesis
+  by_class: [0, 1, 2, 3, 4]

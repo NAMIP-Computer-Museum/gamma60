@@ -1,0 +1,40 @@
+; Classement de C par rapport à A et B, puis somme — exemple NAM-IP Infos 2018/1
+; Profil COURS (mnémoniques françaises : G = garnir ; CDB, TRR) ; F.A. M = mémoire de manœuvre.
+; Transcription de refs/photos/namip-2018-programme-classement.jpg (lignes 019-053).
+; Mémoires de manœuvre : M0-3 = C ; M4-5 = cumul ; M6-9 = 1re position (A) ;
+; M10-13 = 2e position (B) ; M14-17 = 3e position.
+020     COMP
+021     VIERGE
+022     G     0     0    M      ; RAC0 <- C (variable)
+023     G     1     6    M      ; RAC1 <- A (1re borne)
+024     G     2    10    M      ; RAC2 <- B (2e borne)
+025     CDB          2          ; comparaison à deux bornes sur 2 catènes
+026     01          35    R     ; C > A et > B
+027     02          39    R     ; C < A et < B
+028     G     0    10    M      ; A < C < B : B -> 3e position, C -> 2e
+029     G     1    14    M
+030     TRR   1      4
+031     G     0     0    M
+032     G     1    10    M
+033     TRR   1      4
+034     31          45    R
+035     G     0     0    M      ; C -> 3e position
+036     G     1    14    M
+037     TRR   1      4
+038     31          45    R
+039     G     0     6    M      ; « décalage de A et B » (voir note)
+040     G     1    14    M
+041     TRR   1      8
+042     G     0     0    M      ; C -> 1re position
+043     G     1     6    M
+044     TRR   1      4
+045     ARIT
+046     VIERGE
+047     G     0     6    M
+048     G     1    10    M
+049     G     2    14    M
+050     G     3     4    M
+051     ADD   P      - 0 1 P    ; V absent dans la source (?)
+052     ADD   P      - P 2 3
+; NOTE : dans le cas C < A et C < B, la copie de 8 catènes vers la 3e position laisse
+; B en 2e position et A en 3e : la somme est juste, l'ordre n'est pas trié (source à vérifier).
