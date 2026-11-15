@@ -400,12 +400,14 @@ class "«valueType» CatèneQualitatif" as CQ <<v6>> {
 class "«valueType» ProfilMachine" as PM <<v6>> {
   .. COURS (~1958-59) ..
   {field} cycle 11 µs ; clé = reste mod 7 des 24 b
-  {field} mnémoniques françaises ; ARIT 100/300/600 µs
+  {field} ARIT 100/300/600 µs
   {field} JOIN noté dans le X de la catène vierge
   .. B61 (1961) ..
   {field} cycle 10 µs ; clé = parité (9 b) + mod 3 (15 b)
-  {field} mnémoniques anglaises ; ARIT 200/350/550 µs
+  {field} ARIT 200/350/550 µs
   {field} JOIN noté dans le C.C. de la coupure
+  .. langue du code B (indépendante) ..
+  {field} fr (COURS) / en (B61) : traduction des mnémoniques
 }
 
 class "«constraint» Règles" as R <<constraint>> {

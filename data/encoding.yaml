@@ -18,6 +18,10 @@ blank_catena_rule: "7 bits de gauche à 0 => exécuté comme branchement « jama
 synthetic_subcodes:
   synthetic: true
   cut_kind: {normal: 0, no_release: 1, no_busy_check: 2, PROT: 3, LIBE: 4, SIMU: 5, STOP: 6}
-  address_op: {L: 0, P: 1, A: 2, S: 3}
-  central_directive: {PI: 0, GE: 1, RE: 2, TA: 3, PA: 4, TB: 5, PB: 6, LB: 7, AB: 8, SB: 9,
-                      CB: 10, SQ: 11, SI: 12, SA: 13, SN: 14, RR: 15, FO: 16, FZ: 17, IC: 18, CP: 19}
+  address_op: {load: 0, place: 1, add: 2, subtract: 3}
+  central_directive:   # clés = identifiants de directives.yaml (indépendants de la langue)
+    {store_instruction_number: 0, load_element_number: 1, store_element_number: 2,
+     transfer_to_A: 3, place_A: 4, transfer_to_B: 5, place_B: 6, load_B_15: 7, add_B_15: 8,
+     subtract_B_15: 9, compare_B_15: 10, substitute_quantity_in_B: 11, substitute_instruction: 12,
+     switch_branch_always: 13, switch_branch_never: 14, reverse_switches: 15, fill_ones: 16,
+     fill_zeros: 17, iteration_control: 18, counter_progression: 19}

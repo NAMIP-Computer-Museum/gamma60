@@ -18,6 +18,11 @@ Chaîne historique [MAI ; B61 p.28-30] :
 - **Code B** : fichier texte `.g60b`, une instruction par ligne, champs séparés par des
   espaces ou en colonnes fixes (T.O. 4, C.C. 2, X 5, A.F. 2), étiquettes symboliques
   permises (`ETIQ:`), commentaires `;`. Respecter les mnémoniques de `ISA.md`.
+  **Langue** : la première ligne peut déclarer `; langue: fr` (mnémoniques du COURS) ou
+  `; langue: en` (B61, par défaut) ; la langue est indépendante du profil machine.
+  L'assembleur et le désassembleur lisent les deux orthographes dans `data/directives.yaml` ;
+  une orthographe `fr` non relevée (U-29) est remplacée par la forme `en`, avec avertissement
+  en mode diagnostic.
   Une coupure est toujours suivie d'une ligne `VIERGE` (catène vierge) — l'assembleur peut
   l'insérer automatiquement en mode diagnostic avec un avertissement.
 - **Code C** : YAML (`.g60c.yaml`) : sous-programmes, zones, liaisons, implantation, entrée.

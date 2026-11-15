@@ -1,13 +1,11 @@
-# Profils de machine : ce qui change entre les deux états documentés.
+# Profils de machine : ce qui change réellement entre les deux états documentés.
+# Les mnémoniques (langue fr / en du code B) sont indépendants du profil : directives.yaml.
 default: B61
 profiles:
   COURS:
     source: "Bull, Cours de programmation Gamma 60 (~1958-59)"
     memory_cycle_us: 11
     check_key: mod7_24bits
-    mnemonics: french
-    car_no_progression: [Z, U, D, T]
-    arit_cc1: [P, N, A]
     join_count_in: blank_catena_x
     mic: {entries: 128, bits: 20}
     times_us: {arit_add: 100, arit_mul: 300, arit_div: 600, tape_per_catena: 266, tape_avg: 315, drum_per_catena: 98}
@@ -15,9 +13,6 @@ profiles:
     source: "Bull, Gamma 60 Data Processing System (1961)"
     memory_cycle_us: 10
     check_key: parity9_mod3_15
-    mnemonics: english
-    car_no_progression: [Z, F, S, T]
-    arit_cc1: [P, N, R]
     join_count_in: cut_cc
     mic: {entries: 256}
     times_us: {arit_add: 200, arit_mul: 350, arit_div: 550, arit_cmp: 150, tape_per_catena: 190, tape_avg: 230, drum_per_catena: 100}

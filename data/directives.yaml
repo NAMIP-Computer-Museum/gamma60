@@ -1,112 +1,219 @@
-# Jeu d'instructions (code B) — source : B61 tables p.62-66 (voir docs/ISA.md).
-# status: known = lu dans une source ; hypothesis = choix par défaut (voir UNKNOWNS.md).
-# Les encodages binaires (code A) ne sont PAS connus : voir U-01, encoding.yaml (J5).
+# Jeu d'instructions (code B), indépendant de la langue — voir docs/ISA.md.
+# Sources : B61 tables p.62-66 (langue en) ; COURS (langue fr, voir docs/ISA.md §7).
+#
+# Langue ≠ profil : les mnémoniques diffèrent entre COURS et B61 parce que les documents sont
+# en français et en anglais, pas parce que la machine a changé (G→L, R→P, A→A, S→S…).
+# Le profil machine (cycle, clé, temps…) est dans profiles.yaml.
+#
+# Chaque instruction a un identifiant neutre (anglais, comme le code) et un champ mnemonic :
+#   mnemonic: {fr: <COURS>, en: <B61>}
+#   - chaîne simple                          = orthographe lue dans la source ;
+#   - {value, status: hypothesis, unknown}   = orthographe supposée (voir UNKNOWNS.md) ;
+#   - langue absente                         = orthographe non relevée (U-29).
+# Le champ status d'une instruction (known / known_name) porte sur sa sémantique, pas sur
+# son orthographe. Les encodages binaires (code A) ne sont PAS connus : U-01, encoding.yaml.
+
+languages:
+  fr: "COURS (~1958-59)"
+  en: "B61 (1961)"
+  default: en
 
 cuts:            # T.O. 4 caractères ; cc = conditions JOIN supplémentaires (0-3)
-  ARIT: {element: arithmetic,  numbered: false}
-  LOGI: {element: logical,     numbered: false}
-  TRAN: {element: transcoder,  numbered: false}
-  COMP: {element: comparator,  numbered: false}
-  DRUM: {element: drum,        numbered: true}
-  CARR: {element: card_reader, numbered: true}
-  CARP: {element: card_reader_punch, numbered: true}
-  PRIN: {element: printer,     numbered: true}
-  MATA: {element: uniselector, numbered: true}
-  TAPR: {element: paper_tape_reader, numbered: true}
-  TAPP: {element: paper_tape_punch,  numbered: true}
-  DESK: {element: desk,        numbered: true}
-  PROT: {special: virtual_engage,  x: virtual_element_image}
-  LIBE: {special: virtual_release, x: virtual_element_image}
-  SIMU: {special: fork,            x: second_branch_address}
-  STOP: {special: end_of_sequence}
+  arithmetic:        {mnemonic: {fr: ARIT, en: ARIT}, numbered: false}
+  logical:           {mnemonic: {fr: LOGI, en: LOGI}, numbered: false}
+  transcoder:        {mnemonic: {fr: TRAD, en: TRAN}, numbered: false}
+  comparator:        {mnemonic: {fr: COMP, en: COMP}, numbered: false}
+  drum:              {mnemonic: {fr: TAMB, en: DRUM}, numbered: true}
+  card_reader:       {mnemonic: {fr: LECT, en: CARR}, numbered: true}
+  card_reader_punch: {mnemonic: {fr: PECT, en: CARP}, numbered: true}
+  printer:           {mnemonic: {fr: IMPR, en: PRIN}, numbered: true}
+  uniselector:       {mnemonic: {fr: DERU, en: MATA}, numbered: true}
+  paper_tape_reader: {mnemonic: {fr: LEBA, en: TAPR}, numbered: true}
+  paper_tape_punch:  {mnemonic: {fr: PEBA, en: TAPP}, numbered: true}
+  desk:              {mnemonic: {en: DESK},           numbered: true}   # fr : U-29
+  virtual_engage:    {mnemonic: {fr: PROT, en: PROT}, special: true, x: virtual_element_image}
+  virtual_release:   {mnemonic: {fr: LIBE, en: LIBE}, special: true, x: virtual_element_image}
+  fork:              {mnemonic: {fr: SIMU, en: SIMU}, special: true, x: second_branch_address}
+  end_of_sequence:   {mnemonic: {fr: STOP, en: STOP}, special: true}
 
-branches:        # T.O. 2 chiffres
+special_cuts_cours:   # profil COURS : C.C. de coupure spéciale (en B61, le C.C. sert au JOIN)
+  no_release_of_requester: {mnemonic: {fr: A}}
+  no_busy_check:           {mnemonic: {fr: B}}
+
+branches:        # T.O. 2 chiffres, identiques dans les deux langues
   "00": never
   "31": always
   conditional_range: [1, 24]   # teste le bit n du registre A
 
 address_instructions:   # cc = n° de CAR (0-3)
-  L: load
-  P: place
-  A: add
-  S: subtract
+  load:     {mnemonic: {fr: G, en: L}}
+  place:    {mnemonic: {fr: R, en: P}}
+  add:      {mnemonic: {fr: A, en: A}}
+  subtract: {mnemonic: {fr: S, en: S}}
 
-central_directives:     # exécutées par le DP ; status partiel (U-15)
-  PI: {name: place_instruction_number, status: known_name}
-  IC: {name: iteration_control,        status: known_name}
-  CP: {name: counter_progression,      status: known_name}
-  TA: {name: transfer_to_A,            status: known}
-  PA: {name: place_A,                  status: known}
-  TB: {name: transfer_to_B,            status: known}
-  PB: {name: place_B,                  status: known}
-  LB: {name: load_B_15,                status: known}
-  AB: {name: add_B_15,                 status: known}
-  SB: {name: subtract_B_15,            status: known}
-  CB: {name: compare_B_15,             status: known}
-  SQ: {name: substitute_quantity_in_B, status: known_name}
-  SI: {name: substitute_instruction,   status: known_name}
-  SN: {name: switch_branch_never,      status: known}
-  SA: {name: switch_branch_always,     status: known}
-  RR: {name: reverse_switches,         status: known_name}
-  FZ: {name: fill_zeros,               status: known}
-  FO: {name: fill_ones,                status: known}
+central_directives:     # exécutées par le DP ; sémantique : COURS p.53-60 (U-15)
+  store_instruction_number: {mnemonic: {fr: RI, en: PI}, status: known_name}
+  load_element_number:
+    mnemonic: {fr: GE, en: {value: LE, status: hypothesis, unknown: U-28}}
+    status: known      # RNE ← X
+  store_element_number:
+    mnemonic: {fr: RE, en: {value: PE, status: hypothesis, unknown: U-28}}
+    status: known      # mémoire[X] ← RNE
+  iteration_control:        {mnemonic: {fr: DI, en: IC}, status: known_name}
+  counter_progression:      {mnemonic: {fr: PC, en: CP}, status: known_name}
+  transfer_to_A:            {mnemonic: {fr: TA, en: TA}, status: known}
+  place_A:                  {mnemonic: {fr: RA, en: PA}, status: known}
+  transfer_to_B:            {mnemonic: {fr: TB, en: TB}, status: known}
+  place_B:                  {mnemonic: {fr: RB, en: PB}, status: known}
+  load_B_15:                {mnemonic: {fr: GB, en: LB}, status: known}
+  add_B_15:                 {mnemonic: {fr: AB, en: AB}, status: known}
+  subtract_B_15:            {mnemonic: {fr: SB, en: SB}, status: known}
+  compare_B_15:             {mnemonic: {fr: CB, en: CB}, status: known}
+  substitute_quantity_in_B: {mnemonic: {fr: SQ, en: SQ}, status: known_name}
+  substitute_instruction:   {mnemonic: {fr: SI, en: SI}, status: known_name}
+  switch_branch_never:      {mnemonic: {fr: FJ, en: SN}, status: known}
+  switch_branch_always:     {mnemonic: {fr: FT, en: SA}, status: known}
+  reverse_switches:         {mnemonic: {fr: FI, en: RR}, status: known_name}
+  fill_zeros:               {mnemonic: {fr: FZ, en: FZ}, status: known}
+  fill_ones:                {mnemonic: {fr: FU, en: FO}, status: known}
+
+operand_designators:    # champs O1, O2, R d'ARIT et de LOGI [COURS p.66-68, p.110 ; B61 p.36]
+  car_with_progression: ["0", "1", "2", "3"]
+  car_no_progression:   # RAC 0-3 ramenés à leur valeur initiale ; initiales des chiffres
+    fr: [Z, U, D, T]    # zéro, un, deux, trois [COURS p.68]
+    en: [Z, F, S, T]    # « initial letter of the digit » [B61 p.36]
+  accumulator: P        # registre P (ARIT, sauf en O2) ; L pour LOGI
 
 elements:
   arithmetic:
     registers: {P: 2, S: 2, O: 2}          # en catènes
-    cars: 4                                # 0-3 avec progression, Z F S T sans progression
-    operand_designators: ["0", "1", "2", "3", "Z", "F", "S", "T", "P"]
-    cc1_values: {P: programmed_point, N: normalized, R: normalized_rounded, A: normalized_rounded}  # COURS p.68 (A) ; B61 (R)
-    cc2_values: {D: double_length}
+    cars: 4
+    cc1:                                   # mode de calcul [COURS p.67-68 ; B61 table p.62]
+      programmed_point:   {mnemonic: {fr: P, en: P}}
+      normalized:         {mnemonic: {fr: N, en: N}}
+      normalized_rounded: {mnemonic: {fr: A, en: {value: R, status: hypothesis, unknown: U-05}}}
+    cc2:
+      double_length:      {mnemonic: {fr: D, en: D}}
     qualitative_compare_bits: {1: ">", 2: "<", 3: "=", 4: ">=", 5: "<=", 6: "!="}           # B61 p.35 ; COURS p.72
-    directives: [ADD, SUB, MUL, DIV, DIR, TRA, MPT, DPT, RSI, AVA, CAV, CAL, ROF]
+    directives:
+      add:                   {mnemonic: {fr: ADD, en: ADD}}
+      subtract:              {mnemonic: {fr: SOU, en: SUB}}
+      multiply:              {mnemonic: {fr: MUL, en: MUL}}
+      divide:                {mnemonic: {fr: DIV, en: DIV}}
+      divide_with_remainder: {mnemonic: {fr: DIR, en: DIR}}
+      transfer:              {mnemonic: {fr: TER, en: TRA}}
+      multiply_pow10:        {mnemonic: {fr: MPD, en: MPT}}
+      divide_pow10:          {mnemonic: {fr: DPD, en: DPT}}
+      reverse_sign:          {mnemonic: {fr: ISI, en: RSI}}
+      absolute_value:        {mnemonic: {fr: PVA, en: AVA}}
+      compare_absolute:      {mnemonic: {fr: CVA, en: CAV}}
+      compare_algebraic:     {mnemonic: {fr: CAL, en: CAL}}
+      round_off:             {mnemonic: {fr: ARR, en: ROF}}
   logical:
     registers: {K: 1, L: 1}
     cars: 4
-    directives: [TSK, TSL, TKL, SHL, IKL, FZL, FOL, ADD, SUB, MUL, DIV, FLC, INT, REU, BLC]
+    directives:
+      transfer_shift_to_K:   {mnemonic: {fr: TCK, en: TSK}}
+      transfer_shift_to_L:   {mnemonic: {fr: TCL, en: TSL}}
+      transfer_K_to_L:       {mnemonic: {fr: TKL, en: TKL}}
+      shift_left_L:          {mnemonic: {fr: MCL, en: SHL}}
+      insert_K_in_L:         {mnemonic: {fr: IKL, en: IKL}}
+      fill_zeros_L:          {mnemonic: {fr: FZL, en: FZL}}
+      fill_ones_L:           {mnemonic: {fr: FUL, en: FOL}}
+      add:                   {mnemonic: {fr: ADD, en: ADD}}
+      subtract:              {mnemonic: {fr: SOU, en: SUB}}
+      multiply:              {mnemonic: {fr: MUL, en: MUL}}
+      divide:                {mnemonic: {fr: DIV, en: DIV}}
+      complement_L:          {mnemonic: {fr: FCL, en: FLC}}
+      intersection:          {mnemonic: {fr: INT, en: INT}}
+      union:                 {mnemonic: {fr: REU, en: REU}}
+      binary_logical_compare: {mnemonic: {fr: CNL, en: BLC}}
   comparator:
     cars: 3                                # CAR0 variable/1er terme ; CAR1, CAR2 bornes/2e terme
     max_length: 255
-    directives: [OWC, TWC, DEL, TSS]
-  transcoder:
+    directives:
+      simple_compare:        {mnemonic: {fr: CMP, en: OWC}}
+      two_bounds_compare:    {mnemonic: {fr: CDB, en: TWC}}
+      erase:                 {mnemonic: {fr: EFL, en: DEL}}
+      transfer:              {mnemonic: {fr: TRR, en: TSS}}
+  transcoder:                              # fr : U-29
     cars: {0: source, 1: destination, 2: cliche}
     mic_entries: 256                       # U-12
-    directives: [MIC, BCP, ICP, BCS, ICS, PBC, PTP, PPT, PPR, PTS, STP, STS, RCL, END]
-    cliches:
+    directives:
+      load_mic:                  {mnemonic: {en: MIC}}
+      bull_cards_to_processing:  {mnemonic: {en: BCP}}
+      ibm_cards_to_processing:   {mnemonic: {en: ICP}}
+      bull_cards_to_storage:     {mnemonic: {en: BCS}}
+      ibm_cards_to_storage:      {mnemonic: {en: ICS}}
+      processing_to_bull_cards:  {mnemonic: {en: PBC}}
+      paper_tape_to_processing:  {mnemonic: {en: PTP}}
+      processing_to_paper_tape:  {mnemonic: {en: PPT}}
+      processing_to_printer:     {mnemonic: {en: PPR}}
+      processing_to_storage:     {mnemonic: {en: PTS}}
+      storage_to_processing:     {mnemonic: {en: STP}}
+      storage_to_storage:        {mnemonic: {en: STS}}
+      go_to_cliche:              {mnemonic: {en: RCL}}
+      end_of_transcoding:        {mnemonic: {en: END}}
+    cliches:                               # codes B61 (en) ; fr : U-29
       positioning: [AW, NW, AN, NS, BN, AZ]
       execution:   [TO, TN, IO, IN, OO, ON, WO, WN, RO, RN, RP, CQ]
-  drum:
+  drum:                                    # COURS : DAO TRT … ; lien TRT ↔ TCD/TDC : U-29
     cars: 1
-    directives: [DAO, TCD, TDC]
     shareable: true
-  uniselector:
-    cars: 1
     directives:
-      preparatory: [WRI, REF, REB]
-      execution:   [TRA, JUM, DEL, WRM]
-      service:     [SPO, SPN, MAI, MAN]
+      set_drum_origin:       {mnemonic: {fr: DAO, en: DAO}}
+      core_to_drum:          {mnemonic: {en: TCD}}
+      drum_to_core:          {mnemonic: {en: TDC}}
+  uniselector:                             # fr : U-29
+    cars: 1
     shareable: false
-  card_reader:
-    directives: [SPR, SPP, REA, CLE, DMF, DMI]
+    directives:
+      write:                 {mnemonic: {en: WRI}, group: preparatory}
+      read_forward:          {mnemonic: {en: REF}, group: preparatory}
+      read_backward:         {mnemonic: {en: REB}, group: preparatory}
+      read_transfer:         {mnemonic: {en: TRA}, group: execution}
+      skip_block:            {mnemonic: {en: JUM}, group: execution}
+      erase:                 {mnemonic: {en: DEL}, group: execution}
+      write_tape_mark:       {mnemonic: {en: WRM}, group: execution}
+      rewind:                {mnemonic: {en: SPO}, group: service}
+      rewind_and_request:    {mnemonic: {en: SPN}, group: service}
+      incident_request:      {mnemonic: {en: MAI}, group: service}
+      normal_request:        {mnemonic: {en: MAN}, group: service}
+  card_reader:                             # fr : U-29
     shareable: false
-  card_reader_punch:
-    directives: [SPR, SPP, REA, PUN, CLE, DMF, DMI]
+    directives:
+      select_stacker_rs2:    {mnemonic: {en: SPR}}
+      select_stacker_rs5:    {mnemonic: {en: SPP}}
+      read:                  {mnemonic: {en: REA}}
+      clear_track:           {mnemonic: {en: CLE}}
+      handling_request_eof:  {mnemonic: {en: DMF}}
+      handling_request_incident: {mnemonic: {en: DMI}}
+  card_reader_punch:                       # fr : U-29
     shareable: false
-  printer:
-    directives: [SKI, PRI, DMF, DMI]
+    directives:
+      select_stacker_rs2:    {mnemonic: {en: SPR}}
+      select_stacker_rs5:    {mnemonic: {en: SPP}}
+      read:                  {mnemonic: {en: REA}}
+      punch:                 {mnemonic: {en: PUN}}
+      clear_track:           {mnemonic: {en: CLE}}
+      handling_request_eof:  {mnemonic: {en: DMF}}
+      handling_request_incident: {mnemonic: {en: DMI}}
+  printer:                                 # fr : U-29
     shareable: false
-  paper_tape_reader:
-    directives: [REA, DMN, DMI]
+    directives:
+      skip_second_paper:     {mnemonic: {en: SKI}}
+      print:                 {mnemonic: {en: PRI}}
+      handling_request_eof:  {mnemonic: {en: DMF}}
+      handling_request_incident: {mnemonic: {en: DMI}}
+  paper_tape_reader:                       # fr : U-29
     shareable: false
-  paper_tape_punch:
-    directives: [PUN, DMN, DMI]
+    directives:
+      read:                  {mnemonic: {en: REA}}
+      normal_request:        {mnemonic: {en: DMN}}
+      handling_request_incident: {mnemonic: {en: DMI}}
+  paper_tape_punch:                        # fr : U-29
     shareable: false
-
-french_aliases:   # profil COURS (voir docs/ISA.md §7)
-  cuts: {TRAD: TRAN, TAMB: DRUM, LECT: CARR, PECT: CARP, IMPR: PRIN, DERU: MATA, LEBA: TAPR, PEBA: TAPP}
-  address: {G: L, R: P, A: A, S: S}
-  central: {RI: PI, RA: PA, RB: PB, GB: LB, FT: SA, FJ: SN, FI: RR, FU: FO, DI: IC, PC: CP, GE: GE, RE: RE}
-  arithmetic: {SOU: SUB, TER: TRA, MPD: MPT, DPD: DPT, ISI: RSI, PVA: AVA, CVA: CAV, ARR: ROF}
-  logical: {TCK: TSK, TCL: TSL, MCL: SHL, FUL: FOL, FCL: FLC, SOU: SUB, CNL: BLC}
-  comparator: {CMP: OWC, CDB: TWC, EFL: DEL, TRR: TSS}
-special_cuts_cours: {A: no_release_of_requester, B: no_busy_check}
+    directives:
+      punch:                 {mnemonic: {en: PUN}}
+      normal_request:        {mnemonic: {en: DMN}}
+      handling_request_incident: {mnemonic: {en: DMI}}

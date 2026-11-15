@@ -1,3 +1,4 @@
+; langue: en
 ; a = b*c ; d = d+e ; f = a*d  — exemple de Tumlin & Smotherman, notation B61
 ; T.O.  C.C.  X            A.F.
 START:  SIMU        I2           R     ; fork : la suite (I1) et I2 en parallèle

@@ -1,5 +1,5 @@
 # Code interne alphanumérique du Gamma 60 (6 bits, 60 caractères)
-# Source : B61, table « GAMMA 60 CODE », p.16 (refs/photos/b61-p16-code-interne.png)
+# Source : B61, table « GAMMA 60 CODE », p.16 (archives/photos/b61-p16-code-interne.png)
 # Code = 2 bits de colonne (forts) + 4 bits de ligne (faibles).
 # Vérifié par les exemples du texte : B = 000010, U = 010101, L = 001100 ; chiffres = 10 + DCB.
 # card : rangées perforées dans la colonne de carte (code carte Bull à 3 perforations max).

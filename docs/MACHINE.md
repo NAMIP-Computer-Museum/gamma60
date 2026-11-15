@@ -6,10 +6,12 @@ imprimées). Ce qui est incertain ou contradictoire est marqué **(?)** et déta
 Histoire : `HISTORY.md`.
 
 **Deux états de la machine coexistent dans les sources** (voir §12 et `data/profiles.yaml`) :
-- profil **COURS** : *Cours de programmation Gamma 60* (~1958-59) — mnémoniques françaises,
-  cycle 11 µs, clé mod 7 ;
-- profil **B61** : *Gamma 60 Data Processing System* (1961) — mnémoniques anglaises, cycle
-  10 µs, clé parité + mod 3.
+- profil **COURS** : *Cours de programmation Gamma 60* (~1958-59) — cycle 11 µs, clé mod 7 ;
+- profil **B61** : *Gamma 60 Data Processing System* (1961) — cycle 10 µs, clé parité + mod 3.
+
+Les mnémoniques diffèrent aussi (français dans COURS, anglais dans B61), mais c'est la langue
+du document, pas la machine : le code B existe en deux langues `fr` / `en`, indépendantes du
+profil (`data/directives.yaml`, `ISA.md` §7).
 
 ---
 
@@ -261,10 +263,8 @@ décodage des directives (COMP position 22).
 |---|---|---|
 | Cycle MC | 10 µs / 11 µs | B61, ONDE / COURS, BPD |
 | Clé | parité + mod 3 / mod 7 | B61 / COURS |
-| Mnémoniques | anglaises / françaises | B61 / COURS, BPD |
 | Temps ARIT | 200/350/550 / 100/300/600 µs | B61 / COURS |
 | JOIN en code B | C.C. de la coupure / X de la catène vierge | B61 / COURS |
-| RAC sans progression | Z F S T / Z U D T | B61 / COURS |
 | Bande | 190 / 266 µs ; 230 / 315 µs moyen ; 27,5 / ~30 cat/cm | B61 / COURS ; ONDE |
 | Tambour | 100 / 98 µs par catène | B61 / COURS |
 | MIC | 256 / 128×20 / 128×21 | B61 / COURS / ONDE |
@@ -276,6 +276,10 @@ décodage des directives (COMP position 22).
 ## 12. Profils
 `data/profiles.yaml` réunit les paramètres qui changent entre COURS et B61. L'émulateur doit
 pouvoir fonctionner avec l'un ou l'autre ; défaut : B61 (machine livrée).
+
+Les écarts de pure traduction (mnémoniques, lettres des RAC sans progression Z U D T / Z F S T,
+C.C.1 d'ARIT A / R) ne sont pas des divergences de machine : ils relèvent de la langue du
+code B (`fr` / `en`, `data/directives.yaml`).
 
 ## Clés des sources
 Voir `SOURCES.md`. B61 = Bull 1961 ; COURS = Bull, *Cours de programmation Gamma 60* ;

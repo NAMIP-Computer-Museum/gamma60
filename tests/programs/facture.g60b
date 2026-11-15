@@ -1,3 +1,4 @@
+; langue: en
 ; Ligne de facture : 3 branches indépendantes puis jonction (exemple du dialogue de conception)
 ;  - DRUM : lire la fiche client (piste fixe)
 ;  - TRAN : convertir la carte de commande (cartes Bull -> forme traitement)

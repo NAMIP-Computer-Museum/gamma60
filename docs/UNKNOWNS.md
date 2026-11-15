@@ -10,7 +10,7 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 | U-02 | Place des C.C. en code A | **Résolu en partie** : C.C. des coupures = m (bits 19-18), C.C. des adresses = n° RAC (19-18) ; directives d'élément sans variable libre : 20 bits propres (?) | — | `encoding.yaml` |
 | U-03 | Ordre complet des priorités DTQ | principes [B61 p.24 ; COURS p.6] ; pas de liste | urgence physique ; quantités avant instructions à nature égale ; exception lecteur de cartes | `priorities.yaml` |
 | U-04 | Ordre complet des priorités DI | « préétabli » ; classes décroissantes [MAI] | classes 0 > 1 > 2 > 3 > 4 | `priorities.yaml` |
-| U-05 | C.C.1 d'ARIT | **Résolu** : P programmée, N normalisée, A normalisée avec arrondi [COURS p.68] ; « R » de B61 = arrondi (probable) | — | `directives.yaml` |
+| U-05 | C.C.1 d'ARIT | **Partiel** : P programmée, N normalisée, A normalisée avec arrondi [COURS p.67-68] ; B61 donne « P, N ou R » sans définir R [table p.62] | R (langue `en`) = A (langue `fr`) : *rounded* / arrondi, cf. ARR → ROF | `directives.yaml` |
 | U-06 | Positions 1-6 du qualitatif d'ARIT | **Résolu** : > < = ≥ ≤ ≠ [B61 p.35 ; COURS p.72] | — | `qualitative.yaml` |
 | U-07 | Profils du catène qualitatif | **Partiel** : ARIT, COMP, bandes, cartes, registre A (CB, DI) ; manquent imprimante, tambour, LOGI, TRAN | à compléter | `qualitative.yaml` |
 | U-08 | Durées | **Partiel** : LOGI et COMP en cycles [COURS] ; DP ≈ 6 cycles par directive ; temps interne d'ARIT non séparé des transferts | voir `timings.yaml` | `timings.yaml` |
@@ -33,6 +33,8 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 | U-25 | Conservation de P/S/O d'ARIT d'une séquence à l'autre | non dit ; aucun mécanisme de sauvegarde | contenus non garantis : le programme doit tout recharger | — |
 | U-26 | Place exacte du test de JOIN dans l'exploitation de la coupure ; remise à zéro du compteur | non détaillé | test avant activation ; remise à 0 au déclenchement | — |
 | U-27 | Statut du pupitre | élément [ONDE, table B61] / « pas un élément d'E/S » [B61 p.47] | élément de classe 0, hors limite des 40 E/S | — |
+| U-28 | Mnémoniques anglais (B61) de GE / RE (RNE ← X ; mémoire[X] ← RNE) | décrites en COURS p.53-60 ; absentes de la table B61 p.62-66 | LE / PE, par analogie GB→LB, RI→PI, RA→PA, RB→PB (G→L, R→P) | `directives.yaml` |
+| U-29 | Mnémoniques français (COURS) de DESK, TRAN, tambour (hors DAO), unisélecteur, cartes, imprimante, bande perforée, clichés ; lien TRT [COURS] ↔ TCD / TDC [B61] | présents dans COURS (p.83-154) mais non relevés | langue `fr` absente : l'assembleur accepte la forme `en` (avertissement en mode diagnostic) | `directives.yaml` |
 
 ## Pistes documentaires
 - Bosset, ICIP 1959 (logique interne) ; Duverger 1958 et 1961 ; brochure Bull de programmation

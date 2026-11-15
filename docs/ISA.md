@@ -2,11 +2,14 @@
 
 Source principale : B61, chapitre III et tables « The Gamma 60 code B table of instructions »
 (PDF `archives/docs/Bull-1961-Gamma60-Data-Processing-System.pdf`, pages 62 à 66 ; images dans
-`refs/photos/bull-1961-tables-p-62.png` … `-66.png`). Vérifier sur les images en cas de doute :
+`archives/photos/bull-1961-tables-p-62.png` … `-66.png`). Vérifier sur les images en cas de doute :
 l'OCR des tables est inutilisable.
 
 **Ce qui est connu** : mnémoniques, champs, sémantique. **Ce qui ne l'est pas** : la valeur
 binaire (code A) de chaque mnémonique — voir `UNKNOWNS.md` (U-01).
+
+Les mnémoniques sont donnés en **langue `en`** (B61). Le code B existe aussi en **langue `fr`**
+(COURS) : c'est une traduction, indépendante du profil machine (§7, `data/directives.yaml`).
 
 ## 1. Format
 
@@ -110,8 +113,12 @@ Elles concernent l'élément de la coupure précédente.
 | Inverser les aiguillages | RR | adresse | idem |
 | Remplir de zéros | FZ | adresse | idem |
 | Remplir de uns | FO | adresse | idem |
+| Charger le RNE (RNE ← X) | LE **(?)** | quantité | idem |
+| Ranger le RNE (mémoire[X] ← RNE) | PE **(?)** | adresse | idem |
 
 (Correspondance ligne ↔ mnémonique lue sur l'image p.63 ; à revérifier : SQ, SI.)
+LE et PE n'apparaissent pas dans la table B61 : ce sont les directives GE et RE du COURS
+(p.53-60), mnémoniques anglais supposés par analogie G→L, R→P (U-28).
 
 ## 3. Directives des éléments de traitement
 
@@ -133,10 +140,13 @@ Elles concernent l'élément de la coupure précédente.
 | Arrondir | ROF | — | — | — | — |
 
 - dp = position de la virgule du résultat (virgule fixe) ; « rien » = flottant **(?)**.
-- O1, R : `0-3` (CAR avec progression), `Z F S T` (CAR sans progression), `P` (registre P).
+- O1, R : `0-3` (CAR avec progression), `Z F S T` en `en` / `Z U D T` en `fr` (CAR sans
+  progression, initiales des chiffres 0-3) [B61 p.36 ; COURS p.68], `P` (registre P).
   O2 : idem sauf P. Pas de fonction d'adresse.
 - C.C.2 = D : résultat double longueur (P+S, 20 chiffres).
-- Sens de P / N / R en C.C.1 : non établi (U-05).
+- C.C.1 [COURS p.67-68] : P virgule programmée, N normalisée, A (`fr`) normalisée avec arrondi
+  au plus proche (MUL.A = MUL.N puis ARR). En `en`, R (*rounded*) est supposé équivalent à A
+  (U-05).
 
 ### LOGI (15 directives)
 | Opération | T.O. |
@@ -245,17 +255,22 @@ Exemple ancien (BPD, mnémoniques antérieurs) : transfert MC → tambour de 12 
 dans B61 (le code a évolué entre les deux documents).
 
 
-## 7. Correspondance des mnémoniques COURS (~1958-59) ↔ B61 (1961)
+## 7. Langues du code B : `fr` (COURS, ~1958-59) ↔ `en` (B61, 1961)
+
+Les deux documents décrivent la même machine dans deux langues : l'écart des mnémoniques est
+une traduction (G garnir → L load, R ranger → P place ; A, S identiques), pas une évolution.
+Exceptions possibles, qui relèvent du profil : coupures spéciales A / B du COURS (le C.C.
+sert au JOIN en B61) et tambour (TRT ↔ TCD / TDC, U-29). Table complète : `data/directives.yaml`.
 
 | Domaine | COURS | B61 |
 |---|---|---|
 | Coupures | ARIT LOGI TRAD COMP TAMB LECT PECT IMPR DERU LEBA PEBA · PROT LIBE SIMU STOP | ARIT LOGI TRAN COMP DRUM CARR CARP PRIN MATA TAPR TAPP DESK · PROT LIBE SIMU STOP |
 | Coupures spéciales | C.C. A (sans libération), C.C. B (sans test d'occupation) | — (C.C. = JOIN) |
 | Adresse | G R A S | L P A S |
-| Directives centrales | RI GE RE TA RA TB RB GB AB SB CB SQ SI FT FJ FI FU FZ DI PC | PI — — TA PA TB PB LB AB SB CB SQ SI SA SN RR FO FZ IC CP |
+| Directives centrales | RI GE RE TA RA TB RB GB AB SB CB SQ SI FT FJ FI FU FZ DI PC | PI LE (?) PE (?) TA PA TB PB LB AB SB CB SQ SI SA SN RR FO FZ IC CP |
 | ARIT | ADD SOU MUL DIV DIR TER MPD DPD ISI PVA CVA CAL ARR | ADD SUB MUL DIV DIR TRA MPT DPT RSI AVA CAV CAL ROF |
 | ARIT C.C.1 | P N A | P N R |
-| ARIT sans progression | Z U D T | Z F S T |
+| RAC sans progression (ARIT, LOGI) | Z U D T | Z F S T |
 | LOGI | TCK TCL TKL MCL IKL FZL FUL FCL ADD SOU MUL DIV INT REU CNL | TSK TSL TKL SHL IKL FZL FOL FLC ADD SUB MUL DIV INT REU BLC |
 | COMP | CMP CDB EFL TRR | OWC TWC DEL TSS |
 | Tambour | DAO TRT … | DAO TCD TDC |

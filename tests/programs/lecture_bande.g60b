@@ -1,3 +1,4 @@
+; langue: en
 ; Lecture d'un bloc de bande par une UT, via un élément virtuel protégeant la zone tampon
 ; Règles (L'Aventure Gamma 60 p.59) : dérouleur attribué à une seule UT, une seule opération,
 ; zone de MC associée et disponible.
