@@ -1,4 +1,9 @@
-"""Central store: catenae addressed on 15 bits, each with its check key (no timing yet)."""
+"""Central store: catenae addressed on 15 bits, each with its check key.
+
+The store has 1 to 8 blocks of 4,096 catenae (bounds of the profile). An address beyond the
+installed blocks fails the selection check [B61 p.10 ; ONDE §2.2.2.3]: ``SelectionError``.
+Timing (one catena per cycle) is the Data Distributor's business, not the store's.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +11,10 @@ from gamma60 import data
 from gamma60.catena import MASK15, Catena
 
 BLOCK = 4096
+
+
+class SelectionError(IndexError):
+    """Address outside the installed blocks (selection check)."""
 
 
 class Memory:
@@ -19,7 +28,7 @@ class Memory:
 
     def _check(self, address: int) -> None:
         if not 0 <= address < self.size or address > MASK15:
-            raise IndexError(f"address {address} outside the store ({self.size} catenae)")
+            raise SelectionError(f"address {address} outside the store ({self.size} catenae)")
 
     def read(self, address: int) -> int:
         self._check(address)

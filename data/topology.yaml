@@ -32,3 +32,12 @@ circuits:                    # circuits de raccordement : une vanne sur chaque c
 multiplexer:                 # classes 3-4 [ONDE §3.4-3.5 ; MACHINE.md §6.3]
   max_elements: 20
   max_per_installation: 2
+  service:                   # ordre de service entre les éléments du multiplexeur
+    value: round_robin       # à tour de rôle, derrière la vanne unique du circuit c34
+    status: hypothesis
+    unknown: U-43
+
+circuit_assignment:          # circuit d'un élément quand sa classe en a plusieurs (c2a, c2b)
+  value: alternate           # alternance dans l'ordre de la configuration
+  status: hypothesis
+  unknown: U-32

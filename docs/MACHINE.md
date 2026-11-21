@@ -171,6 +171,11 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
 ### 5.3 Distributeur de Données / Transferts (DT)
 - Un transfert par cycle ; ordre préétabli selon la nature des éléments (tambour avant ARIT,
   sinon perte d'un tour de 20 ms). [B61 p.23-24]
+- Chaque élément a un registre tampon d'un catène (RLN), rempli ou vidé par la mémoire en un
+  cycle, puis traité au rythme de l'élément : le tambour (100 µs par catène) n'occupe ainsi le
+  canal qu'un cycle sur dix, les neuf autres restant disponibles. [B61 p.23]
+- Le RAC de l'élément augmente de un à chaque transfert, de sorte qu'il contient toujours
+  l'adresse du catène suivant. [B61 p.22-23]
 - Pour une même nature d'élément, les demandes de quantités passent avant les demandes
   d'instructions ; mais le DP passe avant COMP quand il alimente un lecteur de cartes (pour
   éviter un arrêt mécanique). [COURS p.6]

@@ -1,0 +1,10 @@
+# À nature égale, les quantités passent avant les instructions [COURS p.6]. Une lecture du DP
+# prend le rang de l'élément qu'il sert (U-16) : ici ARIT. Ordre attendu : quantités d'ARIT,
+# puis instructions du DP pour ARIT, puis quantités de LOGI (placé après ARIT, priorities.yaml).
+title: "Quantités d'ARIT, instructions du DP pour ARIT, quantités de LOGI"
+profile: B61
+until_us: 300
+clients:
+  - {name: PD, kind: program_distributor, pattern: continuous, count: 5, nature: instruction, rank_as: arithmetic, address: 0}
+  - {name: ARIT, kind: arithmetic, pattern: continuous, count: 5, address: 100}
+  - {name: LOGI, kind: logical, pattern: continuous, count: 5, address: 200}

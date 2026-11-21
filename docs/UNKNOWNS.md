@@ -8,7 +8,7 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 |---|---|---|---|---|
 | U-01 | Valeurs binaires des sous-codes (sorte de coupure, type d'adresse, n° de directive centrale, directives d'élément) | **Partiel** : préfixes TK et champs connus [COURS p.33-52] ; valeurs non données | table synthétique stable, marquée reconstruite | `data/encoding.yaml` |
 | U-02 | Place des C.C. en code A | **Résolu en partie** : C.C. des coupures = m (bits 19-18), C.C. des adresses = n° RAC (19-18) ; directives d'élément sans variable libre : 20 bits propres (?) | — | `encoding.yaml` |
-| U-03 | Ordre complet des priorités DTQ | principes [B61 p.24 ; COURS p.6] ; pas de liste | urgence physique ; quantités avant instructions à nature égale ; exception lecteur de cartes | `priorities.yaml` |
+| U-03 | Ordre complet des priorités DTQ (mis en œuvre par le DD au J2 : nature de l'élément, puis quantité avant instruction, puis U-41) | principes [B61 p.24 ; COURS p.6] ; pas de liste | urgence physique ; quantités avant instructions à nature égale ; exception lecteur de cartes | `priorities.yaml` |
 | U-04 | Ordre complet des priorités DI | « préétabli » ; classes décroissantes [MAI] | classes 0 > 1 > 2 > 3 > 4 | `priorities.yaml` |
 | U-05 | C.C.1 d'ARIT | **Partiel** : P programmée, N normalisée, A normalisée avec arrondi [COURS p.67-68 ; TFR p.2 « P, N ou A »] ; B61 donne « P, N ou R » sans définir R [table p.62] | R (langue `en`) = A (langue `fr`) : *rounded* / arrondi, cf. ARR → ROF | `directives.yaml` |
 | U-06 | Positions 1-6 du qualitatif d'ARIT | **Résolu** : > < = ≥ ≤ ≠ [B61 p.35 ; COURS p.72] | — | `qualitative.yaml` |
@@ -21,7 +21,7 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 | U-13 | Protection mémoire entre UT | aucune trace matérielle ; topogrammes GGU | aucune en faithful | `behavior.yaml` |
 | U-14 | Formats de cartes code B / C / D | B : 13 car. ; C : « code plus complet » [B61 p.28] ou feuille d'assemblage [MAI] ; D non décrit | formats modernes | `TOOLCHAIN.md` |
 | U-15 | Sémantique des directives centrales | **Résolu** [COURS p.53-60] | — | `ISA.md` ; `directives.yaml` (status: known) |
-| U-16 | Place du DP dans la chaîne du DT | exemple lecteur de cartes [COURS p.6] | selon la nature de l'élément servi | `priorities.yaml` |
+| U-16 | Place du DP dans la chaîne du DT (au J2 : une demande d'instruction prend le rang de l'élément servi, après ses quantités) | exemple lecteur de cartes [COURS p.6] | selon la nature de l'élément servi | `priorities.yaml` |
 | U-17 | Cycle MC | 10 µs [B61, ONDE] / 11 µs [COURS, BPD] | profil | `profiles.yaml` |
 | U-18 | « Une opération par appel » vs préparatoire + exécution (bandes) | **Expliqué** : directive préparatoire = renseignement, une seule directive opératoire | — | diagnostic |
 | U-19 | Clé de contrôle | parité + mod 3 [B61] / mod 7 sur 24 b [COURS] | profil | `profiles.yaml` |
@@ -45,6 +45,10 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 | U-37 | Signalement des incidents d'ARIT et de LOGI (positions du qualitatif, suite de la séquence) | « incident » [COURS p.64, p.117] ; B61 : dépassement « reported in the qualitative catena » [B61 p.35] ; position illisible | qualitatif 23 (incident réparable par programme) et 24 ; arrêt de la séquence | `behavior.yaml` (`incident`) |
 | U-38 | LOGI : positions 2-6 du qualitatif de CBL ; débordements d'ADD et de MUL | OCR illisible pour 2-6 [COURS p.119] ; débordement non décrit (seul l'incident de DIV l'est, p.117) | 2 L < K, 3 L = K, 4 L ≥ K, 5 L ≤ K, 6 L ≠ K (ordre d'ARIT) ; ADD : retenue perdue au-delà du bit 24 ; MUL : incident si le produit dépasse 24 bits | `behavior.yaml` (`logi`) |
 | U-39 | Tailles et nombres de registres non donnés par les sources : chaîne propre du DP (et son lien avec le registre spécial de mise en réserve du SIMU, COURS p.17), registre de mise en réserve, registres B / C des chaînes de reprise, registre directive, index et registre de décomptage de TRAN, RAE du tambour, registre de longueur de bloc de l'unisélecteur, mémoire de ligne de l'imprimante ; nombre de RAC du lecteur de cartes, de la bande perforée et du pupitre | registres cités sans taille [COURS p.36-38, p.87-89, p.108, p.141, p.153 ; ONDE §2 p.10] ; RAC des autres éléments donnés [COURS p.110, p.75, p.88-89, p.125, p.134, p.153] | adresses sur 15 b (chaîne du DP, B / C, RAE, décompteur TRAN) ; 1 catène (registre directive, longueur de bloc) ; index sur 5 b (24 positions) ; ligne = 120 × 6 b ; 1 RAC par élément non documenté | `registers.yaml` |
+| U-40 | DDC et DCC peuvent-ils transférer dans le même cycle ? | « one catena every 10 microseconds » pour la mémoire [B61 p.11, p.23] ; deux canaux distincts [BAT72 fig. 1] | non : un seul transfert par cycle au total | `behavior.yaml` (`dd_channels_same_cycle`) |
+| U-41 | Départage de deux DTQ de même rang (même nature, même type) | ordre « préétabli » sans détail [B61 p.24] ; tambours numérotés à partir de 100 [COURS p.51] | ordre des éléments dans la configuration | `priorities.yaml` (`dtd.tie_break`) |
+| U-42 | Instant de service d'une DTQ levée en cours de cycle | non décrit | au prochain début de cycle ; cycles alignés sur t = 0 | `behavior.yaml` (`dd_cycle_grid`) |
+| U-43 | Ordre de service entre les éléments du multiplexeur c3-c4 | le multiplexeur « intercale » les catènes des éléments lents [ONDE §3.4-3.5] | à tour de rôle derrière une seule vanne ; le circuit prend le rang de sa demande la plus prioritaire | `topology.yaml` (`multiplexer.service`) |
 
 ## Pistes documentaires
 - Bosset, ICIP 1959 (logique interne) ; Duverger 1958 et 1961 ; brochure Bull de programmation

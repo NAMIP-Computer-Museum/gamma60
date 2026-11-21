@@ -1,0 +1,7 @@
+# Lecture d'un bloc sur un dérouleur : 190 µs par catène en B61, 266 µs en COURS ;
+# les canaux sont occupés environ 5 % du temps [B61 p.24].
+title: "Dérouleur seul : lecture d'un bloc de 200 catènes"
+profile: B61
+until_us: 38000
+clients:
+  - {name: MATA, kind: uniselector, pattern: periodic, period_us: 190, count: 200, direction: write, address: 4000}

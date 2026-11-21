@@ -122,6 +122,7 @@ class Interpreter:
     program: Program
     profile: data.Profile
     max_steps: int = 100_000
+    observer: object | None = None  # debug.RegisterTrace / debug.Stepper: before() and after()
     memory: Memory = field(init=False)
     racs: dict[str, list[int]] = field(init=False, default_factory=dict)
     units: dict[str, object] = field(init=False, default_factory=dict)
@@ -224,11 +225,17 @@ class Interpreter:
             line = self.program.at(pc)
             self.trace.append((step, pc, element or "-", " ".join([line.to, *line.args])))
             next_pc = pc + line.size
+            if self.observer is not None:
+                self.observer.before(self, step, line, element)
             try:
                 outcome = self._step(line, element)
             except Incident as exc:
                 status, message = "incident", f"line {line.source_line}: {exc}"
+                if self.observer is not None:
+                    self.observer.after(self, step, line, element, message)
                 break
+            if self.observer is not None:
+                self.observer.after(self, step, line, element, None)
             kind = outcome[0]
             if kind == "next":
                 pc = next_pc

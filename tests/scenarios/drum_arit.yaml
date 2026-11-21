@@ -1,0 +1,8 @@
+# Tambour et ARIT en rafale : le tambour passe d'abord, sinon il perd un tour [B61 p.23-24].
+# Essayer avec  dtd_order: [arithmetic, drum]  pour voir le tambour rater ses échéances.
+title: "Tambour (1 catène / 100 µs) et ARIT en rafale"
+profile: B61
+until_us: 1000
+clients:
+  - {name: DRUM, kind: drum, pattern: periodic, period_us: 100, count: 10, direction: write, address: 2000}
+  - {name: ARIT, kind: arithmetic, pattern: continuous, count: 200, address: 100}

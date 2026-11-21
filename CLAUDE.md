@@ -67,8 +67,10 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 ## Commandes
 - Environnement : `python -m venv .venv` puis `.venv/Scripts/pip install -e .[dev]`
 - Tests : `pytest -q` · Lint : `ruff check . && ruff format --check .`
-- Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b [--profile COURS] [--trace]`
-  (J1 : interpréteur séquentiel, éléments ARIT et LOGI seulement)
+- Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b [--profile COURS]
+  [--trace | --trace=regs | --step] [--names en|fr]` (interpréteur séquentiel : ARIT et LOGI)
+- Scénario du Distributeur de Données : `python -m gamma60 dd tests/scenarios/<nom>.yaml
+  [--profile COURS] [--trace] [--names fr] [--mode diagnostic]`
 
 ## Méthode de travail
 - Avant un jalon : relire ROADMAP.md, proposer un plan, attendre validation.

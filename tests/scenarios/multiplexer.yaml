@@ -1,0 +1,8 @@
+# Classes 3 et 4 derrière la vanne unique du multiplexeur c34, servies à tour de rôle (U-43).
+title: "Multiplexeur c3-c4 : lecteur de cartes, imprimante, lecteur de bande perforée"
+profile: B61
+until_us: 600
+clients:
+  - {name: CARR, kind: card_reader, pattern: continuous, count: 20, direction: write, address: 1000}
+  - {name: PRIN, kind: printer, pattern: continuous, count: 20, address: 1100}
+  - {name: TAPR, kind: paper_tape_reader, pattern: continuous, count: 20, direction: write, address: 1200}

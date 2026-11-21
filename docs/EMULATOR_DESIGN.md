@@ -11,12 +11,13 @@
 |---|---|
 | `data.py` | accès aux tables de `data/` ; `resolve()` des hypothèses `{value, status, unknown}` (J0) |
 | `seq.py` | interpréteur séquentiel provisoire du code B (J1) : coupures ARIT / LOGI, adresses, branchements, SIMU / JOIN / STOP ; remplacé par le DP au J3 |
-| `engine.py` | file d'événements, horloge simulée, traces |
+| `engine.py` | file d'événements, horloge simulée, traces et écouteurs (J2) |
 | `catena.py` | catène 27 bits ; clé selon le profil : `parity9_mod3_15` (B61) ou `mod7_24bits` (COURS) ; codages DCB / alpha / binaire |
 | `number.py` | nombres semi-logarithmiques : mantisse entière 10 chiffres, exposant biaisé 40, clé mod 7 |
 | `memory.py` | mémoire centrale (blocs, adresses 15 b, contrôle de sélection) |
-| `registers.py` | matrices RAI (MAP) et RAC (MAQ), registres RNE, RAPA, RAPP, REDP, RSDP, A et B, indices d'occupation |
-| `data_distributor.py` | DD / DT : file des DTQ, 1 transfert par cycle, chaîne de priorité, vannes par circuit de classe sur les canaux DDC / DCC (`topology.yaml`) |
+| `registers.py` | matrice des RAC (MAQ) au J2, tailles lues dans `registers.yaml` ; au J3 : RAI (MAP), RNE, RAPA, RAPP, REDP, RSDP, A et B, indices d'occupation |
+| `data_distributor.py` | DD / DT (J2) : file des DTQ, 1 transfert par cycle, chaîne de priorité (`priorities.yaml`), vannes par circuit de classe sur les canaux DDC / DCC (`topology.yaml`), multiplexeur c34 à tour de rôle ; le DP lit à l'adresse de son RAPA |
+| `synthetic.py` | éléments synthétiques (continus, périodiques avec échéance) et scénarios YAML (`tests/scenarios/`) pour tester le DD (J2) |
 | `program_distributor.py` | PD / DP : file des DI ; lit le programme par des DTQ ; interprétation C, A, B, directives centrales ; chaînes de reprise ; JOIN ; SIMU ; éléments virtuels |
 | `core/arit.py`, `core/logi.py` | calcul pur d'ARIT et de LOGI, sans temps (J1), appelé par les éléments |
 | `elements/base.py` | machine à états d'un élément (repos, attente DI, servi, exécution : calcul / attente DTQ / transfert) |
@@ -29,7 +30,9 @@
 
 ## Interfaces clés
 - Un élément ne parle qu'à deux arbitres : `request_instruction()` (DI, ITR chez BAT72) et
-  `request_transfer(car_index, direction)` (DTQ, DTR chez BAT72). Il ne lit jamais le programme.
+  `DataDistributor.request(port, car, direction, nature=…)` (DTQ, DTR chez BAT72). Il ne lit
+  jamais le programme. Le DD le rappelle en fin de cycle : `transfer_done(request, value)` ou
+  `transfer_incident(request, reason)` (`key`, `selection`).
 - Le DP est le seul à manipuler RAI, RAC, I1/I2, registres A et B ; il est lui-même client du
   DD pour ses lectures en mémoire [BAT72 p.102].
 - Vocabulaire : noms du COURS dans le code (RAI, RAC, DI, DTQ…) ; équivalents anglais de BAT72

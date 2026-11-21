@@ -81,3 +81,15 @@ qualitative_reset_each_directive:   # positions non décrites (U-07) : remises �
   value: true
   status: hypothesis
   unknown: U-07
+
+dd_channels_same_cycle:      # DDC et DCC peuvent-ils transférer dans le même cycle ? (U-40)
+  value: false               # non : la mémoire fait un accès par cycle [B61 p.11, p.23]
+  status: hypothesis
+  unknown: U-40
+
+dd_cycle_grid:               # instant de service d'une DTQ (U-42)
+  value: aligned_on_zero     # prochain début de cycle, cycles alignés sur t = 0
+  status: hypothesis
+  unknown: U-42
+
+dd_starvation_cycles: 50     # mode diagnostic : alerte si une DTQ attend plus de N cycles (réglage moderne)

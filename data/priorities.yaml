@@ -8,6 +8,11 @@ dtd:
           paper_tape_reader, paper_tape_punch, transcoder, comparator,
           arithmetic, logical, desk]
   program_distributor_fetch: "rang de l'élément servi, juste après ses propres demandes de quantités"
+  nature_order: [quantity, instruction]   # à nature égale [COURS p.6]
+  tie_break:                    # deux demandes de même rang (ex. deux tambours)
+    value: configuration_order  # ordre des éléments dans la configuration (tambours n° 100+ : COURS p.51)
+    status: hypothesis
+    unknown: U-41
 dti:
   source: "B61 p.24 ; MAI : classes à priorité décroissante"
   status: hypothesis
