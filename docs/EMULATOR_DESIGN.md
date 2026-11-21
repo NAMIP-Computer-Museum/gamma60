@@ -24,6 +24,7 @@
 | `elements/drum.py`, `mata.py`, `cards.py`, `printer.py`, `tape_paper.py`, `desk.py` | mémoires auxiliaires et E/S |
 | `system/ggz.py` | superviseur minimal : tables des éléments et des UT, chargement, attribution des E/S |
 | `toolchain/` | transposition code B → code A, assemblage (code C), distribution (code D) → UT |
+| `debug.py` | traces et débogueur (J2, enrichi à chaque jalon) : libellés de `registers.yaml` selon `--names en` ou `fr`, `--trace=regs`, `--step` (registres, mémoire, points d'arrêt) ; lecture seule sur l'état de la simulation |
 | `__main__.py` | `python -m gamma60 run <prog> [--profile] [--trace]` (J1) ; `asm` au J3 |
 
 ## Interfaces clés
@@ -45,3 +46,10 @@
 ## Traces et mesures
 Trace par événement (date, élément, état, adresse) ; statistiques : occupation de chaque
 élément, attentes DI/DTQ, longueur des chaînes de reprise, saturation du DP et des canaux.
+
+Débogage (`debug.py`) : `--trace=regs` affiche après chaque pas les registres modifiés
+(marqués `*`) ; `--step` avance pas à pas (instruction, événement), affiche tous les registres
+(`r`), la mémoire (`m <adr> [n]`), pose des points d'arrêt (`b <étiquette|adresse>`). Noms
+affichés : champ `display` de `data/registers.yaml`, en `en` ou en `fr` (`--names`), avec une
+légende qui donne pour chaque libellé sa forme développée et sa source, ou « emulator label ».
+Le débogueur ne fait que lire l'état : la trace reste identique avec ou sans pas à pas.
