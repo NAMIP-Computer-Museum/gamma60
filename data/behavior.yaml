@@ -1,0 +1,82 @@
+# Comportements non documentés : hypothèses réglables (voir docs/UNKNOWNS.md).
+# Chaque valeur incertaine suit la convention {value, status: hypothesis, unknown: U-xx}.
+# Une configuration (configs/*.yaml) peut surcharger une clé sous « behavior: ».
+
+io_after_operation:          # enchaînement après l'opération d'un élément d'E/S
+  value: request_instruction_after_each_directive
+  status: hypothesis
+  unknown: U-10
+
+key_error_reaction:          # erreur de clé ou de contrôle mod 7
+  value: {faithful: incident_and_stop, diagnostic: incident_and_stop}
+  status: hypothesis
+  unknown: U-11
+
+memory_protection_between_ut:
+  value: {faithful: none, diagnostic: report_overlap}
+  status: hypothesis
+  unknown: U-13
+
+rne_width_bits:
+  value: 7
+  status: hypothesis
+  unknown: U-23
+
+tk_1110:                     # préfixe non documenté
+  value: {faithful: decoded_directive_error, diagnostic: warn}
+  status: hypothesis
+  unknown: U-24
+
+arit_registers_preserved_between_sequences:
+  value: false
+  status: hypothesis
+  unknown: U-25
+
+join:
+  value: {test: before_activation, counter_reset: on_trigger}
+  status: hypothesis
+  unknown: U-26
+
+desk:
+  value: {is_element: true, class: 0, counts_in_io_limit: false}
+  status: hypothesis
+  unknown: U-27
+
+recall_chain_registers:      # I1/I2 (B/C) de chaque élément réel, « adresses spécialisées » [ONDE §2]
+  value: {location: memory_table, base_address: 0, catenae_per_element: 2}
+  status: hypothesis
+  unknown: U-30
+
+arit_unary_operands:         # RSI/ISI, AVA/PVA : O1, R ; ROF/ARR : P + S, R seul [COURS p.71-72] (U-31 résolu)
+  reverse_sign: [O1, R]
+  absolute_value: [O1, R]
+  round_off: [R]
+
+arit_fitting:                # mise en forme des résultats d'ARIT
+  value:
+    zero_exponent_normalized: 0       # zéro normalisé : +, exposant 0 (programmé : 50 − V)
+    lost_digits: truncate             # chiffres au-delà des 20 de P + S : troncature vers zéro
+    exponent_out_of_range: incident   # exposant hors de 0-79
+    missing_point_position: 0         # C.C.1 P sans V
+    remainder_form: normalized        # reste de DIR (U-36)
+    division_by_zero: incident
+  status: hypothesis
+  unknown: U-35
+
+incident:                    # signalement des incidents d'ARIT et de LOGI
+  value: {qualitative_positions: [23, 24], stop_sequence: true}
+  status: hypothesis
+  unknown: U-37
+
+logi:
+  value:
+    cbl_positions_2_6: ["<", "=", ">=", "<=", "!="]
+    add_carry_beyond_24: lost
+    mul_overflow: incident
+  status: hypothesis
+  unknown: U-38
+
+qualitative_reset_each_directive:   # positions non décrites (U-07) : remises à 0 à chaque directive
+  value: true
+  status: hypothesis
+  unknown: U-07

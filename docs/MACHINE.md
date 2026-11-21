@@ -114,7 +114,15 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 - Pour une même nature d'élément, les demandes de quantités passent avant les demandes
   d'instructions ; mais le DP passe avant COMP quand il alimente un lecteur de cartes (pour
   éviter un arrêt mécanique). [COURS p.6]
-- Le DP passe par le DT pour ses propres lectures. [B61 p.24]
+- Le DP passe par le DT pour ses propres lectures. [B61 p.24] Il émet pour cela des demandes
+  de transfert « comme les autres unités ». [BAT72 p.102]
+- Vocabulaire anglais de BAT72 (fig. 1) : Central Memory (CM), Central Processor (CP),
+  Program Distributor (PD), Data Distributor (DD), Program Address Register (PAR = RAI),
+  Data Address Register (DAR = RAC), Data Distribution / Collection Channels (DDC / DCC),
+  Instruction / Data Transfer Request (ITR = DI / DTR = DTQ). Le DD organise une chaîne de
+  priorité et commande l'ouverture des canaux par des vannes (*gates*) propres à chaque
+  classe. Schéma redessiné : `archives/images/Gamma60-architecture-classes.svg`.
+  [BAT72 p.100-101, fig. 1]
 
 ## 6. Éléments
 
@@ -142,8 +150,12 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 ### 6.3 Classes et raccordement [ONDE §2.1, §4.1 ; MAI]
 - 5 ensembles de circuits d'armoire : c0, c1, 2 × c2, c3+c4 ; multiplexeur pour c3-c4
   (≤ 20 éléments, 2 au plus) ; 8 voies dans l'UC, 5 utilisées en standard.
-- c0 : pupitre (et LOGI selon ONDE ; c1 selon MAI ?) ; c1 : ARIT, COMP, TRAN ; c2 : tambours,
+- BAT72 parle de « 6 special circuits » de raccordement (c0, c1, c2 « 2 circuits », c3, c4) ;
+  sa figure 1 montre 4 blocs (c0, c1, c2, c3-4) ; comptes divergents (U-32). [BAT72 p.100]
+- c0 : pupitre (et LOGI selon ONDE et BAT72 ; c1 selon MAI ?) ; c1 : ARIT, COMP, TRAN ; c2 : tambours,
   unisélecteurs ; c3 : cartes, imprimantes ; c4 : bande perforée, machines à écrire.
+- BAT72 : ARIT en décimal codé binaire, chiffres de 4 bits, contrôle mod 7 ; tambour 25 600
+  catènes, 200 par piste. [BAT72 p.104]
 - Répartition « suivant leurs performances et le degré d'urgence de leurs demandes de
   transfert ». ONDE annonce « 4 classes » mais en décrit 5 (0 à 4). [ONDE §3]
 - Classe 3 : le Multiplexeur intercale sur le canal les catènes des éléments lents (cartes,
@@ -194,12 +206,74 @@ profil (`data/directives.yaml`, `ISA.md` §7).
   multiples ×2, ×5, ≤ 3 additions par chiffre.
 - Temps globaux : B61 200 / 350 / 550 / 150 µs (add / mul / div / cmp, transferts compris) ;
   COURS 100 / 300 / 600 µs.
+- **Sémantique des directives** [COURS p.65-72 ; B61 p.35-36] :
+  - P reçoit le 1er opérande et le résultat ; O le 2e opérande, toujours pris en MR (pas de
+    `P` en O2) ; S reçoit les poids faibles, même signe que P, exposant de P − 10.
+  - Les opérandes sont cadrés automatiquement selon leurs exposants ; le résultat est comparé
+    à 0 (qualitatif 7 = 0, 8 < 0, 9 > 0), y compris pour le transfert.
+  - C.C.1 `N` : normalisé (un report à gauche décale à droite et augmente l'exposant ; on ne
+    perd jamais de poids forts). `P` : virgule à la borne V (0-10) du registre P, exposant
+    = 50 − V ; poids forts perdus ⇒ incident (B61 : dépassement signalé au qualitatif).
+    `A` / `R` : normalisé puis arrondi (`MUL.A` = `MUL.N` + `ARR`).
+  - Arrondi au plus proche : ajout de 5 au premier chiffre de S, report éventuel sur le dernier
+    chiffre de P ; porte toujours sur la dernière position de P.
+  - C.C.2 `D` (double capacité) : range P puis S (4 catènes) ; le RAC résultat est alors
+    obligatoirement sans progression (Z U D T / Z F S T).
+  - Opérandes O1, O2, R : `0-3` RAC avec progression (+2 par nombre), `Z U D T` / `Z F S T`
+    RAC ramené à sa valeur initiale, `P` (registre P ; pas en O2 ; en R : résultat laissé dans
+    l'accumulateur).
+  - ADD, SOU/SUB, MUL : S effacé avant l'opération, même si O1 = P ; SOU : O1 − O2.
+  - DIV / DIR : quotient dans S, reste dans P ; DIV transfère S dans P (puis en R), DIR range
+    le reste ; C.C.1 porte sur le quotient (virgule à 0 : division arrêtée aux unités) ;
+    `D` n'a de sens que pour DIR (reste puis quotient à des adresses successives).
+  - TER/TRA : R ← O1 par le registre P, mis sous la forme demandée (P / N) ; S effacé sauf si
+    O1 = P ; perte de poids forts ⇒ incident. Interdit sur des catènes non numériques
+    (tétrade non DCB ⇒ incident).
+  - MPD/MPT, DPD/DPT : exposant ± V (0-15), sans décalage ni C.C.1 ; `D` possible si O1 = P.
+  - ISI/RSI, PVA/AVA : transfert O1 → R avec inversion de signe / valeur absolue ; ni C.C.1, ni
+    V, ni O2 ; S effacé sauf si O1 = P (alors `D` possible). [COURS p.71 ; TFR p.2]
+  - CVA/CAV, CAL : comparaison de O1 et O2 (valeurs absolues / algébriques), sans cadrage
+    préalable ; résultat au qualitatif 1-6 (> < = ≥ ≤ ≠) ; rien en R. [COURS p.71-72 ; B61 p.35]
+  - ARR/ROF : opérande P + S, arrondi sur la dernière position de P, R = destination ; S effacé
+    à la fin. [COURS p.72]
+  - Preuve par 7 : clé = reste de la division décimale de chaque opérande par 7 ; l'opération
+    est refaite sur les clés et comparée à la clé du résultat. [COURS p.66 ; B61 p.35]
+  - Points non tranchés (zéro, troncature, reste de DIR, signalement des incidents) : U-35 à
+    U-37.
 
 ### LOGI [B61 p.39-40 ; COURS p.111-121]
 - Registres K et L, 24 b, à décalage série ; résultat dans L ; 4 RAC.
 - Opère en série, « ce qui conduit à un opérateur très simple ». [ONDE §3.1]
 - Chargement de K et L par deux directives avec décalage circulaire à droite de V positions.
 - Qualitatif : L > K, L < K, L = K, inclusion, exclusion, réunion tout à 1.
+- **Sémantique des directives** [COURS p.110-119] : directives sans variable libre ; X = `V`
+  (« l », 00 à 24 : décalage, longueur ou les deux) et `R` (RAC 0-3 avec progression, Z U D T
+  sans progression, ou `L` : résultat laissé dans L). « Les l premières positions » = les l bits
+  de droite (bits 1 à l).
+  - TCK / TCL : charge K / L depuis la MR (adresse du RAC cité en R) avec rotation à droite de
+    l positions (contenu maintenu sur tout le registre) ; `L` en R sans objet.
+  - Toutes les autres, sauf CBL : rangement de L en MR si un RAC est cité en R (L conservé).
+  - TKL : L ← l bits de droite de K, reste de L effacé ; K inchangé.
+  - MCL/SHL : rotation de L à droite de l positions (décalage à gauche de n = rotation de 24 − n).
+  - IKL : l bits de droite de L ← ceux de K, reste de L maintenu ; puis K et L tournés à droite
+    de l positions.
+  - FZL / FUL (FOL) : l bits de droite de L forcés à 0 / 1, puis rotation de L de l positions.
+  - ADD / SOU (SUB) : L ← L + (l bits de droite de K) ; SOU donne |L − K| (« redressé ») ;
+    K inchangé.
+  - MUL : multiplicande = l bits de droite de K ; multiplicateur dans L ; produit dans L cadré
+    à droite ; bits 24 − l de K effacés ; somme des capacités ≤ 24.
+  - DIV : diviseur = l bits de droite de K ; dividende dans L (≤ 23 bits) ; quotient dans les
+    24 − l bits de droite de L, reste dans les l bits de gauche ; bits 24 − l de K effacés ;
+    quotient trop long ⇒ incident.
+  - FCL/FLC : complément des l bits de droite de L, cadrage inchangé.
+  - INT / REU : ET / OU des l bits de droite de K et L, résultat dans L (reste de L inchangé).
+  - CBL/BLC : compare les l bits de droite de K et de L ; K et L inchangés ; rien en R ;
+    qualitatif 1 L > K … 6 (comparaisons, positions 2-6 illisibles dans l'OCR : U-38),
+    7 L inclus dans K, 8 non inclus, 9 K inclus dans L, 10 non inclus, 11 K et L disjoints,
+    12 empiètement, 13 réunion tout à 1, 14 réunion avec au moins un 0. [COURS p.118-119]
+  - Temps (cycles MR) : alimentation d'une directive 6 ; TCK/TCL 6 + l/2 ; MCL, IKL, FZL, FUL
+    l/2 ; TKL, ADD, FCL, INT, REU, CBL 12 ; SOU 24 ; MUL 6 + 12n − l/2 ; DIV 24 + 12(24 − l) ;
+    rangement + 3. [COURS p.120-121]
 - Temps (cycles MR) : réception d'une directive 6 ; ADD 12 ; SOU 24 ; MUL 6 + 12n (n = nombre
   de 1 du multiplicateur) ; rangement + 3. [COURS p.120-121]
 

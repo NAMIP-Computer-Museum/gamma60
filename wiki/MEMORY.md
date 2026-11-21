@@ -215,7 +215,7 @@ The type is given by a **prefix code (TK)** read from the left [COURS p.33-52]:
 | `01` | **Cut** (*coupure*) | hand the sequence over to an element (`ARIT`, `DRUM` / `TAMB`…), fork (`SIMU`), join, stop (`STOP`) |
 | `10` | **Central directive** | executed by the Program Distributor itself (registers A and B, counters, switches) |
 | `110` | **Address instruction** | load or update a current-address register of the element: load `L` / `G`, place `P` / `R`, add `A` / `A`, subtract `S` / `S` |
-| `1111` | **Element directive** | operation carried out by the element (`ADD` / `ADD`, `SUB` / `SOU`, `OWC` / `CMP`, `TDC` / *fr not recorded* (U-29)…) |
+| `1111` | **Element directive** | operation carried out by the element (`ADD` / `ADD`, `SUB` / `SOU`, `OWC` / `CMP`, `TDC` / `TTR`…) |
 | `1110` | undocumented | — (U-24) |
 
 Bits 17 and 16 carry the **address function**: bit 17 = differential (relative) address,
@@ -303,7 +303,7 @@ whose head and tail are ARIT's I1/I2 (system area) and whose link is the blank a
 |---|---|---|
 | 5000-5001 | `PROT IMAGE` + blank | take the lock on the buffer |
 | 5002-5003 | `MATA 1` / `DERU 1` + blank | cut on tape uniselector 1 |
-| 5004-5006 | `REF 3`, `L 0 TAMPON` / `G 0 TAMPON`, `TRA` | read one block from tape unit 3 into the buffer |
+| 5004-5006 | `REF 3` / `LAV 3`, `L 0 TAMPON` / `G 0 TAMPON`, `TRA` | read one block from tape unit 3 into the buffer |
 | 5007-5009 | `LIBE IMAGE` + blank, `STOP` | release the lock, end |
 | 5010-5011 | IMAGE | virtual element: busy bit + head, tail (initialised to 0) |
 | 5012-5139 | TAMPON | 128-catena I/O zone |

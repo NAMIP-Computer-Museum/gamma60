@@ -1,0 +1,11 @@
+ ; langue: en
+  START:  ARIT                           ; coupure sur l'élément ARIT
+          VIERGE                         ; catène vierge, obligatoire après la coupure
+          L     0     X                  ; RAC 0 <- adresse de X
+          L     1     Y
+          L     2     R
+          DIV   N     - 0 1 2            ; R = X / Y, virgule normalisée
+          STOP
+  X:      NUM   +22
+  Y:      NUM   +7
+  R:      NUM   +0

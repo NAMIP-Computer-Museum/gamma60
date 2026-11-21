@@ -3,6 +3,7 @@ dtd:
   sources: ["B61 p.24 : préétabli selon la nature ; tambour > ARIT",
             "COURS p.6 : à nature égale, quantités avant instructions ; DP avant COMP quand il alimente un lecteur de cartes"]
   status: hypothesis
+  unknown: U-03   # place du DP : U-16
   order: [drum, uniselector, card_reader, card_reader_punch, printer,
           paper_tape_reader, paper_tape_punch, transcoder, comparator,
           arithmetic, logical, desk]
@@ -10,4 +11,5 @@ dtd:
 dti:
   source: "B61 p.24 ; MAI : classes à priorité décroissante"
   status: hypothesis
+  unknown: U-04
   by_class: [0, 1, 2, 3, 4]

@@ -12,6 +12,7 @@ elements:
   card_reader: 4
   card_reader_punch: 4
   paper_tape_reader: 4
+  paper_tape_punch: {value: 4, status: hypothesis, unknown: U-34}
   desk: 1
 limits:
   io_elements_max: 40

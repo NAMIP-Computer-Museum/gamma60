@@ -1,7 +1,8 @@
 ; langue: fr
 ; Classement de C par rapport à A et B, puis somme — exemple NAM-IP Infos 2018/1
 ; Profil COURS, langue fr (G = garnir ; CDB, TRR) ; F.A. M = mémoire de manœuvre.
-; Transcription de archives/photos/namip-2018-programme-classement.jpg (lignes 019-053).
+; Transcription de archives/photos/namip-2018-programme-classement.jpg (lignes 020-052) :
+; extrait d'un programme plus long, les lignes 019 et 053 sont « .... » sur la feuille.
 ; Mémoires de manœuvre : M0-3 = C ; M4-5 = cumul ; M6-9 = 1re position (A) ;
 ; M10-13 = 2e position (B) ; M14-17 = 3e position.
 020     COMP

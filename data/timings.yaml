@@ -1,7 +1,9 @@
 # Durées. Les valeurs dépendantes du profil sont dans profiles.yaml (prioritaires).
 memory: {cycle_us_from_profile: true}
-arithmetic: {other_hypothesis_us: 100, note: "temps globaux, transferts compris ; temps interne non séparé (U-08)"}
-comparator_b61_us_per_catena: {OWC: 30, TSS: 30, TWC: 50, DEL: 10}
+arithmetic:
+  other_us: {value: 100, status: hypothesis, unknown: U-08}   # directives sans temps publié
+  note: "temps globaux, transferts compris ; temps interne non séparé (U-08)"
+comparator_b61_us_per_catena: {OWC: 30, TSS: 30, TWC: 50, DEL: 10}   # B61 p.36-37
 comparator_cours_cycles: {CMP: "5+3L", CDB: "5+5L", EFL: "2+L", TRR: "2+3L"}   # COURS p.78
 logical_cours_cycles: {directive_feed: 6, ADD: 12, SOU: 24, MUL: "6+12n", store_result: 3}   # COURS p.120-121
 transcoder_us_per_character: [15, 20]
@@ -12,4 +14,6 @@ printer: {per_line_us: 200000}
 paper_tape_reader: {per_character_us: 3333}
 paper_tape_punch: {per_character_us: 40000}
 desk_typewriter: {per_character_us: 100000}
-program_distributor: {per_directive_cycles_hypothesis: 6, validation: "≈100 µs de DP pour ≈50 ms de bloc bande (B61 p.24)"}
+program_distributor:
+  per_directive_cycles: {value: 6, status: hypothesis, unknown: U-08}
+  validation: "≈100 µs de DP pour ≈50 ms de bloc bande (B61 p.24)"

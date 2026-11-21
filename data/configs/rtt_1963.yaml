@@ -13,4 +13,5 @@ elements:
   printer: 6                   # 300 l/min, double entraînement
   card_reader: 2
   paper_tape_reader: 3
+  paper_tape_punch: 0           # non cité par la source
   desk: 1

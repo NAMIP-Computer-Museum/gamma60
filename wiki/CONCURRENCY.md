@@ -88,7 +88,7 @@ Line T.O.  C.C.  X     A.F.  Comment
 014  …                       continue: swap buffers, loop
 ```
 
-`R` means "relative line number": the program can be loaded anywhere in memory. `REF` and `TRA` (tape read) are B61 mnemonics; their `fr` forms are not recorded in our sources (U-29).
+`R` means "relative line number": the program can be loaded anywhere in memory. `REF` / `LAV` (read forward) and `TRA` / `TRA` (execute the transfer) are tape directives [TFR p.5].
 
 ```
 time →

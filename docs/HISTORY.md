@@ -20,7 +20,9 @@
 | 1965 | *Alphaville* (Godard) : l'ordinateur Alpha 60 est modelé sur le Gamma 60 | A. Utterson |
 | 1974 | Fin de service des derniers exemplaires (RTT) | RTT |
 
-Environ 16 à 20 machines (16 répertoriées par AVG). Clients connus : voir MACHINE.md et
+Environ 16 à 20 machines (16 répertoriées par AVG ; « Twenty Gamma 60 Systems were produced,
+ten of which are still in operation » en 1971 [BAT72 p.100] ; le calendrier n'en montre
+qu'environ 7 encore en service en 1971 : U-33). Clients connus : voir MACHINE.md et
 SOURCES.md. Génération : « 2e génération » est une classification rétrospective, absente des
 documents d'époque.
 

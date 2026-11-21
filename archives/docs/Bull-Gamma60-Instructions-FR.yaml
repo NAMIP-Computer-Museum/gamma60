@@ -4,7 +4,7 @@
 # Champs : to = type d'opération ; b61 = équivalent dans B61 ; cc = codes complémentaires ;
 #          x = variable libre ; fa = fonction d'adresse admise ; uncertain = lecture à vérifier.
 source:
-  file: Gamma60-instructions-FR.pdf
+  file: Bull-Gamma60-instructions-FR-NOOCR.pdf
   pages: 5
   likely: "version française des tables du code B de B61 (hypothèse : même structure, mêmes conventions)"
 conventions:

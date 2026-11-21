@@ -10,7 +10,9 @@
 #   - chaîne simple                          = orthographe lue dans la source ;
 #   - {value, status: hypothesis, unknown}   = orthographe supposée (voir UNKNOWNS.md) ;
 #   - langue absente                         = orthographe non relevée (U-29).
-# Le champ status d'une instruction (known / known_name) porte sur sa sémantique, pas sur
+# Sources fr : COURS et tables françaises du code B [TFR]
+# (archives/docs/Bull-Gamma60-instructions-FR-NOOCR.pdf ; transcription Bull-Gamma60-Instructions-FR.yaml).
+# Le champ status d'une instruction (known) porte sur sa sémantique (COURS p.53-60), pas sur
 # son orthographe. Les encodages binaires (code A) ne sont PAS connus : U-01, encoding.yaml.
 
 languages:
@@ -52,15 +54,15 @@ address_instructions:   # cc = n° de CAR (0-3)
   subtract: {mnemonic: {fr: S, en: S}}
 
 central_directives:     # exécutées par le DP ; sémantique : COURS p.53-60 (U-15)
-  store_instruction_number: {mnemonic: {fr: RI, en: PI}, status: known_name}
+  store_instruction_number: {mnemonic: {fr: RI, en: PI}, status: known}
   load_element_number:
     mnemonic: {fr: GE, en: {value: LE, status: hypothesis, unknown: U-28}}
     status: known      # RNE ← X
   store_element_number:
     mnemonic: {fr: RE, en: {value: PE, status: hypothesis, unknown: U-28}}
     status: known      # mémoire[X] ← RNE
-  iteration_control:        {mnemonic: {fr: DI, en: IC}, status: known_name}
-  counter_progression:      {mnemonic: {fr: PC, en: CP}, status: known_name}
+  iteration_control:        {mnemonic: {fr: DI, en: IC}, status: known}
+  counter_progression:      {mnemonic: {fr: PC, en: CP}, status: known}
   transfer_to_A:            {mnemonic: {fr: TA, en: TA}, status: known}
   place_A:                  {mnemonic: {fr: RA, en: PA}, status: known}
   transfer_to_B:            {mnemonic: {fr: TB, en: TB}, status: known}
@@ -69,11 +71,11 @@ central_directives:     # exécutées par le DP ; sémantique : COURS p.53-60 (U
   add_B_15:                 {mnemonic: {fr: AB, en: AB}, status: known}
   subtract_B_15:            {mnemonic: {fr: SB, en: SB}, status: known}
   compare_B_15:             {mnemonic: {fr: CB, en: CB}, status: known}
-  substitute_quantity_in_B: {mnemonic: {fr: SQ, en: SQ}, status: known_name}
-  substitute_instruction:   {mnemonic: {fr: SI, en: SI}, status: known_name}
+  substitute_quantity_in_B: {mnemonic: {fr: SQ, en: SQ}, status: known}
+  substitute_instruction:   {mnemonic: {fr: SI, en: SI}, status: known}
   switch_branch_never:      {mnemonic: {fr: FJ, en: SN}, status: known}
   switch_branch_always:     {mnemonic: {fr: FT, en: SA}, status: known}
-  reverse_switches:         {mnemonic: {fr: FI, en: RR}, status: known_name}
+  reverse_switches:         {mnemonic: {fr: FI, en: RR}, status: known}
   fill_zeros:               {mnemonic: {fr: FZ, en: FZ}, status: known}
   fill_ones:                {mnemonic: {fr: FU, en: FO}, status: known}
 
@@ -127,7 +129,7 @@ elements:
       complement_L:          {mnemonic: {fr: FCL, en: FLC}}
       intersection:          {mnemonic: {fr: INT, en: INT}}
       union:                 {mnemonic: {fr: REU, en: REU}}
-      binary_logical_compare: {mnemonic: {fr: CNL, en: BLC}}
+      binary_logical_compare: {mnemonic: {fr: CBL, en: BLC}}   # COURS p.111, p.118 ; TFR p.4 (« CNL » une fois, p.120 : coquille)
   comparator:
     cars: 3                                # CAR0 variable/1er terme ; CAR1, CAR2 bornes/2e terme
     max_length: 255
@@ -136,84 +138,106 @@ elements:
       two_bounds_compare:    {mnemonic: {fr: CDB, en: TWC}}
       erase:                 {mnemonic: {fr: EFL, en: DEL}}
       transfer:              {mnemonic: {fr: TRR, en: TSS}}
-  transcoder:                              # fr : U-29
+  transcoder:                              # fr : TFR p.3
     cars: {0: source, 1: destination, 2: cliche}
-    mic_entries: 256                       # U-12
     directives:
-      load_mic:                  {mnemonic: {en: MIC}}
-      bull_cards_to_processing:  {mnemonic: {en: BCP}}
-      ibm_cards_to_processing:   {mnemonic: {en: ICP}}
-      bull_cards_to_storage:     {mnemonic: {en: BCS}}
-      ibm_cards_to_storage:      {mnemonic: {en: ICS}}
-      processing_to_bull_cards:  {mnemonic: {en: PBC}}
-      paper_tape_to_processing:  {mnemonic: {en: PTP}}
-      processing_to_paper_tape:  {mnemonic: {en: PPT}}
-      processing_to_printer:     {mnemonic: {en: PPR}}
-      processing_to_storage:     {mnemonic: {en: PTS}}
-      storage_to_processing:     {mnemonic: {en: STP}}
-      storage_to_storage:        {mnemonic: {en: STS}}
-      go_to_cliche:              {mnemonic: {en: RCL}}
-      end_of_transcoding:        {mnemonic: {en: END}}
-    cliches:                               # codes B61 (en) ; fr : U-29
-      positioning: [AW, NW, AN, NS, BN, AZ]
-      execution:   [TO, TN, IO, IN, OO, ON, WO, WN, RO, RN, RP, CQ]
-  drum:                                    # COURS : DAO TRT … ; lien TRT ↔ TCD/TDC : U-29
+      load_mic:                  {mnemonic: {fr: GMI, en: MIC}}
+      bull_cards_to_processing:  {mnemonic: {fr: CAT, en: BCP}}
+      ibm_cards_to_processing:   {mnemonic: {fr: CET, en: ICP}}
+      bull_cards_to_storage:     {mnemonic: {fr: CAM, en: BCS}}
+      ibm_cards_to_storage:      {mnemonic: {fr: CEM, en: ICS}}
+      processing_to_bull_cards:  {mnemonic: {fr: TCA, en: PBC}}
+      paper_tape_to_processing:  {mnemonic: {fr: BPT, en: PTP}}
+      processing_to_paper_tape:  {mnemonic: {fr: TBP, en: PPT}}
+      processing_to_printer:     {mnemonic: {fr: TIP, en: PPR}}
+      processing_to_storage:     {mnemonic: {fr: TVM, en: PTS}}
+      storage_to_processing:     {mnemonic: {fr: MVT, en: STP}}
+      storage_to_storage:        {mnemonic: {fr: MVM, en: STS}}
+      go_to_cliche:              {mnemonic: {fr: RCL, en: RCL}}
+      end_of_transcoding:        {mnemonic: {fr: FIN, en: END}}
+    cc:                                    # codes complémentaires localisés [B61 table ; TFR p.3]
+      load_mic_half:      {fr: [G, D], en: [L, R]}       # gauche / droite ; en : lecture incertaine (ISA.md)
+      go_to_cliche:       {fr: "G ou rien ; E, S ou —", en: "A ou rien ; I ou 0"}   # correspondance terme à terme non établie
+      end_of_transcoding: {fr: R, en: S}                 # R souligné dans TFR
+    cliches:                               # {fr, en} ; 4 par catène [B61 table ; TFR p.3]
+      positioning:
+        alphanumeric_word:   {fr: MA, en: AW}
+        numeric_word:        {fr: MN, en: NW}
+        arithmetic_number:   {fr: NA, en: AN}
+        signed_number:       {fr: NS, en: NS}
+        binary:              {fr: BN, en: BN}
+        certified_numeric:   {fr: CE}                    # absent de B61 (TFR p.3)
+        numeric_all_zeros:   {fr: TZ, en: AZ}
+      execution:
+        transfer_one:        {fr: TU, en: TO}
+        transfer_n:          {fr: TL, en: TN}
+        skip_input_one:      {fr: EU, en: IO}
+        skip_input_n:        {fr: EL, en: IN}
+        space_output_one:    {fr: SU, en: OO}
+        space_output_n:      {fr: SL, en: ON}
+        constant_one:        {fr: KU, en: WO}
+        constant_n:          {fr: KL, en: WN}
+        constant_no_advance_one: {fr: RU, en: RO}
+        constant_no_advance_n:   {fr: RL, en: RN}
+        return_to_program:   {fr: RP, en: RP}
+        to_qualitative:      {fr: CQ, en: CQ}
+  drum:                                    # fr : TFR p.5 (TRT = MR → tambour, TTR = tambour → MR)
     cars: 1
     shareable: true
     directives:
       set_drum_origin:       {mnemonic: {fr: DAO, en: DAO}}
-      core_to_drum:          {mnemonic: {en: TCD}}
-      drum_to_core:          {mnemonic: {en: TDC}}
-  uniselector:                             # fr : U-29
+      core_to_drum:          {mnemonic: {fr: TRT, en: TCD}}
+      drum_to_core:          {mnemonic: {fr: TTR, en: TDC}}
+  uniselector:                             # fr : TFR p.5 ; attention : REB = read backward (en) / rebobinage (fr)
     cars: 1
     shareable: false
     directives:
-      write:                 {mnemonic: {en: WRI}, group: preparatory}
-      read_forward:          {mnemonic: {en: REF}, group: preparatory}
-      read_backward:         {mnemonic: {en: REB}, group: preparatory}
-      read_transfer:         {mnemonic: {en: TRA}, group: execution}
-      skip_block:            {mnemonic: {en: JUM}, group: execution}
-      erase:                 {mnemonic: {en: DEL}, group: execution}
-      write_tape_mark:       {mnemonic: {en: WRM}, group: execution}
-      rewind:                {mnemonic: {en: SPO}, group: service}
-      rewind_and_request:    {mnemonic: {en: SPN}, group: service}
-      incident_request:      {mnemonic: {en: MAI}, group: service}
-      normal_request:        {mnemonic: {en: MAN}, group: service}
-  card_reader:                             # fr : U-29
+      write:                 {mnemonic: {fr: ECR, en: WRI}, group: preparatory}
+      read_forward:          {mnemonic: {fr: LAV, en: REF}, group: preparatory}
+      read_backward:         {mnemonic: {fr: LAR, en: REB}, group: preparatory}
+      read_transfer:         {mnemonic: {fr: TRA, en: TRA}, group: execution}
+      skip_block:            {mnemonic: {fr: SAU, en: JUM}, group: execution}
+      erase:                 {mnemonic: {fr: EFF, en: DEL}, group: execution}
+      write_tape_mark:       {mnemonic: {fr: ECM, en: WRM}, group: execution}
+      rewind:                {mnemonic: {fr: REB, en: SPO}, group: service}
+      rewind_and_request:    {mnemonic: {fr: REM, en: SPN}, group: service}
+      incident_request:      {mnemonic: {fr: MAI, en: MAI}, group: service}
+      normal_request:        {mnemonic: {fr: MAN, en: MAN}, group: service}
+  card_reader:                             # fr : TFR p.4 (M = magasin, b = brosse ; en : H = hopper, RS)
     shareable: false
     directives:
-      select_stacker_rs2:    {mnemonic: {en: SPR}}
-      select_stacker_rs5:    {mnemonic: {en: SPP}}
-      read:                  {mnemonic: {en: REA}}
-      clear_track:           {mnemonic: {en: CLE}}
-      handling_request_eof:  {mnemonic: {en: DMF}}
-      handling_request_incident: {mnemonic: {en: DMI}}
-  card_reader_punch:                       # fr : U-29
+      select_stacker_rs2:    {mnemonic: {fr: SCL, en: SPR}}
+      select_stacker_rs5:    {mnemonic: {fr: SCP, en: SPP}}
+      read:                  {mnemonic: {fr: LEC, en: REA}}
+      clear_track:           {mnemonic: {fr: API, en: CLE}}
+      handling_request_eof:  {mnemonic: {fr: DMF, en: DMF}}
+      handling_request_incident: {mnemonic: {fr: DMI, en: DMI}}
+  card_reader_punch:                       # fr : TFR p.4 (M = magasin, b = brosse ; en : H = hopper, RS)
     shareable: false
     directives:
-      select_stacker_rs2:    {mnemonic: {en: SPR}}
-      select_stacker_rs5:    {mnemonic: {en: SPP}}
-      read:                  {mnemonic: {en: REA}}
-      punch:                 {mnemonic: {en: PUN}}
-      clear_track:           {mnemonic: {en: CLE}}
-      handling_request_eof:  {mnemonic: {en: DMF}}
-      handling_request_incident: {mnemonic: {en: DMI}}
-  printer:                                 # fr : U-29
+      select_stacker_rs2:    {mnemonic: {fr: SCL, en: SPR}}
+      select_stacker_rs5:    {mnemonic: {fr: SCP, en: SPP}}
+      read:                  {mnemonic: {fr: LEC, en: REA}}
+      punch:                 {mnemonic: {fr: PER, en: PUN}}
+      clear_track:           {mnemonic: {fr: API, en: CLE}}
+      handling_request_eof:  {mnemonic: {fr: DMF, en: DMF}}
+      handling_request_incident: {mnemonic: {fr: DMI, en: DMI}}
+  printer:                                 # fr : TFR p.5
     shareable: false
     directives:
-      skip_second_paper:     {mnemonic: {en: SKI}}
-      print:                 {mnemonic: {en: PRI}}
-      handling_request_eof:  {mnemonic: {en: DMF}}
-      handling_request_incident: {mnemonic: {en: DMI}}
-  paper_tape_reader:                       # fr : U-29
+      skip_second_paper:     {mnemonic: {fr: SDF, en: SKI}}
+      print:                 {mnemonic: {fr: IMP, en: PRI}}
+      handling_request_eof:  {mnemonic: {fr: DMF, en: DMF}}
+      handling_request_incident: {mnemonic: {fr: DMI, en: DMI}}
+  paper_tape_reader:                       # fr : TFR p.4
     shareable: false
     directives:
-      read:                  {mnemonic: {en: REA}}
-      normal_request:        {mnemonic: {en: DMN}}
-      handling_request_incident: {mnemonic: {en: DMI}}
-  paper_tape_punch:                        # fr : U-29
+      read:                  {mnemonic: {fr: LIR, en: REA}}
+      normal_request:        {mnemonic: {fr: DMN, en: DMN}}
+      handling_request_incident: {mnemonic: {fr: DMI, en: DMI}}
+  paper_tape_punch:                        # fr : TFR p.4
     shareable: false
     directives:
-      punch:                 {mnemonic: {en: PUN}}
-      normal_request:        {mnemonic: {en: DMN}}
-      handling_request_incident: {mnemonic: {en: DMI}}
+      punch:                 {mnemonic: {fr: PBA, en: PUN}}
+      normal_request:        {mnemonic: {fr: DMN, en: DMN}}
+      handling_request_incident: {mnemonic: {fr: DMI, en: DMI}}

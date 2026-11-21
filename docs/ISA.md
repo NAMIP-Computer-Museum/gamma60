@@ -3,7 +3,8 @@
 Source principale : B61, chapitre III et tables « The Gamma 60 code B table of instructions »
 (PDF `archives/docs/Bull-1961-Gamma60-Data-Processing-System.pdf`, pages 62 à 66 ; images dans
 `archives/photos/bull-1961-tables-p-62.png` … `-66.png`). Vérifier sur les images en cas de doute :
-l'OCR des tables est inutilisable.
+l'OCR des tables est inutilisable. Version française des mêmes tables : TFR
+(`archives/docs/Bull-Gamma60-instructions-FR-NOOCR.pdf`, 5 p.).
 
 **Ce qui est connu** : mnémoniques, champs, sémantique. **Ce qui ne l'est pas** : la valeur
 binaire (code A) de chaque mnémonique — voir `UNKNOWNS.md` (U-01).
@@ -133,11 +134,11 @@ LE et PE n'apparaissent pas dans la table B61 : ce sont les directives GE et RE 
 | Transfert | TRA | P ou N | D ou rien | idem | O1, R |
 | Multiplier par 10^n | MPT | — | — | n = 0-15 | O1 **(?)** |
 | Diviser par 10^n | DPT | — | — | n = 0-15 | O1 **(?)** |
-| Inverser le signe de P | RSI | — | — | — | — |
-| Valeur absolue | AVA | — | — | — | — |
+| Inverser le signe de P | RSI | — | — | — | — (O1, R selon TFR p.2, U-31) |
+| Valeur absolue | AVA | — | — | — | — (O1, R selon TFR p.2, U-31) |
 | Comparer valeurs absolues | CAV | — | — | — | O1 O2 **(?)** |
 | Comparer valeurs algébriques | CAL | — | — | — | O1 O2 **(?)** |
-| Arrondir | ROF | — | — | — | — |
+| Arrondir | ROF | — | — | — | — (R ? selon TFR p.2, U-31) |
 
 - dp = position de la virgule du résultat (virgule fixe) ; « rien » = flottant **(?)**.
 - O1, R : `0-3` (CAR avec progression), `Z F S T` en `en` / `Z U D T` en `fr` (CAR sans
@@ -260,7 +261,9 @@ dans B61 (le code a évolué entre les deux documents).
 Les deux documents décrivent la même machine dans deux langues : l'écart des mnémoniques est
 une traduction (G garnir → L load, R ranger → P place ; A, S identiques), pas une évolution.
 Exceptions possibles, qui relèvent du profil : coupures spéciales A / B du COURS (le C.C.
-sert au JOIN en B61) et tambour (TRT ↔ TCD / TDC, U-29). Table complète : `data/directives.yaml`.
+sert au JOIN en B61). Les tables françaises TFR, ligne à ligne identiques à B61 p.62-66,
+confirment la traduction ; seul le cliché CE (numérique avec certification) n'a pas
+d'équivalent B61 [TFR p.3]. Table complète : `data/directives.yaml`.
 
 | Domaine | COURS | B61 |
 |---|---|---|
@@ -271,9 +274,21 @@ sert au JOIN en B61) et tambour (TRT ↔ TCD / TDC, U-29). Table complète : `da
 | ARIT | ADD SOU MUL DIV DIR TER MPD DPD ISI PVA CVA CAL ARR | ADD SUB MUL DIV DIR TRA MPT DPT RSI AVA CAV CAL ROF |
 | ARIT C.C.1 | P N A | P N R |
 | RAC sans progression (ARIT, LOGI) | Z U D T | Z F S T |
-| LOGI | TCK TCL TKL MCL IKL FZL FUL FCL ADD SOU MUL DIV INT REU CNL | TSK TSL TKL SHL IKL FZL FOL FLC ADD SUB MUL DIV INT REU BLC |
+| LOGI | TCK TCL TKL MCL IKL FZL FUL FCL ADD SOU MUL DIV INT REU CBL | TSK TSL TKL SHL IKL FZL FOL FLC ADD SUB MUL DIV INT REU BLC |
 | COMP | CMP CDB EFL TRR | OWC TWC DEL TSS |
-| Tambour | DAO TRT … | DAO TCD TDC |
+| TRAN | GMI CAT CET CAM CEM TCA BPT TBP TIP TVM MVT MVM RCL FIN | MIC BCP ICP BCS ICS PBC PTP PPT PPR PTS STP STS RCL END |
+| TRAN C.C. | GMI : G/D ; RCL : G ou rien, E/S/— ; FIN : R | MIC : L/R ; RCL : A ou rien, I/0 ; END : S |
+| Clichés | MA MN NA NS BN CE TZ · TU TL EU EL SU SL KU KL RU RL RP CQ | AW NW AN NS BN — AZ · TO TN IO IN OO ON WO WN RO RN RP CQ |
+| Cartes | SCL SCP LEC PER API DMI DMF ; C.C. M1/M2 (magasin), b2/b5 (brosse) | SPR SPP REA PUN CLE DMI DMF ; C.C. H1/H2, RS2/RS5 |
+| Bande perforée | LIR PBA DMN DMI | REA PUN DMN DMI |
+| Imprimante | SDF IMP DMI DMF | SKI PRI DMI DMF |
+| Dérouleur | ECR LAV LAR · TRA SAU EFF ECM · REB REM MAN MAI | WRI REF REB · TRA JUM DEL WRM · SPO SPN MAN MAI |
+| Tambour | DAO TRT TTR | DAO TCD TDC |
+| Pupitre | — (non relevé, U-29) | DESK (coupure seule) |
+
+Homonymes entre langues, levés par l'élément de la coupure : `REB` (lecture arrière en `en`,
+rebobinage en `fr`), `TRA` (ARIT `en`, dérouleur dans les deux langues). Sources `fr` des
+lignes TRAN à Tambour : TFR p.3-5.
 
 ### Sémantique des directives centrales [COURS p.53-60]
 - RI/PI : mémoire[X] ← n° d'instruction (adresse de retour, depuis RSDP).

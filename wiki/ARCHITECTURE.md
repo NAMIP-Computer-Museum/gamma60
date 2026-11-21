@@ -67,9 +67,16 @@ busy for only about 100 µs. The rest of the time it serves other elements. [B61
 
 ### Diagrams
 
-> **TODO (image):** historical block diagram of the Gamma 60 (central memory, DP, DT,
-> channels, elements). Candidates: the general diagram in [ONDE] (1st part, §2) or in B61
-> (chap. 2). To be extracted as an image into `archives/photos/` and linked here.
+![Block diagram of the Gamma 60, after Bataille 1971](../archives/images/Gamma60-architecture-classes.svg)
+
+*Block diagram, redrawn after Bataille 1971, Fig. 1 [BAT72 p.100-101]. Central Memory (CM),
+Central Processor (CP) with the Program Distributor (PD) and the Program Address Registers
+(PAR = RAI); the Data Distributor (DD) with the Data Address Registers (DAR = RAC) and the
+priority chain; the Data Distribution and Collection Channels (DDC, DCC). Each class is
+connected to both channels through gates opened by the DD. Elements send instruction
+transfer requests (ITR = DI) to the PD and data transfer requests (DTR = DTQ) to the DD;
+the PD itself issues DTRs to read the program. Bataille counts "6 special circuits" while
+the figure shows 4 blocks (U-32). Abbreviations: [`docs/GLOSSARY.md`](../docs/GLOSSARY.md).*
 
 SysML model of the same structure (internal block diagram): flows between memory, DT, DP,
 channels and element classes.
@@ -168,7 +175,7 @@ documented.*
   24-bit words: union, intersection, shifts, complement. [ONDE §3.1 ; B61 p.39-40]
 - **Instructions:** loading with shift (`TSK` / `TCK`, `TSL` / `TCL`), shifts, fill,
   add, subtract, multiply, divide, logical operations (`INT` / `INT`, `REU` / `REU`),
-  comparison (`BLC` / `CNL`). [B61 p.39-40 ; COURS p.111-121]
+  comparison (`BLC` / `CBL`). [B61 p.39-40 ; COURS p.111-121]
 - **Hardware:** two 24-bit shift registers, K and L, the result going to L; 4 RAC. It works
   **serially**, which "leads to a very simple operator". [ONDE §3.1 ; B61 p.39-40]
 

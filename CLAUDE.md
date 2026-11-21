@@ -10,6 +10,7 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - `docs/MACHINE.md` — la machine telle que documentée, chaque fait sourcé.
 - `docs/ISA.md` — jeu d'instructions (code B) et codage en code A ; correspondance COURS ↔ B61.
 - `docs/UNKNOWNS.md` — inconnues + hypothèse par défaut + réglage associé.
+- `docs/GLOSSARY.md` — sigles et abréviations, `en` / `fr`, forme développée.
 - `docs/EMULATOR_DESIGN.md` — architecture logicielle ; `docs/TOOLCHAIN.md` — chaîne d'outils.
 - `docs/ROADMAP.md` — jalons et critères d'acceptation. Travailler jalon par jalon.
 - `docs/HARDWARE.md`, `docs/HISTORY.md` — contexte (non nécessaire à l'émulation).
@@ -19,7 +20,9 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - `wiki/` — présentation en anglais, dérivée de `docs/` (qui fait foi) ; navigable depuis le
   dépôt, liens relatifs. Un fait nouveau va d'abord dans `docs/`, avec sa source.
 - `data/` — tables : `encoding`, `directives`, `qualitative`, `timings`, `priorities`,
-  `profiles`, `charset` (code interne 6 bits + code carte), `configs/`.
+  `profiles`, `charset` (code interne 6 bits + code carte), `topology` (classes, circuits),
+  `behavior` (comportements non documentés), `configs/`.
+  Valeur incertaine = `{value, status: hypothesis, unknown: U-xx}` (vérifié par les tests).
 - `archives/` — sources versionnées : `docs/` (PDF), `photos/` (photos de pages citées),
   `images/` (photos de la machine, contexte).
 - `tools/fetch_refs.sh` — extrait le texte des PDF d'`archives/docs/` vers `refs/txt/`.
@@ -58,8 +61,10 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
   MATA, TAPR, TAPP, DESK) ; mnémoniques français dans `data/directives.yaml`.
 
 ## Commandes
+- Environnement : `python -m venv .venv` puis `.venv/Scripts/pip install -e .[dev]`
 - Tests : `pytest -q` · Lint : `ruff check . && ruff format --check .`
-- Lancer un programme (à créer au jalon J1) : `python -m gamma60 run tests/programs/<nom>.g60b`
+- Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b [--profile COURS] [--trace]`
+  (J1 : interpréteur séquentiel, éléments ARIT et LOGI seulement)
 
 ## Méthode de travail
 - Avant un jalon : relire ROADMAP.md, proposer un plan, attendre validation.

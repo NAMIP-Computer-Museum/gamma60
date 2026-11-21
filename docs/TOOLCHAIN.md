@@ -21,8 +21,18 @@ Chaîne historique [MAI ; B61 p.28-30] :
   **Langue** : la première ligne peut déclarer `; langue: fr` (mnémoniques du COURS) ou
   `; langue: en` (B61, par défaut) ; la langue est indépendante du profil machine.
   L'assembleur et le désassembleur lisent les deux orthographes dans `data/directives.yaml` ;
-  une orthographe `fr` non relevée (U-29) est remplacée par la forme `en`, avec avertissement
-  en mode diagnostic.
+  une orthographe `fr` non relevée (U-29, seul DESK) est remplacée par la forme `en`, avec
+  avertissement en mode diagnostic. Une ligne `; profil: COURS|B61` peut suivre (défaut :
+  profil par défaut de `profiles.yaml`) ; elle fixe notamment la place du compte du JOIN.
+  Une ligne peut commencer par un numéro de ligne à 3 chiffres (comme les feuilles de
+  programmation d'époque, ex. `namip_classement.g60b`), puis une étiquette `ETIQ:`.
+  Pseudo-instructions (non historiques) : `VIERGE [m]` (catène vierge ; `m` = compte du JOIN en
+  notation COURS), `NUM ±d` (nombre semi-logarithmique sur 2 catènes, forme normalisée),
+  `ZONE n` (réserve n catènes à zéro).
+  Champs des directives sans variable libre : ARIT `[C.C.] V O1 O2 R` (4 cases, `-` = vide ;
+  C.C. = 1re lettre P / N / A (`fr`) ou R (`en`), 2e lettre D) ; LOGI `V R`. Les fonctions
+  d'adresse (`R`, `S`, `M`) suivent les champs obligatoires, ce qui lève l'ambiguïté avec une
+  étiquette nommée `R`.
   Une coupure est toujours suivie d'une ligne `VIERGE` (catène vierge) — l'assembleur peut
   l'insérer automatiquement en mode diagnostic avec un avertissement.
 - **Code C** : YAML (`.g60c.yaml`) : sous-programmes, zones, liaisons, implantation, entrée.

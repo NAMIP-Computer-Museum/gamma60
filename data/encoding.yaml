@@ -17,6 +17,8 @@ types:
 blank_catena_rule: "7 bits de gauche à 0 => exécuté comme branchement « jamais » (COURS p.42)"
 synthetic_subcodes:
   synthetic: true
+  status: hypothesis
+  unknown: U-01
   cut_kind: {normal: 0, no_release: 1, no_busy_check: 2, PROT: 3, LIBE: 4, SIMU: 5, STOP: 6}
   address_op: {load: 0, place: 1, add: 2, subtract: 3}
   central_directive:   # clés = identifiants de directives.yaml (indépendants de la langue)

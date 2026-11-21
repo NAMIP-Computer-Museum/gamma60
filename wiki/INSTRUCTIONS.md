@@ -79,8 +79,9 @@ address instructions (which do not). [B61 p.28-30]
 ~1958-59). The two documents describe the same machine: the difference is a translation (G
 *garnir* → L *load*, R *ranger* → P *place*), not a change of the machine. In the tables
 below, the code B pattern is written in `en`, and the `en` / `fr` column gives both spellings.
-Spellings not yet read in COURS (most input/output and auxiliary-memory directives) are
-marked *not recorded* (U-29).
+The French spellings of the element directives come from the French version of the code B
+tables [TFR], identical line by line to B61's; only the console (`DESK`) has no recorded
+French spelling (U-29).
 
 ### 1.3 Code C: the assembly sheet
 
@@ -122,7 +123,7 @@ conditions (blank, 1, 2 or 3 → wait for 1, 2, 3 or 4 sequences). Every cut is 
 | `MATA m  n  RS` | MATA / DERU | idem | cut on tape uniselector *n* |
 | `TAPR m  n  RS` | TAPR / LEBA | idem | cut on paper-tape reader *n* |
 | `TAPP m  n  RS` | TAPP / PEBA | idem | cut on paper-tape punch *n* |
-| `DESK m  n  RS` | DESK / *not recorded* | idem | cut on the console |
+| `DESK m  n  RS` | DESK / *not recorded* (U-29) | idem | cut on the console |
 | `PROT m  x  RS` | PROT / PROT | `01` · kind *(U-01)* · m · X = image address | take a virtual element (lock) |
 | `LIBE m  x  RS` | LIBE / LIBE | idem | release a virtual element |
 | `SIMU m  x  RS` | SIMU / SIMU | `01` · kind *(U-01)* · X = second branch | start two sequences (fork) |
@@ -219,7 +220,8 @@ normalised and rounded (`R` assumed, U-05). C.C.2 = `D`: double-length result (2
 | `CAL       O1 O2` | CAL / CAL | idem | compare algebraic values |
 | `ROF` | ROF / ARR | idem | round off |
 
-Operands of `MPT`, `DPT`, `CAV`, `CAL` are uncertain in the table (marked (?) in ISA.md).
+Operands of `MPT`, `DPT`, `CAV`, `CAL` are uncertain in the B61 table. The French table shows
+operands O1 and R for `ISI` (`RSI`) and `PVA` (`AVA`), and possibly R for `ARR` (`ROF`) (U-31).
 
 ### 3.2 LOGI, logical calculator
 
@@ -243,7 +245,7 @@ or `L`. [B61 table p.62-66]
 | `FLC` | FLC / FCL | idem | replace L by its complement |
 | `INT …` | INT / INT | idem | logical intersection (AND) |
 | `REU …` | REU / REU | idem | logical union (OR) |
-| `BLC …` | BLC / CNL | idem | binary and logical comparison |
+| `BLC …` | BLC / CBL | idem | binary and logical comparison |
 
 ### 3.3 COMP, comparator
 
@@ -259,66 +261,69 @@ or `L`. [B61 table p.62-66]
 ### 3.4 TRAN, transcoder
 
 *Class 1 · shared.* Converts between card, tape, printer, processing and storage forms,
-driven by **clichés** (4 per catena) held in a microprogram store (MIC). [B61 table p.62-66]
-French spellings: *not recorded* (U-29).
+driven by **clichés** (4 per catena) held in a microprogram store (MIC). [B61 table p.62-66 ;
+TFR p.3]
 
 | Code B (`en`) | `en` / `fr` | Code A | Effect |
 |---|---|---|---|
-| `MIC c` | MIC / *not recorded* | `1111` · sub-code *(U-01)* · fields | load the MIC (C.C. L or R, uncertain) |
-| `BCP cc p` | BCP / *not recorded* | idem | Bull cards → processing form (p = part of the MIC, 1-9) |
-| `ICP cc p` | ICP / *not recorded* | idem | IBM cards → processing form |
-| `BCS cc p` | BCS / *not recorded* | idem | Bull cards → storage form |
-| `ICS cc p` | ICS / *not recorded* | idem | IBM cards → storage form |
-| `PBC cc p` | PBC / *not recorded* | idem | processing form → Bull cards |
-| `PTP cc p` | PTP / *not recorded* | idem | paper tape → processing form |
-| `PPT cc p` | PPT / *not recorded* | idem | processing form → paper tape |
-| `PPR cc p` | PPR / *not recorded* | idem | processing form → printer |
-| `PTS cc p` | PTS / *not recorded* | idem | processing form → storage form |
-| `STP cc p` | STP / *not recorded* | idem | storage form → processing form |
-| `STS cc p` | STS / *not recorded* | idem | storage form → storage form |
-| `RCL cc` | RCL / *not recorded* | idem | go to the cliché (C.C. A or blank; I or 0) |
-| `END S` | END / *not recorded* | idem | end of transcoding |
+| `MIC c` | MIC / GMI | `1111` · sub-code *(U-01)* · fields | load the MIC (C.C. left/right: `L`/`R` in `en`, uncertain; `G`/`D` in `fr`) |
+| `BCP cc p` | BCP / CAT | idem | Bull cards → processing form (p = part of the MIC, 1-9) |
+| `ICP cc p` | ICP / CET | idem | IBM cards → processing form |
+| `BCS cc p` | BCS / CAM | idem | Bull cards → storage form |
+| `ICS cc p` | ICS / CEM | idem | IBM cards → storage form |
+| `PBC cc p` | PBC / TCA | idem | processing form → Bull cards |
+| `PTP cc p` | PTP / BPT | idem | paper tape → processing form |
+| `PPT cc p` | PPT / TBP | idem | processing form → paper tape |
+| `PPR cc p` | PPR / TIP | idem | processing form → printer |
+| `PTS cc p` | PTS / TVM | idem | processing form → storage form |
+| `STP cc p` | STP / MVT | idem | storage form → processing form |
+| `STS cc p` | STS / MVM | idem | storage form → storage form |
+| `RCL cc` | RCL / RCL | idem | go to the cliché (C.C. `en`: A or blank, I or 0; `fr`: G or blank, E, S or —) |
+| `END S` | END / FIN | idem | end of transcoding (C.C. `S` in `en`, `R` in `fr`) |
 
-Clichés: positioning AW, NW, AN, NS, BN, AZ; execution TO, TN, IO, IN, OO, ON, WO, WN, RO,
-RN, RP, CQ (N ≤ 63). See [`docs/ISA.md`](../docs/ISA.md) §3.
+Clichés (`en` / `fr`): positioning AW/MA, NW/MN, AN/NA, NS/NS, BN/BN, AZ/TZ, and CE
+("numeric with certification", French table only); execution TO/TU, TN/TL, IO/EU, IN/EL,
+OO/SU, ON/SL, WO/KU, WN/KL, RO/RU, RN/RL, RP/RP, CQ/CQ (N ≤ 63). See
+[`docs/ISA.md`](../docs/ISA.md) §3 and §7.
 
 ---
 
 ## 4. Input / output elements
 
 *Class 3 (cards, printer) and class 4 (paper tape) · assigned to one program, no recall
-chain.* French spellings: *not recorded* (U-29). [B61 table p.62-66]
+chain.* [B61 table p.62-66 ; TFR p.4-5] In the French table, hoppers are `M1`/`M2`
+(*magasin*, `en` `H1`/`H2`) and brushes `b2`/`b5` (`en` `RS2`/`RS5`).
 
 ### 4.1 Card reader (CARR) and card reader-punch (CARP)
 
 | Code B (`en`) | `en` / `fr` | Code A | Effect |
 |---|---|---|---|
-| `SPR 1` / `SPR 2` | SPR / *not recorded* | `1111` · sub-code *(U-01)* · fields | select stacker 1 / 2 after RS2 |
-| `SPP 1` / `SPP 2` | SPP / *not recorded* | idem | select stacker 1 / 2 after RS5 |
-| `REA M1` | REA / *not recorded* | idem | read from hopper 1 (C.C. uncertain) |
-| `REA B1` | REA / *not recorded* | idem | read, split track after RS5 (C.C. uncertain) |
-| `PUN H1` / `H2` / `P` | PUN / *not recorded* | idem | punch from hopper 1 / 2, or without feeding a card (CARP only) |
-| `CLE B2` / `H2` / `P` | CLE / *not recorded* | idem | clear the track (after reading / after H2 / after punching) |
-| `DMF` | DMF / *not recorded* | idem | handling request, end of file |
-| `DMI` | DMI / *not recorded* | idem | handling request, incident |
+| `SPR 1` / `SPR 2` | SPR / SCL | `1111` · sub-code *(U-01)* · fields | select stacker 1 / 2 after RS2 |
+| `SPP 1` / `SPP 2` | SPP / SCP | idem | select stacker 1 / 2 after RS5 |
+| `REA M1` | REA / LEC | idem | read from hopper 1 (C.C. uncertain) |
+| `REA B1` | REA / LEC | idem | read, split track after RS5 (C.C. uncertain) |
+| `PUN H1` / `H2` / `P` | PUN / PER | idem | punch from hopper 1 / 2, or without feeding a card (CARP only) |
+| `CLE B2` / `H2` / `P` | CLE / API | idem | clear the track (after reading / after H2 / after punching) |
+| `DMF` | DMF / DMF | idem | handling request, end of file |
+| `DMI` | DMI / DMI | idem | handling request, incident |
 
 ### 4.2 Printer (PRIN)
 
 | Code B (`en`) | `en` / `fr` | Code A | Effect |
 |---|---|---|---|
-| `SKI   n` | SKI / *not recorded* | `1111` · sub-code *(U-01)* · X | skip *n* lines (≤ 255) on the second paper |
-| `PRI   n` | PRI / *not recorded* | idem | skip on the first paper, then print |
-| `DMF` | DMF / *not recorded* | idem | handling request, end of file |
-| `DMI` | DMI / *not recorded* | idem | handling request, incident |
+| `SKI   n` | SKI / SDF | `1111` · sub-code *(U-01)* · X | skip *n* lines (≤ 255) on the second paper |
+| `PRI   n` | PRI / IMP | idem | skip on the first paper, then print |
+| `DMF` | DMF / DMF | idem | handling request, end of file |
+| `DMI` | DMI / DMI | idem | handling request, incident |
 
 ### 4.3 Paper-tape reader (TAPR) and punch (TAPP)
 
 | Code B (`en`) | `en` / `fr` | Code A | Effect |
 |---|---|---|---|
-| `REA   n` | REA / *not recorded* | `1111` · sub-code *(U-01)* · X | read *n* catenae (reader) |
-| `PUN   n` | PUN / *not recorded* | idem | punch *n* catenae (punch) |
-| `DMN` | DMN / *not recorded* | idem | handling request, normal |
-| `DMI` | DMI / *not recorded* | idem | handling request, incident |
+| `REA   n` | REA / LIR (reader) | `1111` · sub-code *(U-01)* · X | read *n* catenae (reader) |
+| `PUN   n` | PUN / PBA (punch) | idem | punch *n* catenae (punch) |
+| `DMN` | DMN / DMN | idem | handling request, normal |
+| `DMI` | DMI / DMI | idem | handling request, incident |
 
 ### 4.4 Console (DESK)
 
@@ -330,33 +335,35 @@ it counts as an element is discussed (U-27).
 ## 5. Auxiliary memories
 
 *Class 2.* The drum is shared (recall chain); tape units are assigned to one program.
-[B61 table p.62-66] French spellings: *not recorded* (U-29), except `DAO`.
+[B61 table p.62-66 ; TFR p.5]
 
 ### 5.1 Drum (DRUM)
 
 | Code B (`en`) | `en` / `fr` | Code A | Effect |
 |---|---|---|---|
 | `DAO   a` | DAO / DAO | `1111` · sub-code *(U-01)* · X | set the origin address on the drum (track × 256 + position) |
-| `TCD   n` | TCD / *not recorded* | idem | transfer *n* catenae memory → drum |
-| `TDC   n` | TDC / *not recorded* | idem | transfer *n* catenae drum → memory |
+| `TCD   n` | TCD / TRT | idem | transfer *n* catenae memory → drum |
+| `TDC   n` | TDC / TTR | idem | transfer *n* catenae drum → memory |
 
-COURS uses `TRT` for drum transfers; its link with `TCD` / `TDC` is open (U-29).
+`TRT` (*transfert mémoire rapide → tambour*) and `TTR` (*tambour → mémoire rapide*) [TFR p.5].
 
 ### 5.2 Magnetic tape (MATA, uniselector)
 
 | Group | Code B (`en`) | `en` / `fr` | Code A | Effect |
 |---|---|---|---|---|
-| Preparatory | `WRI   u` | WRI / *not recorded* | `1111` · sub-code *(U-01)* · X | write on tape unit *u* |
-| Preparatory | `REF   u` | REF / *not recorded* | idem | read forward |
-| Preparatory | `REB   u` | REB / *not recorded* | idem | read backward |
-| Execution | `TRA` | TRA / *not recorded* | idem | read with transfer |
-| Execution | `JUM` | JUM / *not recorded* | idem | read without transfer (skip a block) |
-| Execution | `DEL` | DEL / *not recorded* | idem | erase |
-| Execution | `WRM` | WRM / *not recorded* | idem | write a block mark |
-| Service | `SPO   u` | SPO / *not recorded* | idem | rewind |
-| Service | `SPN   u` | SPN / *not recorded* | idem | rewind and request handling |
-| Service | `MAI   u` | MAI / *not recorded* | idem | handling request, incident |
-| Service | `MAN   u` | MAN / *not recorded* | idem | handling request, normal |
+| Preparatory | `WRI   u` | WRI / ECR | `1111` · sub-code *(U-01)* · X | write on tape unit *u* |
+| Preparatory | `REF   u` | REF / LAV | idem | read forward |
+| Preparatory | `REB   u` | REB / LAR | idem | read backward |
+| Execution | `TRA` | TRA / TRA | idem | read with transfer |
+| Execution | `JUM` | JUM / SAU | idem | read without transfer (skip a block) |
+| Execution | `DEL` | DEL / EFF | idem | erase |
+| Execution | `WRM` | WRM / ECM | idem | write a block mark |
+| Service | `SPO   u` | SPO / REB | idem | rewind |
+| Service | `SPN   u` | SPN / REM | idem | rewind and request handling |
+| Service | `MAI   u` | MAI / MAI | idem | handling request, incident |
+| Service | `MAN   u` | MAN / MAN | idem | handling request, normal |
+
+Beware: `REB` means *read backward* in `en` but *rebobinage* (rewind) in `fr`.
 
 ---
 
@@ -371,7 +378,7 @@ PROT        IMAGE          take the lock
 (blank)
 MATA        1              cut on tape uniselector 1        (fr: DERU)
 (blank)
-REF         3              preparatory: read forward, unit 3
+REF         3              preparatory: read forward, unit 3 (fr: LAV)
 L     0     TAMPON         CAR 0 ← buffer address           (fr: G)
 TRA                        read one block with transfer
 LIBE        IMAGE          release the lock

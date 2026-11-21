@@ -37,3 +37,13 @@ register_A_by_central:
   CB: {1_6: "comme ARIT"}
   DI: {14: "compteur arrivé à zéro", 15: "sinon"}
 transcoder: {CQ: "le cliché CQ écrit un caractère choisi dans le qualitatif (B61)"}
+logical:      # CBL [COURS p.118-119] ; positions 2-6 : U-38 (behavior.yaml)
+  1: "L > K"
+  7: "L inclus dans K"
+  8: "L non inclus dans K"
+  9: "K inclus dans L"
+  10: "K non inclus dans L"
+  11: "K exclu de L (intersection nulle)"
+  12: "empiètement (intersection non nulle)"
+  13: "réunion tout à 1"
+  14: "réunion avec au moins un 0"

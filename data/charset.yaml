@@ -49,10 +49,10 @@ characters:
   - {code: '100111', value: 39, char: '7', card: [7]}
   - {code: '101000', value: 40, char: '8', card: [8]}
   - {code: '101001', value: 41, char: '9', card: [9]}
-  - {code: '101010', value: 42, char: '*', card: [12], note: "glyphe peu net sur le scan : astérisque probable"}
+  - {code: '101010', value: 42, char: '*', card: [12], note: "glyphe peu net sur le scan : astérisque probable", status: hypothesis, unknown: U-22}
   - {code: '101011', value: 43, char: ',', card: [9, 8, 11]}
   - {code: '101100', value: 44, char: '◊', card: [9, 12]}
-  - {code: '101101', value: 45, char: '-', card: [9, 8], note: "tiret court (trait d'union probable), distinct du « moins » 11-1010"}
+  - {code: '101101', value: 45, char: '-', card: [9, 8], note: "tiret court (trait d'union probable), distinct du « moins » 11-1010", status: hypothesis, unknown: U-22}
   - {code: '101110', value: 46, char: '£', card: [9, 7, 11]}
   - {code: '101111', value: 47, char: '$', card: [9, 7, 12]}
   - {code: '110000', value: 48, char: 'Δ', card: [9, 7, 0]}
@@ -65,7 +65,7 @@ characters:
   - {code: '110111', value: 55, char: '/', card: [9, 7]}
   - {code: '111000', value: 56, char: '(', card: [9, 8, 0]}
   - {code: '111001', value: 57, char: ')', card: [9, 8, 1]}
-  - {code: '111010', value: 58, char: '−', card: [9, 8, 2], note: "tiret long : signe moins probable"}
+  - {code: '111010', value: 58, char: '−', card: [9, 8, 2], note: "tiret long : signe moins probable", status: hypothesis, unknown: U-22}
   - {code: '111011', value: 59, char: '+', card: [9, 8, 3]}
   - {code: '111100', value: 60, char: '≠', card: [9, 8, 4]}
   - {code: '111101', value: 61, char: 'Π', card: [9, 8, 5]}
