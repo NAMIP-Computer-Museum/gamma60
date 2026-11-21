@@ -47,6 +47,8 @@ The [wiki](wiki/) presents the machine in English:
 - [Memory](wiki/MEMORY.md) — the core store, the 24-bit word (catena), number formats and the
   memory layout.
 - [Concurrency](wiki/CONCURRENCY.md) — fork/join, wait queues and locks on the Gamma 60.
+- [Registers](wiki/REGISTERS.md) — the registers of the central unit, of the Program Distributor and of each
+  element, with their sizes.
 - [Instructions](wiki/INSTRUCTIONS.md) — codes A, B, C, D and every instruction, in English and French forms.
 - [Known installations](wiki/INSTALLATIONS.md) — the 16 customers, the deployment calendar and photos.
 - [Facts and anecdotes](wiki/TRIVIA.md) — the stories around the machine, from its name to *Alphaville*.

@@ -107,6 +107,9 @@ All elements follow the same pattern; only their complexity differs. [ONDE §3 ;
   it into register A when it serves the element, where conditional branches test it.
   [B61 p.23 ; COURS p.6, p.15]
 
+The registers of each element, of the central unit and of the DP are listed in
+[REGISTERS.md](REGISTERS.md).
+
 An element is either **idle** (no sequence) or **active**. An active element is either
 **waiting** for its next order (DI line raised) or **operating** on its own. [COURS p.13-14]
 

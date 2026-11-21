@@ -80,20 +80,62 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 ## 5. Unité centrale
 
 ### 5.1 Registres
+Liste lisible par programme : `data/registers.yaml` (tailles incertaines marquées U-23, U-39) ;
+vue anglaise : `wiki/REGISTERS.md`.
+
+**Unité centrale et Distributeur de Programme**
 
 | Registre | Taille | Rôle | Emplacement | Source |
 |---|---|---|---|---|
+| Z | 31 b (24 + 3 de clé + 4 de contrôle de sélection) | passage obligé de tout catène entre la mémoire et les canaux | UC | COURS p.5 ; ONDE §2.2.2.3 p.20-21 |
 | RNE | 7 b (15 selon p.14 ?) | n° de l'élément servi ; sélectionne ses RAI/RAC | DP | COURS p.14, p.53 |
 | RAPA | 15 b | adresse de l'instruction lue | DP | COURS p.14 |
 | RAPP | 15 b | RAPA + 1 ; recopié dans le RAI après une directive | DP | COURS p.14-15 |
 | REDP | 24 b | reçoit chaque instruction lue | DP | COURS p.14 |
 | RSDP | 24 b | sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI) | DP | COURS p.15, p.42, p.54 |
-| Chaîne propre du DP | 2 registres | séquences en attente du DP (SIMU, LIBE) | DP | COURS p.36-38 |
+| Chaîne propre du DP | 2 registres (taille non donnée, U-39) | séquences en attente du DP (SIMU, LIBE) | DP | COURS p.36-38 |
 | Registre A (analyse) | 24 b | reçoit le catène qualitatif ; testé par les branchements 01-24 | UC | B61 p.23, p.31 ; COURS p.54 |
-| Registre B (opérateur) | 24 b | calculs sur les 15 bits droits | UC | B61 p.32 ; COURS p.54 |
-| RAI (IAR, RAP) | 128 × 15 b + clé + **indice d'occupation dédoublé** | prochaine instruction de chaque élément | matrice MAP de l'UC | B61 p.22 ; COURS p.8, p.14 ; ONDE p.5, p.16 |
-| RAC (CAR, DAR, RAQ) | 128 × 15 b, 1 à 4 par élément | adresses courantes, +1 (ou −1) par transfert | matrice MAQ de l'UC | B61 p.22-23 ; COURS p.8, p.14 |
-| Registres B et C de chaque élément | 15 b | tête et queue de la chaîne de reprise | MC, adresses spécialisées (ONDE) | B61 p.24-25 ; COURS p.24-31 |
+| Registre B (opérateur) | 24 b | calculs sur les 15 bits droits | UC | B61 p.32 ; COURS p.55 |
+| RAI (IAR, RAP) | 128 × 21 b : 15 d'adresse + 2 de clé par 3 + **indice d'occupation dédoublé** (2) + 2 de contrôle de sélection | prochaine instruction de chaque élément | matrice MAP de l'UC | B61 p.22 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
+| RAC (CAR, DAR, RAQ) | 128 × 19 b : 15 d'adresse + 2 de clé par 3 + 2 de contrôle de sélection ; 1 à 4 par élément | adresses courantes, +1 (ou −1) par transfert | matrice MAQ de l'UC | B61 p.22-23 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
+
+**Registres de chaque élément**
+
+| Registre | Taille | Rôle | Emplacement | Source |
+|---|---|---|---|---|
+| Registres B et C (I1, I2) | 2 adresses (taille non donnée, U-39) | tête et queue de la chaîne de reprise | MC, adresses spécialisées (U-30) | B61 p.24-25 ; COURS p.24-31 ; ONDE §2 |
+| Registre de liaison (RLN) | 1 catène | tampon entre le cycle mémoire et le rythme de l'élément | élément | B61 p.23 ; COURS p.8 |
+| Registre catène qualitatif | 24 b | indicateurs de l'élément, envoyés au registre A quand le DP le sert | élément | B61 p.23 ; COURS p.74, p.110 |
+
+**Registres propres à certains éléments**
+
+| Élément | Registre | Taille | Rôle | Source |
+|---|---|---|---|---|
+| ARIT | P (principal) | 2 catènes | 1er opérande puis résultat (poids forts) ; P + S = accumulateur | B61 p.35 ; COURS p.65 |
+| ARIT | S (secondaire) | 2 catènes | poids faibles, même signe que P, exposant de P − 10 | B61 p.35 ; COURS p.65 |
+| ARIT | O (opérande) | 2 catènes | 2e opérande | B61 p.35 ; COURS p.65 |
+| LOGI | K, L | 24 b chacun, à décalage, accès série | opérandes ; résultat dans L | B61 p.39 ; COURS p.110 |
+| COMP | 2 registres opérandes | 1 catène chacun | opérande du RAC 0 ; opérande du RAC 1 ou 2 | COURS p.75 |
+| COMP | registre longueur | 8 b (≤ 255) | longueur des zones, décomptée à chaque catène | COURS p.75 |
+| TRAN | registre d'entrée | 1 catène | données à traiter, lues caractère par caractère (inutilisé pour les cartes) | COURS p.86 |
+| TRAN | registre de sortie (S) | 1 catène | résultat, composé caractère par caractère (inutilisé pour les cartes) | COURS p.86, p.89 |
+| TRAN | registre cliché (C) | 1 catène | cliché, fourni code-cliché par code-cliché | COURS p.86, p.89 |
+| TRAN | registre directive et catène qualitatif | non donnée (U-39) | directives reçues du DP ; qualitatif formé pendant le travail | COURS p.87 |
+| TRAN | index d'entrée et de sortie | non donnée (U-39) | position courante dans les registres d'entrée et de sortie | COURS p.89, p.108 |
+| TRAN | registre de décomptage | non donnée (U-39) | décompte la zone ; son passage par 0 termine l'opération | COURS p.108-109 |
+| TRAN | matrice de transposition | 12 × 24 = 288 b | transposition lignes → colonnes des cartes | COURS p.87 ; ONDE §3.2 |
+| TRAN | MIC | 128 × 20 b [COURS] / 256 adresses [B61] / 128 × 21 b [ONDE] (U-12) | interprétation des codes, garnie par programme | COURS p.87 ; B61 p.38 ; ONDE §3.2 |
+| TRAN | datum de reprise | 4 catènes en MC (1m-4m) | sauvegarde des registres d'entrée, de sortie et de leurs index | COURS p.108 |
+| Tambour | RAE | non donnée (U-39) | adresse tambour (piste × 256 + position), posée par DAO ; progresse avec le RAC | B61 p.53 ; COURS p.153 |
+| Unisélecteur | registre de longueur de bloc | non donnée (U-39) | reçoit le catène longueur de tête de bloc ; contrôle la lecture | COURS p.141 |
+| Imprimante | mémoire d'une ligne | 1 ligne (120 caractères), à tores | contrôle de la frappe par écho | ONDE §2 p.10 |
+| Imprimante | 2 compteurs d'interlignes | sauts ≤ 255 interlignes | un par feuillet ; chargés par SDF et IMP, décomptés pendant le saut | COURS p.134 ; ONDE §2.5.3 p.27 |
+
+**Nombre de RAC par élément** : ARIT 4 et LOGI 4, banalisés [B61 p.35 ; COURS p.110] ; COMP 3,
+spécialisés [B61 p.36-37 ; COURS p.75] ; TRAN 3 (source, destination, cliché) [COURS p.88-89] ;
+tambour 1 [COURS p.153] ; unisélecteur 1, ou 2 en marche continue, où il est vu comme un élément
+double avec 2 RAI et 2 RAC [COURS p.141, p.148] ; lecteur-perforateur de cartes 2 [COURS p.125] ;
+imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non trouvé (U-39).
 
 ### 5.2 Distributeur de Programme (DP)
 - Circuits de priorité sur les lignes DI ; une fois un élément choisi : RNE ← n°, catène

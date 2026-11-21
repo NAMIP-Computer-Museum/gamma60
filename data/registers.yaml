@@ -1,0 +1,294 @@
+# Registres de l'unité centrale, du Distributeur de Programme et des éléments.
+# Faits et sources : docs/MACHINE.md §5.1 (tableau complet) ; vue anglaise : wiki/REGISTERS.md.
+#
+# Champs d'un registre :
+#   name      {en, fr} : en = B61 / BAT72 (null si la source anglaise ne le nomme pas) ; fr = COURS
+#   owner     central_unit | program_distributor | every_element | <type d'élément de
+#             directives.yaml (elements.*)>
+#   bits      taille en bits utiles (sans clé sauf mention) ; incertain = {value, status, unknown}
+#   count     nombre d'exemplaires (par élément pour un registre d'élément) ; défaut 1
+#   location  central_unit | map | maq | central_memory | element
+#   role      rôle en une ligne
+#   source    clé de docs/SOURCES.md + page / §
+#
+# Les RAC (DAR) sont une ressource de l'unité centrale (matrice MAQ, 128 registres) ; leur
+# nombre par élément est dans rac_per_element ; il doit concorder avec `cars` de
+# directives.yaml quand celui-ci est renseigné (vérifié par les tests).
+
+registers:
+  # --- unité centrale et mémoire -----------------------------------------------------------
+  - id: z
+    name: {en: null, fr: Z}
+    owner: central_unit
+    bits: 31                 # 24 + 3 de clé + 4 de contrôle de sélection (clés par 3 de X et Y)
+    location: central_unit
+    role: "passage obligé de tout catène entre la mémoire et les canaux distributeur et collecteur"
+    source: "COURS p.5 ; ONDE §2.2.2.3 p.20-21"
+  - id: a
+    name: {en: A, fr: A}
+    owner: central_unit
+    bits: 24
+    location: central_unit
+    role: "registre d'analyse ; reçoit le catène qualitatif de l'élément servi ; testé par les branchements 01-24"
+    source: "B61 p.23, p.31 ; COURS p.54"
+  - id: b
+    name: {en: B, fr: B}
+    owner: central_unit
+    bits: 24
+    location: central_unit
+    role: "registre opérateur ; calculs sur ses 15 bits de droite (GB, AB, SB, CB…)"
+    source: "B61 p.32 ; COURS p.55"
+  - id: rai
+    name: {en: IAR, fr: RAI}
+    owner: central_unit
+    bits: 21                 # 15 d'adresse + 2 de clé par 3 + 2 d'occupation (dédoublée) + 2 de sélection
+    count: 128
+    location: map
+    role: "adresse de la prochaine instruction de chaque élément, avec son indice d'occupation (repos / activité)"
+    source: "B61 p.22 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16"
+  - id: rac
+    name: {en: DAR, fr: RAC}
+    owner: central_unit
+    bits: 19                 # 15 d'adresse + 2 de clé par 3 + 2 de sélection
+    count: 128
+    location: maq
+    role: "adresse courante des données d'un élément ; +1 (ou −1) à chaque transfert"
+    source: "B61 p.22-23 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16"
+
+  # --- Distributeur de Programme -----------------------------------------------------------
+  - id: rne
+    name: {en: null, fr: RNE}
+    owner: program_distributor
+    bits: {value: 7, status: hypothesis, unknown: U-23}   # 7 b [COURS p.53] / 15 b [COURS p.14]
+    location: central_unit
+    role: "numéro de l'élément servi ; sélectionne ses RAI et RAC"
+    source: "COURS p.14, p.53"
+  - id: rapa
+    name: {en: null, fr: RAPA}
+    owner: program_distributor
+    bits: 15
+    location: central_unit
+    role: "adresse de l'instruction en cours de lecture"
+    source: "COURS p.14"
+  - id: rapp
+    name: {en: null, fr: RAPP}
+    owner: program_distributor
+    bits: 15
+    location: central_unit
+    role: "RAPA + 1 ; recopié dans le RAI après une directive"
+    source: "COURS p.14-15"
+  - id: redp
+    name: {en: null, fr: REDP}
+    owner: program_distributor
+    bits: 24
+    location: central_unit
+    role: "reçoit chaque instruction lue"
+    source: "COURS p.14"
+  - id: rsdp
+    name: {en: null, fr: RSDP}
+    owner: program_distributor
+    bits: 24
+    location: central_unit
+    role: "sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI)"
+    source: "COURS p.15, p.42, p.54"
+  - id: pd_chain
+    name: {en: null, fr: chaîne propre du DP}
+    owner: program_distributor
+    bits: {value: 15, status: hypothesis, unknown: U-39}
+    count: 2
+    location: central_unit
+    role: "tête et queue des séquences en attente du DP (SIMU, LIBE)"
+    source: "COURS p.36-38"
+
+  # --- registres de chaque élément -----------------------------------------------------------
+  - id: chain_head_tail
+    name: {en: "I1, I2", fr: "B, C"}
+    owner: every_element
+    bits: {value: 15, status: hypothesis, unknown: U-39}
+    count: 2
+    location: central_memory   # adresses spécialisées : U-30
+    role: "I1 / I2, tête et queue de la chaîne de reprise de l'élément"
+    source: "B61 p.24-25 ; COURS p.24-31 ; ONDE §2 (registres I1, I2)"
+  - id: rln
+    name: {en: buffer register, fr: RLN}
+    owner: every_element
+    bits: 24
+    location: element
+    role: "registre de liaison, tampon d'un catène entre le cycle mémoire et le rythme de l'élément"
+    source: "B61 p.23 ; COURS p.8"
+  - id: qualitative
+    name: {en: null, fr: registre catène qualitatif}
+    owner: every_element
+    bits: 24
+    location: element
+    role: "indicateurs de l'élément, envoyés au registre A quand le DP le sert"
+    source: "B61 p.23 ; COURS p.74, p.110"
+
+  # --- ARIT ----------------------------------------------------------------------------------
+  - id: arit_p
+    name: {en: P, fr: P}
+    owner: arithmetic
+    bits: 48                 # 2 catènes : signe, exposant, 10 chiffres DCB
+    location: element
+    role: "principal ; 1er opérande puis résultat (poids forts) ; P + S = accumulateur"
+    source: "B61 p.35 ; COURS p.65"
+  - id: arit_s
+    name: {en: S, fr: S}
+    owner: arithmetic
+    bits: 48
+    location: element
+    role: "secondaire ; poids faibles, même signe que P, exposant de P − 10"
+    source: "B61 p.35 ; COURS p.65"
+  - id: arit_o
+    name: {en: O, fr: O}
+    owner: arithmetic
+    bits: 48
+    location: element
+    role: "opérande ; reçoit le 2e opérande"
+    source: "B61 p.35 ; COURS p.65"
+
+  # --- LOGI ----------------------------------------------------------------------------------
+  - id: logi_k
+    name: {en: K, fr: K}
+    owner: logical
+    bits: 24
+    location: element
+    role: "registre à décalage, accès série ; 1er opérande (filtre, multiplicande, diviseur)"
+    source: "B61 p.39 ; COURS p.110"
+  - id: logi_l
+    name: {en: L, fr: L}
+    owner: logical
+    bits: 24
+    location: element
+    role: "registre à décalage, accès série ; reçoit le résultat"
+    source: "B61 p.39 ; COURS p.110"
+
+  # --- COMP ----------------------------------------------------------------------------------
+  - id: comp_operand
+    name: {en: null, fr: registres opérandes}
+    owner: comparator
+    bits: 24
+    count: 2
+    location: element
+    role: "1er : opérande du RAC 0 ; 2e : opérande du RAC 1 ou 2 (alternativement pour deux bornes)"
+    source: "COURS p.75"
+  - id: comp_length
+    name: {en: null, fr: registre longueur}
+    owner: comparator
+    bits: 8
+    location: element
+    role: "longueur des zones en catènes (≤ 255), décomptée de 1 à chaque catène"
+    source: "COURS p.75"
+
+  # --- TRAN ----------------------------------------------------------------------------------
+  - id: tran_input
+    name: {en: null, fr: registre d'entrée}
+    owner: transcoder
+    bits: 24
+    location: element
+    role: "reçoit les informations catène par catène ; lues caractère par caractère (inutilisé pour les cartes)"
+    source: "COURS p.86"
+  - id: tran_output
+    name: {en: null, fr: registre de sortie (S)}
+    owner: transcoder
+    bits: 24
+    location: element
+    role: "reçoit le résultat caractère par caractère, renvoyé catène par catène (inutilisé pour les cartes)"
+    source: "COURS p.86, p.89"
+  - id: tran_cliche
+    name: {en: null, fr: registre cliché (C)}
+    owner: transcoder
+    bits: 24
+    location: element
+    role: "reçoit le cliché catène par catène et le fournit code-cliché par code-cliché"
+    source: "COURS p.86, p.89"
+  - id: tran_directive
+    name: {en: null, fr: registre directive et catène qualitatif}
+    owner: transcoder
+    bits: {value: 24, status: hypothesis, unknown: U-39}
+    location: element
+    role: "reçoit les directives du DP ; le catène qualitatif s'y forme pendant le travail"
+    source: "COURS p.87"
+  - id: tran_index
+    name: {en: null, fr: index d'entrée et de sortie}
+    owner: transcoder
+    bits: {value: 5, status: hypothesis, unknown: U-39}
+    count: 2
+    location: element
+    role: "position courante (monade) dans les registres d'entrée et de sortie"
+    source: "COURS p.89, p.108"
+  - id: tran_countdown
+    name: {en: null, fr: registre de décomptage}
+    owner: transcoder
+    bits: {value: 15, status: hypothesis, unknown: U-39}
+    location: element
+    role: "décompte la zone traitée ; son passage par 0 termine l'opération"
+    source: "COURS p.108-109"
+  - id: tran_transposition
+    name: {en: null, fr: matrice de transposition}
+    owner: transcoder
+    bits: 288                # 12 × 24
+    location: element
+    role: "transposition lignes → colonnes des cartes ; remplace l'entrée ou la sortie pour les cartes"
+    source: "COURS p.87 ; ONDE §3.2"
+  - id: tran_mic
+    name: {en: null, fr: MIC}
+    owner: transcoder
+    bits: {value: 2560, status: hypothesis, unknown: U-12}   # 128 × 20 [COURS] ; taille par profil
+    location: element
+    role: "matrice d'interprétation des codes ; garnie par programme (2 codes par mémoire caractère)"
+    source: "COURS p.87 ; B61 p.38 ; ONDE §3.2"
+  - id: tran_resume_datum
+    name: {en: null, fr: datum de reprise}
+    owner: transcoder
+    bits: 24
+    count: 4
+    location: central_memory
+    role: "mémoires 1m-4m où sont sauvés les registres d'entrée, de sortie et leurs index"
+    source: "COURS p.108"
+
+  # --- éléments d'entrée-sortie et mémoires auxiliaires --------------------------------------
+  - id: drum_rae
+    name: {en: null, fr: RAE}
+    owner: drum
+    bits: {value: 15, status: hypothesis, unknown: U-39}   # piste × 256 + position
+    location: element
+    role: "adresse tambour, posée par DAO ; progresse avec le RAC à chaque catène transféré"
+    source: "B61 p.53 ; COURS p.153"
+  - id: uniselector_block_length
+    name: {en: null, fr: registre de longueur de bloc}
+    owner: uniselector
+    bits: {value: 24, status: hypothesis, unknown: U-39}
+    location: element
+    role: "reçoit le catène longueur lu en tête de bloc ; contrôle la lecture du bloc"
+    source: "COURS p.141"
+  - id: printer_line_memory
+    name: {en: null, fr: mémoire d'une ligne}
+    owner: printer
+    bits: {value: 720, status: hypothesis, unknown: U-39}   # 120 caractères × 6 bits
+    location: element
+    role: "mémoire à tores d'une ligne d'impression ; contrôle de la frappe par écho"
+    source: "ONDE §2 p.10"
+  - id: printer_spacing_counters
+    name: {en: null, fr: compteurs d'interlignes}
+    owner: printer
+    bits: 8                  # sauts jusqu'à 255 interlignes [ONDE §2.5.3]
+    count: 2
+    location: element
+    role: "un par feuillet ; chargés par SDF et IMP, décomptés pendant le saut"
+    source: "COURS p.134 ; ONDE §2.5.3 p.27"
+
+# Nombre de RAC par type d'élément (pris dans la matrice MAQ).
+rac_per_element:
+  arithmetic: 4              # banalisés 0-3 [COURS p.110 ; B61 p.35]
+  logical: 4                 # [COURS p.110]
+  comparator: 3              # spécialisés : 0 variable, 1 et 2 bornes / 2e terme [B61 p.36-37 ; COURS p.75]
+  transcoder: 3              # 0 source, 1 destination, 2 cliché [COURS p.88-89]
+  drum: 1                    # [COURS p.153]
+  uniselector: 1             # 2 en marche continue (élément double : 2 RAI, 2 RAC) [COURS p.141, p.148]
+  card_reader_punch: 2       # spécialisés 0 et 1 [COURS p.125]
+  printer: 1                 # RAC n° 0 [COURS p.134]
+  card_reader: {value: 1, status: hypothesis, unknown: U-39}
+  paper_tape_reader: {value: 1, status: hypothesis, unknown: U-39}
+  paper_tape_punch: {value: 1, status: hypothesis, unknown: U-39}
+  desk: {value: 1, status: hypothesis, unknown: U-39}

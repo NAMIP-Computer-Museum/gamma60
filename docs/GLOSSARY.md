@@ -1,7 +1,7 @@
 # Glossary of abbreviations
 
 Abbreviations, acronyms and mnemonics used for the Gamma 60, sorted in **English alphabetical
-order** of the `en` form. Machine-readable mnemonics live in [`directives.yaml`](directives.yaml);
+order** of the `en` form. Machine-readable mnemonics live in [`directives.yaml`](../data/directives.yaml);
 the facts and their sources are in [`docs/`](../docs/), which prevails.
 
 - **en**: form used by B61 (1961) or by Bataille (BAT72, Fig. 1); **fr**: form used by COURS
@@ -191,6 +191,7 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | WRI | ECR | WRIte / ÉCRiture | Tape directive | Preparatory: write. |
 | WRM | ECM | WRite block Mark / ÉCriture d'un bloc Marque | Tape directive | Write a block (tape) mark. |
 | X | X | Free variable / variable libre | Code B field | 5 decimal digits ≤ 32,767: address, quantity, length, element number. |
+| — | Z | Registre Z | Register | 31-bit register of the central unit (catena, key, selection check); every catena read from or written to memory passes through it. See [REGISTERS](../wiki/REGISTERS.md). |
 | Z F S T | Z U D T | Zero, First, Second, Third / Zéro, Un, Deux, Trois | ARIT / LOGI operands | CAR 0-3 without progression. |
 
 Cut names, branches (`00` never, `31` always, `01`-`24` conditional) and code letters are the
