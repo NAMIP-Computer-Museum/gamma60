@@ -1,0 +1,197 @@
+# Tables d'instructions du Gamma 60 en code B, version française (5 pages, sans titre ni date)
+# Transcription lue sur les images des pages (OCR de la source écarté : inutilisable).
+# Structure et conventions identiques aux tables de B61 (1961) ; mnémoniques françaises.
+# Champs : to = type d'opération ; b61 = équivalent dans B61 ; cc = codes complémentaires ;
+#          x = variable libre ; fa = fonction d'adresse admise ; uncertain = lecture à vérifier.
+source:
+  file: Gamma60-instructions-FR.pdf
+  pages: 5
+  likely: "version française des tables du code B de B61 (hypothèse : même structure, mêmes conventions)"
+conventions:
+  fa_values: "rien ou R (colonne 1) ; rien ou S (colonne 2)"
+  arit_operand_codes:
+    with_progression: ["0", "1", "2", "3"]   # imprimé « 8, 1, 2 ou 3 » : 8 = défaut d'impression pour 0 (quasi certain)
+    without_progression: [Z, U, D, T]         # zéro, un, deux, trois
+    register: P                               # interdit en O2
+
+cuts:   # page 1 — « Code des coupures » ; cc = conditions supplémentaires attendues : 1, 2 ou 3 (toutes sauf STOP)
+  note: "pas de coupure pupitre (DESK de B61 absente)"
+  items:
+    - {to: ARIT, name: Calculateur arithmétique, b61: ARIT, x: null, fa: false}
+    - {to: LOGI, name: Calculateur logique, b61: LOGI, x: null, fa: false}
+    - {to: TRAD, name: Traducteur, b61: TRAN, x: null, fa: false}
+    - {to: COMP, name: Comparateur général, b61: COMP, x: null, fa: false}
+    - {to: TAMB, name: Tambour magnétique, b61: DRUM, x: numéro d'élément, fa: true}
+    - {to: LECT, name: Lecteur de cartes, b61: CARR, x: numéro d'élément, fa: true}
+    - {to: PECT, name: Perforateur de cartes, b61: CARP, x: numéro d'élément, fa: true}
+    - {to: IMPR, name: Imprimante, b61: PRIN, x: numéro d'élément, fa: true}
+    - {to: DERU, name: Dérouleur de ruban magnétique, b61: MATA, x: numéro d'élément, fa: true}
+    - {to: LEBA, name: Lecteur de bande perforée, b61: TAPR, x: numéro d'élément, fa: true}
+    - {to: PEBA, name: Perforateur de bande, b61: TAPP, x: numéro d'élément, fa: true}
+    - {to: PROT, name: Coupure sur élément virtuel, b61: PROT, x: adresse catène-image, fa: true}
+    - {to: LIBE, name: Libération d'élément virtuel, b61: LIBE, x: adresse catène-image, fa: true}
+    - {to: SIMU, name: Lancement de séquence simultanée, b61: SIMU, x: adresse extraordinaire, fa: true}
+    - {to: STOP, name: Fin de séquence, b61: STOP, x: null, fa: false, cc: null}
+
+branches:   # page 1
+  - {to: "00", name: Jamais, x: adresse de renvoi, fa: true}
+  - {to: "31", name: Toujours, x: adresse de renvoi, fa: true}
+  - {to: "01-24", name: Conditionnels, x: adresse de renvoi, fa: true}
+
+address_instructions:   # page 1 ; cc = n° de R.A.C. 0, 1, 2 ou 3 ; x = adresse ou quantité
+  - {to: G, name: Garnir, b61: L}
+  - {to: R, name: Ranger, b61: P}
+  - {to: A, name: Additionner, b61: A}
+  - {to: S, name: Soustraire, b61: S}
+
+central_directives:   # page 2 — 18 directives (pas de GE ni RE)
+  - {to: RI, name: Rangement n° instruction, b61: PI, x: adresse, fa: true}
+  - {to: TA, name: Transfert dans A, b61: TA, x: adresse, fa: true}
+  - {to: RA, name: Rangement de A, b61: PA, x: adresse, fa: true}
+  - {to: TB, name: Transfert dans B, b61: TB, x: adresse, fa: true}
+  - {to: RB, name: Rangement de B, b61: PB, x: adresse, fa: true}
+  - {to: GB, name: Garnissage de B (sur 15 positions), b61: LB, x: quantité, fa: true}
+  - {to: AB, name: Addition dans B (sur 15 positions), b61: AB, x: quantité, fa: true}
+  - {to: SB, name: Soustraction dans B (sur 15 positions), b61: SB, x: quantité, fa: true}
+  - {to: CB, name: Comparaison dans B (sur 15 positions), b61: CB, x: quantité, fa: true}
+  - {to: SQ, name: Substitution de quantité dans B, b61: SQ, x: null, fa: false}
+  - {to: SI, name: Substitution d'instruction, b61: SI, x: null, fa: false}
+  - {to: FJ, name: Forçage d'un branchement à « jamais », b61: SN, x: adresse, fa: true}
+  - {to: FT, name: Forçage d'un branchement à « toujours », b61: SA, x: adresse, fa: true}
+  - {to: FI, name: Forçage inversion « jamais-toujours », b61: RR, x: adresse, fa: true}
+  - {to: FZ, name: Forçage à zéro d'un catène, b61: FZ, x: adresse, fa: true}
+  - {to: FU, name: Forçage à « un » d'un catène, b61: FO, x: adresse, fa: true}
+  - {to: DI, name: Décomptage itération, b61: IC, x: adresse, fa: true}
+  - {to: PC, name: Progression de compteur, b61: CP, x: adresse, fa: true}
+
+arithmetic:   # page 2 — pas de fonction d'adresse ; x = V (virgule) + O1, O2, R
+  - {to: ADD, name: Addition, b61: ADD, cc1: [P, N, A], cc2: [D, rien], v: "0-10 ou rien", operands: [O1, O2, R]}
+  - {to: SOU, name: Soustraction, b61: SUB, cc1: [P, N, A], cc2: [D, rien], v: "0-10 ou rien", operands: [O1, O2, R]}
+  - {to: MUL, name: Multiplication, b61: MUL, cc1: [P, N, A], cc2: [D, rien], v: "0-10 ou rien", operands: [O1, O2, R]}
+  - {to: DIV, name: Division normale, b61: DIV, cc1: [P, N], cc2: null, v: "0-10 ou rien", operands: [O1, O2, R]}
+  - {to: DIR, name: Division avec reste, b61: DIR, cc1: [P, N], cc2: [D, rien], v: "0-10 ou rien", operands: [O1, O2, R]}
+  - {to: TER, name: Transfert, b61: TRA, cc1: [P, N], cc2: [D, rien], v: "0-10 ou rien", operands: [O1, R]}
+  - {to: MPD, name: Multiplication par une puissance de dix, b61: MPT, v: "0-15", operands: [O1, R]}
+  - {to: DPD, name: Division par une puissance de dix, b61: DPT, v: "0-15", operands: [O1, R]}
+  - {to: ISI, name: Inversion de signe, b61: RSI, operands: [O1, R]}
+  - {to: PVA, name: Prise de valeur absolue, b61: AVA, operands: [O1, R]}
+  - {to: CVA, name: Comparaison en valeur absolue, b61: CAV, operands: [O1, O2]}
+  - {to: CAL, name: Comparaison algébrique, b61: CAL, operands: [O1, O2]}
+  - {to: ARR, name: Arrondi, b61: ROF, operands: [], uncertain: "cases O1/O2/R grisées à confirmer"}
+
+comparator:   # page 3 ; x = longueur (maxi 255) ; fa admise
+  - {to: CMP, name: Comparaison simple, b61: OWC, cc: [1, 2]}
+  - {to: CDB, name: Comparaison à deux bornes, b61: TWC, cc: null}
+  - {to: EFL, name: Effacement avec longueur, b61: DEL, cc: null}
+  - {to: TRR, name: Transfert mémoire rapide-mémoire rapide, b61: TSS, cc: [1, 2]}
+
+translator:   # page 3
+  load_mic: {to: GMI, name: Garnissage MIC, b61: MIC, cc: [G, D], note: "G/D = gauche/droite (B61 : L/R = left/right)"}
+  preparatory:   # directives préparatoires « cas d'emploi » ; cc1 = P, N ou rien ; cc2 = S ou rien ; V = partie de la MIC 1 à 9 (« OD-MIC »)
+    - {to: CAT, name: Cartes BULL vers traitement, b61: BCP}
+    - {to: CET, name: Cartes IBM vers traitement, b61: ICP}
+    - {to: CAM, name: Cartes BULL vers mémorisation, b61: BCS}
+    - {to: CEM, name: Cartes IBM vers mémorisation, b61: ICS}
+    - {to: TCA, name: Traitement vers cartes BULL, b61: PBC}
+    - {to: BPT, name: Bande perforée vers traitement, b61: PTP}
+    - {to: TBP, name: Traitement vers bande perforée, b61: PPT}
+    - {to: TIP, name: Traitement vers imprimante, b61: PPR}
+    - {to: TVM, name: Traitement vers mémorisation, b61: PTS}
+    - {to: MVT, name: Mémorisation vers traitement, b61: STP}
+    - {to: MVM, name: Mémorisation vers mémorisation, b61: STS}
+  others:
+    - {to: RCL, name: Renvoi au cliché, b61: RCL, cc1: [G, rien], cc2: "E, S ou — (lecture à vérifier)", uncertain: true}
+    - {to: FIN, name: Fin de traduction, b61: END, cc: [R], note: "R souligné dans la source (B61 : S)"}
+
+translator_cliches:   # page 3 — 4 codes par catène
+  positioning_main:
+    - {code: MA, name: Mot alphanumérique (6 monades en code interne), b61: AW}
+    - {code: MN, name: Mot numérique (4 monades en code interne), b61: NW}
+    - {code: NA, name: Nombre arithmétique (semi-logarithmique, avec exposant, sans signe), b61: AN}
+    - {code: NS, name: Nombre avec signe (semi-log., pour le calculateur arithmétique), b61: NS}
+    - {code: BN, name: Binaire (1 monade), b61: BN}
+  positioning_secondary:
+    - {code: CE, name: Numérique avec certification, b61: null, note: "absent de B61"}
+    - {code: TZ, name: Numérique avec codage de tous les zéros, b61: AZ}
+  execution:
+    - {code: TU, name: Transfert d'un caractère, b61: TO}
+    - {code: TL, name: Transfert avec longueur (2 à 63 caractères), b61: TN}
+    - {code: EU, name: Annulation d'un caractère à l'entrée, b61: IO}
+    - {code: EL, name: Annulation de l'entrée avec longueur (2 à 63), b61: IN}
+    - {code: SU, name: Injection d'un espace à la sortie, b61: OO}
+    - {code: SL, name: Injection d'espaces à la sortie avec longueur (2 à 63), b61: ON}
+    - {code: KU, name: Injection d'une constante, b61: WO}
+    - {code: KL, name: Injection de constantes avec longueur (2 à 63), b61: WN}
+    - {code: RU, name: Injection d'une constante sans avancer la sortie, b61: RO}
+    - {code: RL, name: Injection de n constantes (2 à 63) sans avancer la sortie, b61: RN}
+    - {code: RP, name: Retour au programme, b61: RP}
+    - {code: CQ, name: Envoi d'un caractère dans le catène qualitatif, b61: CQ}
+
+logical:   # page 4 — V = décalage ou longueur, 01 à 23 (« l ») ; R = 0, 1, 2, 3, Z, U, D, T ou L (L sans objet pour TCK, TCL)
+  - {to: TCK, name: Transfert cadré dans K, b61: TSK}
+  - {to: TCL, name: Transfert cadré dans L, b61: TSL}
+  - {to: TKL, name: Transfert de K dans L, b61: TKL}
+  - {to: MCL, name: Maintien cadré de L, b61: SHL}
+  - {to: IKL, name: Insertion de K dans L, b61: IKL}
+  - {to: FZL, name: Forçage à zéro dans L, b61: FZL}
+  - {to: FUL, name: Forçage à un dans L, b61: FOL}
+  - {to: ADD, name: Addition binaire, b61: ADD}
+  - {to: SOU, name: Soustraction binaire, b61: SUB}
+  - {to: MUL, name: Multiplication binaire, b61: MUL}
+  - {to: DIV, name: Division binaire, b61: DIV}
+  - {to: FCL, name: Forçage au complément dans L, b61: FLC}
+  - {to: INT, name: Intersection logique, b61: INT}
+  - {to: REU, name: Réunion logique, b61: REU}
+  - {to: CBL, name: Comparaison binaire et logique, b61: BLC}
+
+card_reader_punch:   # page 4 — M = magasin (B61 : H, hopper) ; b = brosse (B61 : RS) ; pas de X ni de FA
+  - {to: SCL, cc: "1", name: Sélection clapet 1 après b2, b61: "SPR 1"}
+  - {to: SCL, cc: "2", name: Sélection clapet 2 après b2, b61: "SPR 2"}
+  - {to: SCP, cc: "1", name: Sélection clapet 1 après b5, b61: "SPP 1", uncertain: "indice b5 ou b6 peu net ; B61 : RS5"}
+  - {to: SCP, cc: "2", name: Sélection clapet 2 après b5, b61: "SPP 2", uncertain: "idem"}
+  - {to: LEC, cc: "M1", name: Lecture normale, b61: "REA M1"}
+  - {to: LEC, cc: "B1", name: Lecture avec splittage après b1, b61: "REA B1", uncertain: "b1 lu ; B61 dit « après RS5 »"}
+  - {to: PER, cc: "M1", name: Perforation normale depuis M1, b61: "PUN H1"}
+  - {to: PER, cc: "M2", name: Perforation normale depuis M2, b61: "PUN H2"}
+  - {to: PER, cc: "P", name: Perforation sans alimentation, b61: "PUN P"}
+  - {to: API, cc: "B2", name: Avancement de piste pour vidage lecture, b61: "CLE B2"}
+  - {to: API, cc: "M2", name: Avancement de piste pour vidage depuis M2, b61: "CLE H2"}
+  - {to: API, cc: "P", name: Avancement de piste pour vidage piste P, b61: "CLE P"}
+  - {to: DMI, name: Demande de manipulation incident, b61: DMI}
+  - {to: DMF, name: Demande de manipulation fin de fichier, b61: DMF}
+
+paper_tape_reader:   # page 4
+  - {to: LIR, name: Lecture, b61: REA, x: longueur}
+  - {to: DMN, name: Demande de manipulation normale, b61: DMN}
+  - {to: DMI, name: Demande de manipulation incident, b61: DMI}
+paper_tape_punch:
+  - {to: PBA, name: Perforer la bande, b61: PUN, x: longueur}
+  - {to: DMN, name: Demande de manipulation normale, b61: DMN}
+  - {to: DMI, name: Demande de manipulation incident, b61: DMI}
+
+printer:   # page 5
+  - {to: SDF, name: Saut deuxième feuillet, b61: SKI, x: "longueur en interligne, maximum 255", fa: true}
+  - {to: IMP, name: Saut premier feuillet et impression d'une ligne, b61: PRI, x: "id.", fa: true}
+  - {to: DMI, name: Demande de manipulation incident, b61: DMI}
+  - {to: DMF, name: Demande de manipulation fin de fichier, b61: DMF}
+
+tape_unit:   # page 5 — X = n° de dérouleur sans FA, ou adresse du n° de dérouleur avec FA
+  preparatory:
+    - {to: ECR, name: Écriture, b61: WRI}
+    - {to: LAV, name: Lecture avant, b61: REF}
+    - {to: LAR, name: Lecture arrière, b61: REB}
+  execution:   # pas de X ni de FA
+    - {to: TRA, name: Exécution avec transfert effectif (selon la directive préparatoire), b61: TRA}
+    - {to: SAU, name: Lecture sans transfert en mémoire rapide (saut), b61: JUM}
+    - {to: EFF, name: Effacement, b61: DEL}
+    - {to: ECM, name: Écriture d'un bloc marque, b61: WRM}
+  service:
+    - {to: REB, name: Rebobinage, b61: SPO}
+    - {to: REM, name: Rebobinage et demande de manipulation normale, b61: SPN}
+    - {to: MAN, name: Demande de manipulation normale, b61: MAN}
+    - {to: MAI, name: Demande de manipulation incident, b61: MAI}
+
+drum:   # page 5
+  - {to: DAO, name: Désignation adresse origine en tambour, b61: DAO, x: adresse tambour, fa: true}
+  - {to: TRT, name: Transfert mémoire rapide - tambour, b61: TCD, x: longueur, fa: true}
+  - {to: TTR, name: Transfert tambour - mémoire rapide, b61: TDC, x: longueur, fa: true}
