@@ -17,3 +17,5 @@ Colonnes : `T.O.  C.C.  X  A.F.` ; pour les directives ARIT, X = `dp O1 O2 R`
 | `namip_classement.g60b` | extrait (lignes 020-052) d'un programme d'époque (NAM-IP 2018), profil COURS, langue `fr` : COMP à deux bornes, branchements sur le qualitatif, TRR, ARIT | somme dans le cumul ; ordre trié dans 2 cas sur 3 (voir note) |
 | `lecture_bande.g60b` | élément virtuel d'E/S (PROT/LIBE), unisélecteur, opération unique, priorité DTD | bloc lu dans TAMPON ; un catène transféré toutes les ≈190 µs |
 | `test-arith01.g60b` | ARIT seul : DIV en virgule normalisée | R = 22 / 7 = 3,142857142 (10 chiffres, tronqué) |
+| `test-arith02-overflow.g60b` | MUL normalisé : 10^20 × 10^19, exposant 80 > 79 | incident ligne 9 (U-35), R inchangé |
+| `test-arith03-underflow.g60b` | MUL normalisé : 10^-21 × 10^-21, exposant −1 < 0 | incident ligne 10 par défaut ; R = +0 avec `exponent_underflow: zero` (U-35) |

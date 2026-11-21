@@ -1,0 +1,13 @@
+; langue: en
+; MUL en dépassement d'exposant vers le haut : 10^20 x 10^19 = 10^39
+; = 0,1 x 10^40, exposant stocké 80 > 79 (COURS p.63) ⇒ incident (U-35)
+START:  ARIT                           ; coupure sur l'élément ARIT
+        VIERGE                         ; catène vierge, obligatoire après la coupure
+        L     0     X                  ; RAC 0 <- adresse de X
+        L     1     Y
+        L     2     R
+        MUL   N     - 0 1 2            ; R = X x Y, virgule normalisée
+        STOP
+X:      NUM   +1E20                    ; exposant stocké 61
+Y:      NUM   +1E19                    ; exposant stocké 60
+R:      NUM   +0

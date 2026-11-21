@@ -56,7 +56,8 @@ arit_fitting:                # mise en forme des résultats d'ARIT
   value:
     zero_exponent_normalized: 0       # zéro normalisé : +, exposant 0 (programmé : 50 − V)
     lost_digits: truncate             # chiffres au-delà des 20 de P + S : troncature vers zéro
-    exponent_out_of_range: incident   # exposant hors de 0-79
+    exponent_overflow: incident       # exposant > 79 (seule valeur prise en charge : incident)
+    exponent_underflow: incident      # exposant < 0 : incident | zero (résultat remplacé par 0)
     missing_point_position: 0         # C.C.1 P sans V
     remainder_form: normalized        # reste de DIR (U-36)
     division_by_zero: incident

@@ -1,0 +1,14 @@
+; langue: en
+; MUL en dépassement d'exposant vers le bas : 10^-21 x 10^-21 = 10^-42
+; = 0,1 x 10^-41, exposant stocké -1 < 0 ⇒ incident par défaut, ou +0 si
+; exponent_underflow: zero dans data/behavior.yaml (U-35)
+START:  ARIT                           ; coupure sur l'élément ARIT
+        VIERGE                         ; catène vierge, obligatoire après la coupure
+        L     0     X                  ; RAC 0 <- adresse de X
+        L     1     Y
+        L     2     R
+        MUL   N     - 0 1 2            ; R = X x Y, virgule normalisée
+        STOP
+X:      NUM   +1E-21                   ; exposant stocké 20
+Y:      NUM   +1E-21                   ; exposant stocké 20
+R:      NUM   +0

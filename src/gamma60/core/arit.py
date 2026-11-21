@@ -31,6 +31,26 @@ def _rules() -> dict:
     return data.resolve(data.load("behavior")["arit_fitting"])
 
 
+def _exponent_out_of_range(exponent: int) -> Number:
+    """Apply the U-35 rule to an exponent outside 0-79; return the zero to use instead.
+
+    The sources give the bounds (COURS p.63, B61 p.18) but not what happens beyond them in
+    normalised form: overflow (> 79) and underflow (< 0) are read from behavior.yaml.
+    """
+    rules = _rules()
+    key, allowed = (
+        ("exponent_overflow", ("incident",))
+        if exponent > EXPONENT_MAX
+        else ("exponent_underflow", ("incident", "zero"))
+    )
+    action = rules[key]
+    if action not in allowed:
+        raise ValueError(f"{key}: unsupported value {action!r} (expected one of {allowed})")
+    if action == "incident":
+        raise Incident(f"exponent {exponent} outside 0-79")
+    return Number(False, rules["zero_exponent_normalized"], 0)
+
+
 def set_position(qualitative: int, position: int) -> int:
     return qualitative | (1 << (position - 1))
 
@@ -62,7 +82,8 @@ def fit(value: Fraction, point: int | None) -> tuple[Number, Number]:
             raise Incident(f"decimal point position {point} outside 0-10")
         exponent = 50 - point
     if not 0 <= exponent <= EXPONENT_MAX:
-        raise Incident(f"exponent {exponent} outside 0-79")
+        zero = _exponent_out_of_range(exponent)  # U-35
+        return zero, Number(False, max(zero.exponent - 10, 0), 0)
     scaled = a * Fraction(10) ** (60 - exponent)
     digits = scaled.numerator // scaled.denominator  # truncation toward zero
     if digits >= DIGITS20:
@@ -102,14 +123,14 @@ def round_off(p: Number, s: Number) -> Number:
         high //= 10
         exponent += 1
         if exponent > EXPONENT_MAX:
-            raise Incident("exponent overflow on rounding")
+            _exponent_out_of_range(exponent)  # U-35
     return Number(p.negative and high > 0, exponent, high)
 
 
 def _shift_exponent(n: Number, delta: int) -> Number:
     e = n.exponent + delta
     if not 0 <= e <= EXPONENT_MAX:
-        raise Incident(f"exponent {e} outside 0-79")
+        return _exponent_out_of_range(e)  # U-35
     return Number(n.negative, e, n.mantissa)
 
 
@@ -231,7 +252,10 @@ class ArithmeticUnit:
                     raise Incident(f"power of ten {n} outside 0-15")
                 delta = n if op == "multiply_pow10" else -n
                 p = _shift_exponent(p, delta)
-                s = _shift_exponent(s, delta) if s.mantissa else s
+                if s.mantissa and s.exponent + delta < 0:  # S below exponent 0: lost (U-35)
+                    s = Number(False, 0, 0)
+                elif s.mantissa:
+                    s = _shift_exponent(s, delta)
             else:
                 negative = (not p.negative) if op == "reverse_sign" else False
                 p = Number(negative and p.mantissa > 0, p.exponent, p.mantissa)

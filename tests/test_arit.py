@@ -5,6 +5,7 @@ from fractions import Fraction
 import pytest
 
 from gamma60 import data
+from gamma60.core import arit
 from gamma60.core.arit import ArithmeticUnit, Incident, fit
 from gamma60.number import Number
 
@@ -202,3 +203,92 @@ def test_not_a_number_operand_is_an_incident():
 def test_unknown_directive():
     with pytest.raises(ValueError):
         run("nothing", o1="a", values={"a": 1})
+
+
+# -- exponent bounds 0-79 [COURS p.63 ; B61 p.18]; beyond them: hypothesis U-35 -----------
+
+
+@pytest.fixture
+def underflow_to_zero(monkeypatch):
+    rules = dict(arit._rules(), exponent_underflow="zero")
+    monkeypatch.setattr(arit, "_rules", lambda: rules)
+
+
+def mul(a, b, unit=None):
+    return run("multiply", unit=unit, mode="N", o1="a", o2="b", r="r", values={"a": a, "b": b})
+
+
+def test_multiply_largest_exponent_79():
+    _, s = mul(F(10) ** 20, F(10) ** 18)  # 10^38 = 0.1 x 10^39
+    assert s.out["r"][0] == Number(False, 79, 1_000_000_000)
+
+
+def test_multiply_exponent_overflow_is_an_incident():
+    u = ArithmeticUnit()
+    with pytest.raises(Incident):
+        mul(F(10) ** 20, F(10) ** 19, unit=u)  # 10^39 needs exponent 80
+    assert {23, 24} <= positions(u.qualitative)
+    with pytest.raises(Incident):
+        mul(F(10) ** 30, F(10) ** 30)  # exponent 101
+
+
+def test_multiply_smallest_exponent_0():
+    _, s = mul(F(10) ** -20, F(10) ** -21)  # 10^-41 = 0.1 x 10^-40
+    assert s.out["r"][0] == Number(False, 0, 1_000_000_000)
+
+
+def test_multiply_exponent_underflow_is_an_incident_by_default():
+    u = ArithmeticUnit()
+    with pytest.raises(Incident):
+        mul(F(10) ** -21, F(10) ** -21, unit=u)  # 10^-42 needs exponent -1
+    assert {23, 24} <= positions(u.qualitative)
+
+
+def test_multiply_exponent_underflow_to_zero(underflow_to_zero):
+    u, s = mul(F(10) ** -30, F(10) ** -30)
+    assert s.out["r"][0] == Number(False, 0, 0) and positions(u.qualitative) == {7}
+    _, s = mul(F(-1) * F(10) ** -21, F(10) ** -21)
+    assert s.out["r"][0] == Number(False, 0, 0)  # zero is positive
+
+
+def test_overflow_stays_an_incident_when_underflow_gives_zero(underflow_to_zero):
+    with pytest.raises(Incident):
+        mul(F(10) ** 20, F(10) ** 19)
+
+
+def test_unsupported_overflow_rule_is_rejected(monkeypatch):
+    rules = dict(arit._rules(), exponent_overflow="saturate")
+    monkeypatch.setattr(arit, "_rules", lambda: rules)
+    with pytest.raises(ValueError):
+        mul(F(10) ** 20, F(10) ** 19)
+
+
+def test_add_exponent_overflow():
+    big = Number(False, 79, 9_999_999_999)
+    with pytest.raises(Incident):
+        run("add", mode="N", o1="a", o2="a", r="r", values={"a": big})
+
+
+def test_divide_exponent_overflow_and_underflow(underflow_to_zero):
+    with pytest.raises(Incident):
+        run("divide", mode="N", o1="a", o2="b", r="r", values={"a": F(10) ** 30, "b": F(10) ** -30})
+    _, s = run(
+        "divide", mode="N", o1="a", o2="b", r="r", values={"a": F(10) ** -30, "b": F(10) ** 30}
+    )
+    assert s.out["r"][0] == Number(False, 0, 0)
+
+
+def test_divide_pow10_underflow_is_an_incident_by_default():
+    with pytest.raises(Incident):
+        run("divide_pow10", point=5, o1="a", r="r", values={"a": Number(False, 3, 42)})
+
+
+def test_divide_pow10_underflow_to_zero(underflow_to_zero):
+    _, s = run("divide_pow10", point=5, o1="a", r="r", values={"a": Number(False, 3, 42)})
+    assert s.out["r"][0] == Number(False, 0, 0)
+
+
+def test_divide_pow10_keeps_p_when_only_s_falls_below_0():
+    u = ArithmeticUnit(p=Number(False, 12, 1234), s=Number(False, 2, 5_000_000_000))
+    run("divide_pow10", unit=u, point=5, o1="P", r="P")
+    assert u.p == Number(False, 7, 1234) and u.s.mantissa == 0  # low digits lost (U-35)
