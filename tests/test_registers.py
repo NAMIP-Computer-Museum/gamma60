@@ -29,7 +29,9 @@ def test_ids_are_unique():
 def test_register_fields(reg):
     assert reg["owner"] in OWNERS
     assert reg["location"] in LOCATIONS
-    assert set(reg["name"]) == {"en", "fr"} and reg["name"]["fr"]
+    assert set(reg["name"]) == {"en", "fr"}
+    assert set(reg["long"]) == {"en", "fr"} and all(reg["long"].values())
+    assert set(reg["display"]) == {"en", "fr"}
     assert isinstance(data.resolve(reg["bits"]), int) and data.resolve(reg["bits"]) > 0
     assert isinstance(reg.get("count", 1), int) and reg.get("count", 1) >= 1
     assert reg["role"] and reg["source"]
@@ -67,15 +69,64 @@ def test_configurations_fit_in_the_matrices(name):
     assert needed <= by_id("rac")["count"]
 
 
+def labels(reg: dict, language: str) -> list[str]:
+    """Displayed labels, one per copy (``pdc`` → ``pdc1``, ``pdc2``)."""
+    label = reg["display"][language]
+    count = 1 if reg["location"] in ("map", "maq") else reg.get("count", 1)  # matrices: per element
+    if isinstance(label, list):
+        assert len(label) == count, reg["id"]
+        return label
+    return [label] if count == 1 else [f"{label}{i}" for i in range(1, count + 1)]
+
+
+def base_labels(reg: dict, language: str) -> list[str]:
+    label = reg["display"][language]
+    return label if isinstance(label, list) else [label]
+
+
+@pytest.mark.parametrize("language", ["en", "fr"])
+@pytest.mark.parametrize("reg", REGISTERS, ids=lambda r: r["id"])
+def test_display_case_convention(reg, language):
+    """UPPER CASE = name attested in that language; lower case = emulator proposal."""
+    attested = set((reg["name"][language] or "").split(", ")) - {""}
+    label = reg["display"][language]
+    for one in label if isinstance(label, list) else [label]:
+        assert 1 <= len(one) <= 6, one
+        if not one.islower():
+            assert one.isupper() and one in attested, (
+                f"{reg['id']}: {one} not attested in {language}"
+            )
+
+
+@pytest.mark.parametrize("language", ["en", "fr"])
+def test_display_labels_unique_per_unit(language):
+    # registers held in central memory (B / C, resume datum) are shown apart, with the memory
+    regs_ = [r for r in REGISTERS if r["location"] != "central_memory"]
+    in_memory = [r for r in REGISTERS if r["location"] == "central_memory"]
+    central = [r for r in regs_ if r["owner"] in ("central_unit", "program_distributor")]
+    common = [r for r in regs_ if r["owner"] == "every_element"]
+    units = [central, in_memory] + [
+        common + [r for r in regs_ if r["owner"] == kind] for kind in sorted(ELEMENT_KINDS)
+    ]
+    for regs in units:
+        shown = [label for r in regs for label in labels(r, language)]
+        assert len(shown) == len(set(shown)), shown
+
+
 def test_machine_md_lists_every_register():
     text = (ROOT / "docs" / "MACHINE.md").read_text(encoding="utf-8")
     section = text[text.index("### 5.1 Registres") : text.index("### 5.2")]
     for reg in REGISTERS:
-        names = {reg["name"]["fr"], reg["name"]["en"]} - {None}
+        names = {reg["name"]["fr"], reg["name"]["en"], reg["long"]["fr"]} - {None}
         assert any(n.split(" (")[0].lower() in section.lower() for n in names), reg["id"]
+        for language in ("en", "fr"):
+            for label in base_labels(reg, language):
+                assert f"`{label}`" in section, (reg["id"], label)
 
 
 def test_wiki_lists_every_register():
     text = (ROOT / "wiki" / "REGISTERS.md").read_text(encoding="utf-8")
     for reg in REGISTERS:
         assert f"`{reg['id']}`" in text, reg["id"]
+        for label in base_labels(reg, "en"):
+            assert f"`{label}`" in text, (reg["id"], label)

@@ -7,6 +7,9 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 - **en**: form used by B61 (1961) or by Bataille (BAT72, Fig. 1); **fr**: form used by COURS
   and by the French code B tables (TFR). "—" = no form in that language; "?" = not recorded
   (U-29); *(hyp.)* = assumed spelling.
+- Display names of the registers in traces and in the debugger follow their own convention
+  (UPPER CASE = attested name, lower case = emulator proposal): see
+  [`wiki/REGISTERS.md`](../wiki/REGISTERS.md#naming-convention).
 - **Expanded form**: the full name as given (or described) by the sources, `en` / `fr`.
 - One line per meaning: a mnemonic used by several elements with different meanings (`ADD`,
   `DEL`, `REA`, `TRA`…) has one line per element. Watch the cross-language homonyms: `CP`,
@@ -26,6 +29,7 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | AW | MA | Alphanumeric Word / Mot Alphanumérique | TRAN cliché | 4 characters of 6 bits (internal code). |
 | AZ | TZ | Numeric, all zeros / Numérique avec codage de Tous les Zéros | TRAN cliché | Numeric word, zeros included (secondary positioning). |
 | B | B | Register B (operator) / registre B (opérateur) | Register | 24-bit register of the central unit; computations on its 15 right bits. |
+| — | B, C | temporary storage registers (B61 p.24) / registres de chaîne de reprise | Register | Head and tail of an element's recall chain, in central memory at specialised addresses (U-30). Called I1, I2 by ONDE (French). |
 | B61 | B61 | Bull 1961 brochure | Profile | Machine profile of 1961 (10 µs cycle, parity + mod 3 key; default) and source key. |
 | BCP | CAT | Bull Cards → Processing / CArtes BULL vers Traitement | TRAN directive | Phase: Bull cards to processing form. |
 | BCS | CAM | Bull Cards → Storage / CArtes BULL vers Mémorisation | TRAN directive | Phase: Bull cards to storage form. |
@@ -33,7 +37,7 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | BN | BN | BiNary / BiNaire | TRAN cliché | Binary (1 monade). |
 | C.C. | C.C. | Complementary Codes / Codes Complémentaires | Code B field | 2 characters, use depends on the instruction (join count, CAR number, mode…). |
 | CAL | CAL | Compare ALgebraic / Comparaison ALgébrique | ARIT directive | Compare O1 and O2 algebraically. |
-| CAR | RAC | Current Address Register / Registre d'Adresse Courante | Register | 1 to 4 per element (matrix MAQ); data address, +1 or −1 per transfer. Also DAR (BAT72), RAQ. |
+| CAR | RAC | Current Address Register / Registre d'Adresse Courante | Register | 1 to 4 per element (matrix MAQ); data address, +1 or −1 per transfer. Also D.A.R. (B61 p.22), DAR (BAT72), RAQ (ONDE). |
 | CARP | PECT | CArd Reader-Punch / PErforateur de Cartes | Element, cut | Card reader-punch (class 3). |
 | CARR | LECT | CArd Reader / LECTeur de cartes | Element, cut | Card reader (class 3). |
 | CAV | CVA | Compare Absolute Values / Comparaison en Valeur Absolue | ARIT directive | Compare \|O1\| and \|O2\|. |
@@ -48,7 +52,7 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | CQ | CQ | Character to Qualitative / envoi d'un Caractère dans le catène Qualitatif | TRAN cliché | Write one character into the qualitative catena. |
 | D1, D2, D3 | D1, D2, D3 | Code D cards | Toolchain | Distribution values: D2 (addresses, units, lengths → UT), D1 (launch parameters), D3 (jobs). |
 | DAO | DAO | Désignation d'Adresse d'Origine (drum) | Drum directive | Set the origin address on the drum (track × 256 + position). |
-| DAR | RAC | Data Address Register (BAT72) | Register | Same as CAR. |
+| DAR | RAC | Data Address Register (B61 p.22 « D.A.R. » ; BAT72) | Register | Same as CAR. |
 | DCC | — | Data Collection Channel / canal de collecte | Channel | Elements → central memory (BAT72 Fig. 1). |
 | DD | DT | Data Distributor / Distributeur de Données (de Transferts) | Unit | Arbitrates memory transfers, one per cycle, by priority chain; opens the class gates. |
 | DDC | — | Data Distribution Channel / canal de distribution | Channel | Central memory → elements (BAT72 Fig. 1). |
@@ -73,7 +77,6 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | — | GGU | (expansion unknown) | System software | Operating system: kernel ≈ 3,800 words, memory maps, job handling (MAI). |
 | — | GGZ | (expansion unknown) | System software | Resident supervisor at the start of memory (MAI). |
 | H1, H2 | M1, M2 | Hopper / Magasin | Card C.C. | Card hoppers 1 and 2. |
-| I1, I2 | B, C | Recall-chain registers / registres de chaîne de reprise | Register | Head and tail of an element's recall chain, in central memory at specialised addresses (ONDE; U-30). |
 | IAR | RAI | Instruction Address Register | Register | Same as PAR. |
 | IC | DI | Iteration Control / Décomptage d'Itération | Central directive | Count down on memory[X], [X+1]; sets bit 14 or 15 of A. Beware: `DI` is also the French name of ITR. |
 | ICP | CET | IBM Cards → Processing / Cartes IBM vers Traitement | TRAN directive | Phase: IBM cards to processing form. |
@@ -128,25 +131,25 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | PUN | PBA | PUNch / Perforer la BAnde | Paper tape directive | Punch n catenae. |
 | R | R | Relative / Relatif | A.F. | Differential address (bit 17). Beware: `R` is also the French `Ranger` (place). |
 | R *(hyp.)* | A | Rounded / Arrondi | ARIT C.C.1 | Normalised and rounded (U-05). |
-| — | RAE | Registre d'Adresse Élément (COURS) | Register | Local drum address register, set by DAO. |
-| — | RAPA | Registre d'Adresse Programme A (?) | Register | Address of the instruction being read (PD). |
-| — | RAPP | Registre d'Adresse Programme P (?) | Register | RAPA + 1; copied into the RAI after a directive (PD). |
+| — | RAE | — / Registre Adresse dans l'Élément (COURS p.153) | Register | Local drum address register, set by DAO. |
+| — | RAPA | — / Registre Adresse de Programme Actuel (COURS p.14) | Register | Address of the current instruction (PD). |
+| — | RAPP | — / Registre Adresse de Programme Progressé (COURS p.14) | Register | RAPA + 1; copied into RAPA for the next instruction, or into the RAI after the directive that starts the element (PD). |
 | RCL | RCL | Return to CLiché / Renvoi au CLiché | TRAN directive | Start the clichés (C.C. `A`/`I`/`0` / `G`/`E`/`S`). |
 | REA | LEC | REAd / LECture | Card directive | Read from hopper 1, or split track (C.C. M1 / B1). |
 | REA | LIR | REAd / LIRe | Paper tape directive | Read n catenae. |
 | REB | LAR | REad Backward / Lecture ARrière | Tape directive | Preparatory: read backward. Beware: French `REB` = rewind (en `SPO`). |
-| — | REDP | Registre d'Entrée du DP (?) | Register | Receives each instruction read (PD, 24 b). |
+| — | REDP | — / Registre d'Entrée du Distributeur de Programme (COURS p.14) | Register | Receives each instruction read (PD, 24 b). |
 | REF | LAV | REad Forward / Lecture AVant | Tape directive | Preparatory: read forward. |
 | REU | REU | Union / RÉUnion logique | LOGI directive | Logical OR. |
-| RLN | RLN | — / Registre de LiaisoN | Register | One-catena buffer in each element, decoupling memory cycle and element rhythm. |
+| — | RLN | buffer register (B61 p.23) / Registre de Liaison | Register | One-catena buffer in each element, decoupling memory cycle and element rhythm. |
 | RN | RL | Write N constants without advancing / Injection de n constantes sans avancer (Longueur) | TRAN cliché | 2-63 constants, output address unchanged. |
-| — | RNE | Registre du Numéro d'Élément (?) | Register | Number of the element being served; selects its RAI / RAC (PD). |
+| — | RNE | — / Registre Numéro d'Élément (COURS p.13-14) | Register | Number of the element being served; selects its RAI / RAC (PD). |
 | RO | RU | Write One constant without advancing / Injection d'Une constante sans avancer | TRAN cliché | One constant, output address unchanged. |
 | ROF | ARR | Round OFf / ARRondi | ARIT directive | Round (operands: U-31). |
 | RP | RP | Return to Program / Retour au Programme | TRAN cliché | End of the cliché sequence. |
 | RR | FI | Reverse switches / Forçage Inversion « jamais-toujours » | Central directive | Swap never / always on the branch at X. |
 | RS1, RS2, RS5 | b1, b2, b5 | Reading Station / brosse | Card C.C. | Card reading brushes (double reading RS1/RS2, punch check RS5). |
-| — | RSDP | Registre de Sortie du DP (?) | Register | Output of the PD; receives RAPP at each branch (return address). |
+| — | RSDP | — / Registre de Sortie du Distributeur de Programme (COURS p.14) | Register | Output of the PD; receives RAPP at each branch (return address). |
 | RSI | ISI | Reverse SIgn / Inversion de SIgne | ARIT directive | Reverse the sign (operands: U-31). |
 | S | S | Subtract / Soustraire | Address instruction | Subtract X from a CAR / RAC. |
 | S | S | Substitution | A.F. | Indirect address (bit 16). |
@@ -191,11 +194,12 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | WRI | ECR | WRIte / ÉCRiture | Tape directive | Preparatory: write. |
 | WRM | ECM | WRite block Mark / ÉCriture d'un bloc Marque | Tape directive | Write a block (tape) mark. |
 | X | X | Free variable / variable libre | Code B field | 5 decimal digits ≤ 32,767: address, quantity, length, element number. |
-| — | Z | Registre Z | Register | 31-bit register of the central unit (catena, key, selection check); every catena read from or written to memory passes through it. See [REGISTERS](../wiki/REGISTERS.md). |
+| — | Z | — / Registre Z | Register | 31-bit register of the central unit (catena, key, selection check); every catena read from or written to memory passes through it. Named by French sources only (COURS p.5, ONDE). |
 | Z F S T | Z U D T | Zero, First, Second, Third / Zéro, Un, Deux, Trois | ARIT / LOGI operands | CAR 0-3 without progression. |
 
 Cut names, branches (`00` never, `31` always, `01`-`24` conditional) and code letters are the
 same in both languages unless shown otherwise. Expanded forms of some `en` mnemonics are not
 spelled out by B61 and are inferred from the table descriptions (e.g. `OWC`, `TWC`, `SPO`);
 letter-by-letter expansions marked (?) are not given by the sources. `I1`, `I2` are ONDE's
-names, `B`, `C` COURS's; `DAR`, `PAR`, `ITR`, `DTR`, `DDC`, `DCC` are BAT72's.
+(French) names, `B`, `C` COURS's; `PAR`, `ITR`, `DTR`, `DDC`, `DCC` are BAT72's; `DAR` is both
+B61's (« D.A.R. », p.22) and BAT72's.

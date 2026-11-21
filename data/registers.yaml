@@ -2,23 +2,33 @@
 # Faits et sources : docs/MACHINE.md §5.1 (tableau complet) ; vue anglaise : wiki/REGISTERS.md.
 #
 # Champs d'un registre :
-#   name      {en, fr} : en = B61 / BAT72 (null si la source anglaise ne le nomme pas) ; fr = COURS
+#   name      {en, fr} : sigle ou nom court d'époque ; en = B61 / BAT72, fr = COURS / ONDE / TFR ;
+#             null si aucune source de cette langue n'en donne
+#   long      {en, fr} : forme développée ; celle d'une source si elle existe, sinon traduction
+#             de l'émulateur, suivie de « (emulator) »
+#   display   {en, fr} : libellé affiché par les traces et le débogueur (≤ 6 caractères).
+#             Convention de casse : MAJUSCULES = nom attesté dans cette langue (= name) ;
+#             minuscules = initiales de la forme développée, proposées par l'émulateur, non
+#             validées. Un registre en plusieurs exemplaires est indexé à l'affichage (pdc1,
+#             pdc2) ; une liste donne un libellé par exemplaire.
 #   owner     central_unit | program_distributor | every_element | <type d'élément de
-#             directives.yaml (elements.*)>
+#             topology.yaml (classes)>
 #   bits      taille en bits utiles (sans clé sauf mention) ; incertain = {value, status, unknown}
 #   count     nombre d'exemplaires (par élément pour un registre d'élément) ; défaut 1
 #   location  central_unit | map | maq | central_memory | element
 #   role      rôle en une ligne
 #   source    clé de docs/SOURCES.md + page / §
 #
-# Les RAC (DAR) sont une ressource de l'unité centrale (matrice MAQ, 128 registres) ; leur
-# nombre par élément est dans rac_per_element ; il doit concorder avec `cars` de
-# directives.yaml quand celui-ci est renseigné (vérifié par les tests).
+# Les RAC sont une ressource de l'unité centrale (matrice MAQ, 128 registres) ; leur nombre
+# par élément est dans rac_per_element ; il doit concorder avec `cars` de directives.yaml
+# quand celui-ci est renseigné (vérifié par les tests).
 
 registers:
   # --- unité centrale et mémoire -----------------------------------------------------------
   - id: z
     name: {en: null, fr: Z}
+    long: {en: "store register (emulator)", fr: "registre Z"}
+    display: {en: z, fr: Z}
     owner: central_unit
     bits: 31                 # 24 + 3 de clé + 4 de contrôle de sélection (clés par 3 de X et Y)
     location: central_unit
@@ -26,6 +36,8 @@ registers:
     source: "COURS p.5 ; ONDE §2.2.2.3 p.20-21"
   - id: a
     name: {en: A, fr: A}
+    long: {en: "analysis register", fr: "registre d'analyse"}
+    display: {en: A, fr: A}
     owner: central_unit
     bits: 24
     location: central_unit
@@ -33,6 +45,8 @@ registers:
     source: "B61 p.23, p.31 ; COURS p.54"
   - id: b
     name: {en: B, fr: B}
+    long: {en: "operator register", fr: "registre opérateur"}
+    display: {en: B, fr: B}
     owner: central_unit
     bits: 24
     location: central_unit
@@ -40,6 +54,8 @@ registers:
     source: "B61 p.32 ; COURS p.55"
   - id: rai
     name: {en: IAR, fr: RAI}
+    long: {en: "Instruction Address Register", fr: "Registre d'Adresse Instruction"}
+    display: {en: IAR, fr: RAI}
     owner: central_unit
     bits: 21                 # 15 d'adresse + 2 de clé par 3 + 2 d'occupation (dédoublée) + 2 de sélection
     count: 128
@@ -47,7 +63,9 @@ registers:
     role: "adresse de la prochaine instruction de chaque élément, avec son indice d'occupation (repos / activité)"
     source: "B61 p.22 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16"
   - id: rac
-    name: {en: DAR, fr: RAC}
+    name: {en: "CAR, DAR", fr: RAC}
+    long: {en: "Current Address Register; Data Address Register (D.A.R.)", fr: "Registre d'Adresse Courante"}
+    display: {en: CAR, fr: RAC}
     owner: central_unit
     bits: 19                 # 15 d'adresse + 2 de clé par 3 + 2 de sélection
     count: 128
@@ -58,27 +76,35 @@ registers:
   # --- Distributeur de Programme -----------------------------------------------------------
   - id: rne
     name: {en: null, fr: RNE}
+    long: {en: "element number register (emulator)", fr: "Registre Numéro d'Élément"}
+    display: {en: enr, fr: RNE}
     owner: program_distributor
     bits: {value: 7, status: hypothesis, unknown: U-23}   # 7 b [COURS p.53] / 15 b [COURS p.14]
     location: central_unit
     role: "numéro de l'élément servi ; sélectionne ses RAI et RAC"
-    source: "COURS p.14, p.53"
+    source: "COURS p.13-14, p.53"
   - id: rapa
     name: {en: null, fr: RAPA}
+    long: {en: "current program address register (emulator)", fr: "Registre Adresse de Programme Actuel"}
+    display: {en: cpar, fr: RAPA}
     owner: program_distributor
     bits: 15
     location: central_unit
-    role: "adresse de l'instruction en cours de lecture"
+    role: "adresse de l'instruction courante, lue par une demande de transfert au DT"
     source: "COURS p.14"
   - id: rapp
     name: {en: null, fr: RAPP}
+    long: {en: "incremented program address register (emulator)", fr: "Registre Adresse de Programme Progressé"}
+    display: {en: ipar, fr: RAPP}
     owner: program_distributor
     bits: 15
     location: central_unit
-    role: "RAPA + 1 ; recopié dans le RAI après une directive"
+    role: "RAPA + 1 ; recopié dans RAPA pour l'instruction suivante, ou dans le RAI après la directive qui lance l'élément"
     source: "COURS p.14-15"
   - id: redp
     name: {en: null, fr: REDP}
+    long: {en: "program distributor input register (emulator)", fr: "Registre d'Entrée du Distributeur de Programme"}
+    display: {en: pdir, fr: REDP}
     owner: program_distributor
     bits: 24
     location: central_unit
@@ -86,13 +112,26 @@ registers:
     source: "COURS p.14"
   - id: rsdp
     name: {en: null, fr: RSDP}
+    long: {en: "program distributor output register (emulator)", fr: "Registre de Sortie du Distributeur de Programme"}
+    display: {en: pdor, fr: RSDP}
     owner: program_distributor
     bits: 24
     location: central_unit
     role: "sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI)"
     source: "COURS p.15, p.42, p.54"
+  - id: simu_reserve
+    name: {en: null, fr: null}
+    long: {en: "SIMU reserve register (emulator)", fr: "registre spécial de mise en réserve"}
+    display: {en: srr, fr: rmr}
+    owner: program_distributor
+    bits: {value: 15, status: hypothesis, unknown: U-39}   # lien avec la chaîne propre du DP : U-39
+    location: central_unit
+    role: "reçoit RAPP (branche ordinaire) pendant que le DP traite la branche extraordinaire d'un SIMU"
+    source: "COURS p.17"
   - id: pd_chain
-    name: {en: null, fr: chaîne propre du DP}
+    name: {en: null, fr: null}
+    long: {en: "program distributor chain (emulator)", fr: "chaîne propre du DP (Distributeur de Programme)"}
+    display: {en: pdc, fr: cdp}
     owner: program_distributor
     bits: {value: 15, status: hypothesis, unknown: U-39}
     count: 2
@@ -102,22 +141,28 @@ registers:
 
   # --- registres de chaque élément -----------------------------------------------------------
   - id: chain_head_tail
-    name: {en: "I1, I2", fr: "B, C"}
+    name: {en: null, fr: "B, C"}
+    long: {en: "temporary storage registers (B61 p.24)", fr: "registres de chaîne de reprise (I1, I2 chez ONDE)"}
+    display: {en: [i1, i2], fr: [B, C]}
     owner: every_element
     bits: {value: 15, status: hypothesis, unknown: U-39}
     count: 2
     location: central_memory   # adresses spécialisées : U-30
-    role: "I1 / I2, tête et queue de la chaîne de reprise de l'élément"
-    source: "B61 p.24-25 ; COURS p.24-31 ; ONDE §2 (registres I1, I2)"
+    role: "tête et queue de la chaîne de reprise de l'élément"
+    source: "B61 p.24-25 ; COURS p.24-31 ; ONDE §2"
   - id: rln
-    name: {en: buffer register, fr: RLN}
+    name: {en: null, fr: RLN}
+    long: {en: "buffer register", fr: "Registre de Liaison"}
+    display: {en: br, fr: RLN}
     owner: every_element
     bits: 24
     location: element
     role: "registre de liaison, tampon d'un catène entre le cycle mémoire et le rythme de l'élément"
     source: "B61 p.23 ; COURS p.8"
   - id: qualitative
-    name: {en: null, fr: registre catène qualitatif}
+    name: {en: null, fr: null}
+    long: {en: "qualitative catena register (emulator)", fr: "registre catène qualitatif"}
+    display: {en: qcr, fr: rcq}
     owner: every_element
     bits: 24
     location: element
@@ -127,6 +172,8 @@ registers:
   # --- ARIT ----------------------------------------------------------------------------------
   - id: arit_p
     name: {en: P, fr: P}
+    long: {en: "principal register", fr: "registre principal"}
+    display: {en: P, fr: P}
     owner: arithmetic
     bits: 48                 # 2 catènes : signe, exposant, 10 chiffres DCB
     location: element
@@ -134,6 +181,8 @@ registers:
     source: "B61 p.35 ; COURS p.65"
   - id: arit_s
     name: {en: S, fr: S}
+    long: {en: "secondary register", fr: "registre secondaire"}
+    display: {en: S, fr: S}
     owner: arithmetic
     bits: 48
     location: element
@@ -141,6 +190,8 @@ registers:
     source: "B61 p.35 ; COURS p.65"
   - id: arit_o
     name: {en: O, fr: O}
+    long: {en: "operand register", fr: "registre opérande"}
+    display: {en: O, fr: O}
     owner: arithmetic
     bits: 48
     location: element
@@ -150,6 +201,8 @@ registers:
   # --- LOGI ----------------------------------------------------------------------------------
   - id: logi_k
     name: {en: K, fr: K}
+    long: {en: "K register", fr: "registre K"}
+    display: {en: K, fr: K}
     owner: logical
     bits: 24
     location: element
@@ -157,6 +210,8 @@ registers:
     source: "B61 p.39 ; COURS p.110"
   - id: logi_l
     name: {en: L, fr: L}
+    long: {en: "L register", fr: "registre L"}
+    display: {en: L, fr: L}
     owner: logical
     bits: 24
     location: element
@@ -165,7 +220,9 @@ registers:
 
   # --- COMP ----------------------------------------------------------------------------------
   - id: comp_operand
-    name: {en: null, fr: registres opérandes}
+    name: {en: null, fr: null}
+    long: {en: "operand registers (emulator)", fr: "registres opérandes"}
+    display: {en: or, fr: ro}
     owner: comparator
     bits: 24
     count: 2
@@ -173,7 +230,9 @@ registers:
     role: "1er : opérande du RAC 0 ; 2e : opérande du RAC 1 ou 2 (alternativement pour deux bornes)"
     source: "COURS p.75"
   - id: comp_length
-    name: {en: null, fr: registre longueur}
+    name: {en: null, fr: null}
+    long: {en: "length register (emulator)", fr: "registre longueur"}
+    display: {en: lr, fr: rl}
     owner: comparator
     bits: 8
     location: element
@@ -182,35 +241,45 @@ registers:
 
   # --- TRAN ----------------------------------------------------------------------------------
   - id: tran_input
-    name: {en: null, fr: registre d'entrée}
+    name: {en: null, fr: null}
+    long: {en: "input register (emulator)", fr: "registre d'entrée"}
+    display: {en: ir, fr: re}
     owner: transcoder
     bits: 24
     location: element
     role: "reçoit les informations catène par catène ; lues caractère par caractère (inutilisé pour les cartes)"
     source: "COURS p.86"
   - id: tran_output
-    name: {en: null, fr: registre de sortie (S)}
+    name: {en: null, fr: S}
+    long: {en: "output register (emulator)", fr: "registre de sortie"}
+    display: {en: or, fr: S}
     owner: transcoder
     bits: 24
     location: element
     role: "reçoit le résultat caractère par caractère, renvoyé catène par catène (inutilisé pour les cartes)"
     source: "COURS p.86, p.89"
   - id: tran_cliche
-    name: {en: null, fr: registre cliché (C)}
+    name: {en: null, fr: C}
+    long: {en: "cliché register (emulator)", fr: "registre cliché"}
+    display: {en: cr, fr: C}
     owner: transcoder
     bits: 24
     location: element
     role: "reçoit le cliché catène par catène et le fournit code-cliché par code-cliché"
     source: "COURS p.86, p.89"
   - id: tran_directive
-    name: {en: null, fr: registre directive et catène qualitatif}
+    name: {en: null, fr: null}
+    long: {en: "directive and qualitative register (emulator)", fr: "registre directive et catène qualitatif"}
+    display: {en: dqr, fr: rdq}
     owner: transcoder
     bits: {value: 24, status: hypothesis, unknown: U-39}
     location: element
     role: "reçoit les directives du DP ; le catène qualitatif s'y forme pendant le travail"
     source: "COURS p.87"
   - id: tran_index
-    name: {en: null, fr: index d'entrée et de sortie}
+    name: {en: null, fr: null}
+    long: {en: "input and output indexes (emulator)", fr: "index des registres d'entrée et de sortie"}
+    display: {en: [ii, oi], fr: [ie, is]}
     owner: transcoder
     bits: {value: 5, status: hypothesis, unknown: U-39}
     count: 2
@@ -218,28 +287,36 @@ registers:
     role: "position courante (monade) dans les registres d'entrée et de sortie"
     source: "COURS p.89, p.108"
   - id: tran_countdown
-    name: {en: null, fr: registre de décomptage}
+    name: {en: null, fr: null}
+    long: {en: "count-down register (emulator)", fr: "registre de décomptage"}
+    display: {en: cdr, fr: rd}
     owner: transcoder
     bits: {value: 15, status: hypothesis, unknown: U-39}
     location: element
     role: "décompte la zone traitée ; son passage par 0 termine l'opération"
     source: "COURS p.108-109"
   - id: tran_transposition
-    name: {en: null, fr: matrice de transposition}
+    name: {en: null, fr: null}
+    long: {en: "transposition matrix (emulator)", fr: "matrice de transposition"}
+    display: {en: tm, fr: mt}
     owner: transcoder
     bits: 288                # 12 × 24
     location: element
     role: "transposition lignes → colonnes des cartes ; remplace l'entrée ou la sortie pour les cartes"
     source: "COURS p.87 ; ONDE §3.2"
   - id: tran_mic
-    name: {en: null, fr: MIC}
+    name: {en: MIC, fr: MIC}
+    long: {en: "M.I.C. (not expanded by B61)", fr: "Matrice d'Interprétation des Codes"}
+    display: {en: MIC, fr: MIC}
     owner: transcoder
     bits: {value: 2560, status: hypothesis, unknown: U-12}   # 128 × 20 [COURS] ; taille par profil
     location: element
     role: "matrice d'interprétation des codes ; garnie par programme (2 codes par mémoire caractère)"
     source: "COURS p.87 ; B61 p.38 ; ONDE §3.2"
   - id: tran_resume_datum
-    name: {en: null, fr: datum de reprise}
+    name: {en: null, fr: null}
+    long: {en: "resume datum (emulator)", fr: "datum de reprise"}
+    display: {en: rd, fr: dr}
     owner: transcoder
     bits: 24
     count: 4
@@ -250,27 +327,35 @@ registers:
   # --- éléments d'entrée-sortie et mémoires auxiliaires --------------------------------------
   - id: drum_rae
     name: {en: null, fr: RAE}
+    long: {en: "element address register (emulator)", fr: "Registre Adresse dans l'Élément"}
+    display: {en: ear, fr: RAE}
     owner: drum
     bits: {value: 15, status: hypothesis, unknown: U-39}   # piste × 256 + position
     location: element
     role: "adresse tambour, posée par DAO ; progresse avec le RAC à chaque catène transféré"
     source: "B61 p.53 ; COURS p.153"
   - id: uniselector_block_length
-    name: {en: null, fr: registre de longueur de bloc}
+    name: {en: null, fr: null}
+    long: {en: "block length register (emulator)", fr: "registre de longueur de bloc"}
+    display: {en: blr, fr: rlb}
     owner: uniselector
     bits: {value: 24, status: hypothesis, unknown: U-39}
     location: element
     role: "reçoit le catène longueur lu en tête de bloc ; contrôle la lecture du bloc"
     source: "COURS p.141"
   - id: printer_line_memory
-    name: {en: null, fr: mémoire d'une ligne}
+    name: {en: null, fr: null}
+    long: {en: "line memory (emulator)", fr: "mémoire d'une ligne"}
+    display: {en: lm, fr: ml}
     owner: printer
     bits: {value: 720, status: hypothesis, unknown: U-39}   # 120 caractères × 6 bits
     location: element
     role: "mémoire à tores d'une ligne d'impression ; contrôle de la frappe par écho"
     source: "ONDE §2 p.10"
   - id: printer_spacing_counters
-    name: {en: null, fr: compteurs d'interlignes}
+    name: {en: null, fr: null}
+    long: {en: "line-spacing counters (emulator)", fr: "compteurs d'interlignes"}
+    display: {en: lsc, fr: ci}
     owner: printer
     bits: 8                  # sauts jusqu'à 255 interlignes [ONDE §2.5.3]
     count: 2

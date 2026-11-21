@@ -83,53 +83,71 @@ profil (`data/directives.yaml`, `ISA.md` §7).
 Liste lisible par programme : `data/registers.yaml` (tailles incertaines marquées U-23, U-39) ;
 vue anglaise : `wiki/REGISTERS.md`.
 
+**Noms affichés** (colonne « Affichage `en` / `fr` », utilisée par les traces et le débogueur) :
+- **MAJUSCULES** : nom attesté dans la langue affichée (`en` : B61, BAT72 ; `fr` : COURS,
+  ONDE, TFR) ;
+- **minuscules** : initiales de la forme développée, proposées par l'émulateur, **non
+  validées** ; la forme développée anglaise est alors une traduction de l'émulateur.
+
+Un registre en plusieurs exemplaires est indexé à l'affichage (`pdc1`, `pdc2`, `CAR0`-`CAR3`).
+Exemples : RAPA s'affiche `cpar` en anglais (*current program address register* ; le RAI de
+l'élément servi, PAR chez BAT72) ; Z s'affiche `z`, car aucune source anglaise ne le nomme.
+
 **Unité centrale et Distributeur de Programme**
 
-| Registre | Taille | Rôle | Emplacement | Source |
-|---|---|---|---|---|
-| Z | 31 b (24 + 3 de clé + 4 de contrôle de sélection) | passage obligé de tout catène entre la mémoire et les canaux | UC | COURS p.5 ; ONDE §2.2.2.3 p.20-21 |
-| RNE | 7 b (15 selon p.14 ?) | n° de l'élément servi ; sélectionne ses RAI/RAC | DP | COURS p.14, p.53 |
-| RAPA | 15 b | adresse de l'instruction lue | DP | COURS p.14 |
-| RAPP | 15 b | RAPA + 1 ; recopié dans le RAI après une directive | DP | COURS p.14-15 |
-| REDP | 24 b | reçoit chaque instruction lue | DP | COURS p.14 |
-| RSDP | 24 b | sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI) | DP | COURS p.15, p.42, p.54 |
-| Chaîne propre du DP | 2 registres (taille non donnée, U-39) | séquences en attente du DP (SIMU, LIBE) | DP | COURS p.36-38 |
-| Registre A (analyse) | 24 b | reçoit le catène qualitatif ; testé par les branchements 01-24 | UC | B61 p.23, p.31 ; COURS p.54 |
-| Registre B (opérateur) | 24 b | calculs sur les 15 bits droits | UC | B61 p.32 ; COURS p.55 |
-| RAI (IAR, RAP) | 128 × 21 b : 15 d'adresse + 2 de clé par 3 + **indice d'occupation dédoublé** (2) + 2 de contrôle de sélection | prochaine instruction de chaque élément | matrice MAP de l'UC | B61 p.22 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
-| RAC (CAR, DAR, RAQ) | 128 × 19 b : 15 d'adresse + 2 de clé par 3 + 2 de contrôle de sélection ; 1 à 4 par élément | adresses courantes, +1 (ou −1) par transfert | matrice MAQ de l'UC | B61 p.22-23 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
+| Registre | Affichage `en` / `fr` | Taille | Rôle | Emplacement | Source |
+|---|---|---|---|---|---|
+| Z | `z` / `Z` | 31 b (24 + 3 de clé + 4 de contrôle de sélection) | passage obligé de tout catène entre la mémoire et les canaux | UC | COURS p.5 ; ONDE §2.2.2.3 p.20-21 |
+| RNE (Registre Numéro d'Élément) | `enr` / `RNE` | 7 b [p.53] ; 15 b selon p.14 (U-23) | n° de l'élément servi ; sélectionne ses RAI/RAC | DP | COURS p.13-14, p.53 |
+| RAPA (Registre Adresse de Programme Actuel) | `cpar` / `RAPA` | 15 b | adresse de l'instruction courante, lue par une demande de transfert au DT | DP | COURS p.14 |
+| RAPP (Registre Adresse de Programme Progressé) | `ipar` / `RAPP` | 15 b | RAPA + 1 ; recopié dans RAPA pour l'instruction suivante, ou dans le RAI après la directive qui lance l'élément | DP | COURS p.14-15 |
+| REDP (Registre d'Entrée du Distributeur de Programme) | `pdir` / `REDP` | 24 b | reçoit chaque instruction lue | DP | COURS p.14 |
+| RSDP (Registre de Sortie du Distributeur de Programme) | `pdor` / `RSDP` | 24 b | sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI) | DP | COURS p.14-15, p.42, p.54 |
+| Registre spécial de mise en réserve | `srr` / `rmr` | non donnée (U-39) | reçoit RAPP (branche ordinaire) pendant que le DP traite la branche extraordinaire d'un SIMU | DP | COURS p.17 |
+| Chaîne propre du DP | `pdc` / `cdp` (×2) | 2 registres (taille non donnée, U-39) | séquences en attente du DP (SIMU, LIBE) ; lien avec le registre de mise en réserve : U-39 | DP | COURS p.36-38 |
+| Registre A (analyse) | `A` / `A` | 24 b | reçoit le catène qualitatif ; testé par les branchements 01-24 | UC | B61 p.23, p.31 ; COURS p.54 |
+| Registre B (opérateur) | `B` / `B` | 24 b | calculs sur les 15 bits droits | UC | B61 p.32 ; COURS p.55 |
+| RAI (Registre d'Adresse Instruction ; IAR, PAR) | `IAR` / `RAI` | 128 × 21 b : 15 d'adresse + 2 de clé par 3 + **indice d'occupation dédoublé** (2) + 2 de contrôle de sélection | prochaine instruction de chaque élément | matrice MAP de l'UC | B61 p.22 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
+| RAC (Registre d'Adresse Courante ; CAR, DAR, RAQ) | `CAR` / `RAC` | 128 × 19 b : 15 d'adresse + 2 de clé par 3 + 2 de contrôle de sélection ; 1 à 4 par élément | adresses courantes, +1 (ou −1) par transfert | matrice MAQ de l'UC | B61 p.22-23 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
+
+Cycle d'une instruction [COURS p.14-15] : RNE ← n° de l'élément servi ; RAPA ← son RAI (par la
+matrice MAP et le registre Z) ; RAPP ← RAPA + 1 ; le DP demande au DT le catène d'adresse
+RAPA, qui arrive dans REDP ; il l'exécute (chargement d'un RAC, directive par RSDP, rangement
+en MC par RSDP, coupure ou branchement) ; puis RAPA ← RAPP, et ainsi de suite jusqu'à la
+directive qui lance l'élément : alors RAI ← RAPP et le RNE est effacé. Un branchement force
+RAPA à l'adresse indiquée et envoie RAPP dans RSDP. [COURS p.15-16]
 
 **Registres de chaque élément**
 
-| Registre | Taille | Rôle | Emplacement | Source |
-|---|---|---|---|---|
-| Registres B et C (I1, I2) | 2 adresses (taille non donnée, U-39) | tête et queue de la chaîne de reprise | MC, adresses spécialisées (U-30) | B61 p.24-25 ; COURS p.24-31 ; ONDE §2 |
-| Registre de liaison (RLN) | 1 catène | tampon entre le cycle mémoire et le rythme de l'élément | élément | B61 p.23 ; COURS p.8 |
-| Registre catène qualitatif | 24 b | indicateurs de l'élément, envoyés au registre A quand le DP le sert | élément | B61 p.23 ; COURS p.74, p.110 |
+| Registre | Affichage `en` / `fr` | Taille | Rôle | Emplacement | Source |
+|---|---|---|---|---|---|
+| Registres de chaîne de reprise B, C (I1, I2 chez ONDE ; *temporary storage registers* chez B61) | `i1`, `i2` / `B`, `C` | 2 adresses (taille non donnée, U-39) | tête et queue de la chaîne de reprise | MC, adresses spécialisées (U-30) | B61 p.24-25 ; COURS p.24-31 ; ONDE §2 |
+| Registre de Liaison (RLN ; *buffer register* chez B61) | `br` / `RLN` | 1 catène | tampon entre le cycle mémoire et le rythme de l'élément | élément | B61 p.23 ; COURS p.8 |
+| Registre catène qualitatif | `qcr` / `rcq` | 24 b | indicateurs de l'élément, envoyés au registre A quand le DP le sert | élément | B61 p.23 ; COURS p.74, p.110 |
 
 **Registres propres à certains éléments**
 
-| Élément | Registre | Taille | Rôle | Source |
-|---|---|---|---|---|
-| ARIT | P (principal) | 2 catènes | 1er opérande puis résultat (poids forts) ; P + S = accumulateur | B61 p.35 ; COURS p.65 |
-| ARIT | S (secondaire) | 2 catènes | poids faibles, même signe que P, exposant de P − 10 | B61 p.35 ; COURS p.65 |
-| ARIT | O (opérande) | 2 catènes | 2e opérande | B61 p.35 ; COURS p.65 |
-| LOGI | K, L | 24 b chacun, à décalage, accès série | opérandes ; résultat dans L | B61 p.39 ; COURS p.110 |
-| COMP | 2 registres opérandes | 1 catène chacun | opérande du RAC 0 ; opérande du RAC 1 ou 2 | COURS p.75 |
-| COMP | registre longueur | 8 b (≤ 255) | longueur des zones, décomptée à chaque catène | COURS p.75 |
-| TRAN | registre d'entrée | 1 catène | données à traiter, lues caractère par caractère (inutilisé pour les cartes) | COURS p.86 |
-| TRAN | registre de sortie (S) | 1 catène | résultat, composé caractère par caractère (inutilisé pour les cartes) | COURS p.86, p.89 |
-| TRAN | registre cliché (C) | 1 catène | cliché, fourni code-cliché par code-cliché | COURS p.86, p.89 |
-| TRAN | registre directive et catène qualitatif | non donnée (U-39) | directives reçues du DP ; qualitatif formé pendant le travail | COURS p.87 |
-| TRAN | index d'entrée et de sortie | non donnée (U-39) | position courante dans les registres d'entrée et de sortie | COURS p.89, p.108 |
-| TRAN | registre de décomptage | non donnée (U-39) | décompte la zone ; son passage par 0 termine l'opération | COURS p.108-109 |
-| TRAN | matrice de transposition | 12 × 24 = 288 b | transposition lignes → colonnes des cartes | COURS p.87 ; ONDE §3.2 |
-| TRAN | MIC | 128 × 20 b [COURS] / 256 adresses [B61] / 128 × 21 b [ONDE] (U-12) | interprétation des codes, garnie par programme | COURS p.87 ; B61 p.38 ; ONDE §3.2 |
-| TRAN | datum de reprise | 4 catènes en MC (1m-4m) | sauvegarde des registres d'entrée, de sortie et de leurs index | COURS p.108 |
-| Tambour | RAE | non donnée (U-39) | adresse tambour (piste × 256 + position), posée par DAO ; progresse avec le RAC | B61 p.53 ; COURS p.153 |
-| Unisélecteur | registre de longueur de bloc | non donnée (U-39) | reçoit le catène longueur de tête de bloc ; contrôle la lecture | COURS p.141 |
-| Imprimante | mémoire d'une ligne | 1 ligne (120 caractères), à tores | contrôle de la frappe par écho | ONDE §2 p.10 |
-| Imprimante | 2 compteurs d'interlignes | sauts ≤ 255 interlignes | un par feuillet ; chargés par SDF et IMP, décomptés pendant le saut | COURS p.134 ; ONDE §2.5.3 p.27 |
+| Élément | Registre | Affichage `en` / `fr` | Taille | Rôle | Source |
+|---|---|---|---|---|---|
+| ARIT | P (principal) | `P` / `P` | 2 catènes | 1er opérande puis résultat (poids forts) ; P + S = accumulateur | B61 p.35 ; COURS p.65 |
+| ARIT | S (secondaire) | `S` / `S` | 2 catènes | poids faibles, même signe que P, exposant de P − 10 | B61 p.35 ; COURS p.65 |
+| ARIT | O (opérande) | `O` / `O` | 2 catènes | 2e opérande | B61 p.35 ; COURS p.65 |
+| LOGI | K, L | `K`, `L` / `K`, `L` | 24 b chacun, à décalage, accès série | opérandes ; résultat dans L | B61 p.39 ; COURS p.110 |
+| COMP | registres opérandes | `or` / `ro` (×2) | 1 catène chacun | opérande du RAC 0 ; opérande du RAC 1 ou 2 | COURS p.75 |
+| COMP | registre longueur | `lr` / `rl` | 8 b (≤ 255) | longueur des zones, décomptée à chaque catène | COURS p.75 |
+| TRAN | registre d'entrée | `ir` / `re` | 1 catène | données à traiter, lues caractère par caractère (inutilisé pour les cartes) | COURS p.86 |
+| TRAN | registre de sortie (S) | `or` / `S` | 1 catène | résultat, composé caractère par caractère (inutilisé pour les cartes) | COURS p.86, p.89 |
+| TRAN | registre cliché (C) | `cr` / `C` | 1 catène | cliché, fourni code-cliché par code-cliché | COURS p.86, p.89 |
+| TRAN | registre directive et catène qualitatif | `dqr` / `rdq` | non donnée (U-39) | directives reçues du DP ; qualitatif formé pendant le travail | COURS p.87 |
+| TRAN | index des registres d'entrée et de sortie | `ii`, `oi` / `ie`, `is` | non donnée (U-39) | position courante dans les registres d'entrée et de sortie | COURS p.89, p.108 |
+| TRAN | registre de décomptage | `cdr` / `rd` | non donnée (U-39) | décompte la zone ; son passage par 0 termine l'opération | COURS p.108-109 |
+| TRAN | matrice de transposition | `tm` / `mt` | 12 × 24 = 288 b | transposition lignes → colonnes des cartes | COURS p.87 ; ONDE §3.2 |
+| TRAN | MIC (Matrice d'Interprétation des Codes ; « M.I.C. » chez B61) | `MIC` / `MIC` | 128 × 20 b [COURS] / 256 adresses [B61] / 128 × 21 b [ONDE] (U-12) | interprétation des codes, garnie par programme | COURS p.87 ; B61 p.38, p.64 ; ONDE §3.2 |
+| TRAN | datum de reprise | `rd` / `dr` | 4 catènes en MC (1m-4m) | sauvegarde des registres d'entrée, de sortie et de leurs index | COURS p.108 |
+| Tambour | RAE (Registre Adresse dans l'Élément) | `ear` / `RAE` | non donnée (U-39) | adresse tambour (piste × 256 + position), posée par DAO ; progresse avec le RAC | B61 p.53 ; COURS p.153 |
+| Unisélecteur | registre de longueur de bloc | `blr` / `rlb` | non donnée (U-39) | reçoit le catène longueur de tête de bloc ; contrôle la lecture | COURS p.141 |
+| Imprimante | mémoire d'une ligne | `lm` / `ml` | 1 ligne (120 caractères), à tores | contrôle de la frappe par écho | ONDE §2 p.10 |
+| Imprimante | 2 compteurs d'interlignes | `lsc` / `ci` (×2) | sauts ≤ 255 interlignes | un par feuillet ; chargés par SDF et IMP, décomptés pendant le saut | COURS p.134 ; ONDE §2.5.3 p.27 |
 
 **Nombre de RAC par élément** : ARIT 4 et LOGI 4, banalisés [B61 p.35 ; COURS p.110] ; COMP 3,
 spécialisés [B61 p.36-37 ; COURS p.75] ; TRAN 3 (source, destination, cliché) [COURS p.88-89] ;

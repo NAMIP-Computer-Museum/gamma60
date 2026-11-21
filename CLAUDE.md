@@ -57,7 +57,10 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
   codes complémentaires, lettres des RAC…) est donné dans les deux langues du code B,
   `en` (B61) et `fr` (COURS), par exemple `L` / `G` ; orthographe supposée marquée (U-xx).
 - Registres nommés comme dans le cours : RNE, RAPA, RAPP, REDP, RSDP, A, B, RAI (+ indice
-  d'occupation), RAC, registres B/C de chaîne de reprise, RLN.
+  d'occupation), RAC, registres B/C de chaîne de reprise, RLN. Noms affichés (traces,
+  débogueur) : champ `display` de `data/registers.yaml`, en `en` et en `fr` ; MAJUSCULES = nom
+  attesté dans cette langue, minuscules = initiales proposées par l'émulateur, non validées
+  (ex. `cpar` / `RAPA`, `z` / `Z`).
 - Éléments nommés par les mnémoniques B61 (ARIT, LOGI, TRAN, COMP, DRUM, CARR, CARP, PRIN,
   MATA, TAPR, TAPP, DESK) ; mnémoniques français dans `data/directives.yaml`.
 
