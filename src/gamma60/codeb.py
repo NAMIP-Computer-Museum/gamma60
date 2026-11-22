@@ -3,7 +3,8 @@
 Layout (docs/TOOLCHAIN.md): optional 3-digit line number, optional ``LABEL:``, T.O., then the
 fields. ARIT directives: ``[C.C.] V O1 O2 R`` (``-`` = empty); LOGI directives: ``V R``.
 Pseudo-instructions: ``VIERGE [m]``, ``NUM ±d``, ``BIN n``, ``ZONE n``. Header comments ``; langue:``,
-``; profil:`` and ``; origine:`` (load address, default 0).
+``; profil:`` and ``; origine:`` (load address; default after the table of the recall chain
+registers B / C, ``program_origin_default`` of behavior.yaml, U-30).
 """
 
 from __future__ import annotations
@@ -61,7 +62,8 @@ def binary_value(token: str, where: str = "") -> int:
 
 
 def parse(text: str) -> Program:
-    language, profile, origin = data.default_language(), None, 0
+    language, profile = data.default_language(), None
+    origin = data.resolve(data.load("behavior")["program_origin_default"])
     for raw in text.splitlines():
         if m := re.match(r";\s*origine:\s*(\d+)", raw):
             origin = int(m.group(1))

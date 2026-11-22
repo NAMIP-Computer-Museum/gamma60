@@ -1,5 +1,9 @@
 ; langue: en
 ; a = b*c ; d = d+e ; f = a*d  — exemple de Tumlin & Smotherman, notation B61
+; Les deux branches lancées par SIMU commencent par une coupure sur ARIT : avec un seul ARIT,
+; la seconde attend sur sa chaîne de reprise et les calculs se succèdent [COURS p.17-18, p.24].
+; L'exemple montre les mécanismes (fork, chaîne de reprise, JOIN), pas un gain de temps ;
+; voir parallele.g60b pour une simultanéité réelle (ARIT et LOGI en même temps).
 ; T.O.  C.C.  X            A.F.
 START:  SIMU        I2           R     ; fork : la suite (I1) et I2 en parallèle
         VIERGE

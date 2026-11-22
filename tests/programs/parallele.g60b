@@ -1,0 +1,40 @@
+; langue: en
+; Deux branches simultanées sur deux éléments différents, puis regroupement (J4) :
+;   branche ARIT : Q = X / Y (DIV, 550 µs en B61)
+;   branche LOGI : M = K x L sur 12 bits (MUL binaire, environ 6 + 12n - l/2 cycles)
+; puis, regroupées sur ARIT (JOIN à 2 arrivées) : R = Q + 1.
+; La durée totale est proche de celle de la plus longue branche, pas de leur somme : ARIT et
+; LOGI travaillent en même temps, et le Distributeur de Données leur partage les cycles.
+START:  SIMU        BRL          R     ; la branche LOGI d'abord, la suite (ARIT) sur la chaîne du DP
+        VIERGE
+BRA:    ARIT
+        VIERGE
+        L     0     X
+        L     1     Y
+        L     2     Q
+        DIV   N     - 0 1 2            ; Q = X / Y
+        31          FIN          R
+BRL:    LOGI
+        VIERGE
+        L     0     K
+        L     1     L
+        L     2     M
+        TSK   0     0                  ; K <- multiplicande
+        TSL   0     1                  ; L <- multiplicateur
+        MUL   12    2                  ; L <- K x L (12 bits), rangé en M
+        31          FIN          R
+FIN:    ARIT  1                        ; regroupement : effectif à la 2e arrivée
+        VIERGE
+        L     0     Q
+        L     1     UN
+        L     2     R
+        ADD   N     - 0 1 2            ; R = Q + 1
+        STOP
+X:      NUM   +22
+Y:      NUM   +7
+Q:      NUM   +0
+UN:     NUM   +1
+R:      NUM   +0
+K:      BIN   1234
+L:      BIN   3001
+M:      ZONE  1

@@ -124,7 +124,7 @@ def test_step_breakpoint_registers_memory_and_quit():
     with pytest.raises(debug.Quit):
         interpreter(observer=s).run()
     text = out.getvalue()
-    assert "break at 00016" in text
+    assert "break at 00272" in text
     assert "P +42 1100|000000 (= 11)" in text  # after D = D + E, before F = A x D
     assert "  F        000000" in text  # F not computed yet
     assert "? unknown address or label" in text

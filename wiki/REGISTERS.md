@@ -63,8 +63,7 @@ central unit, MAP (program addresses) and MAQ (data addresses), with 128 registe
 | `ipar` / `RAPP` | *incremented program address register (emulator)* / Registre Adresse de Programme Progressé | 15 | RAPA + 1; copied into RAPA for the next instruction, or into the IAR after the directive that starts the element. | COURS p.14-15 | `rapp` |
 | `pdir` / `REDP` | *program distributor input register (emulator)* / Registre d'Entrée du Distributeur de Programme | 24 | Receives each instruction read. | COURS p.14 | `redp` |
 | `pdor` / `RSDP` | *program distributor output register (emulator)* / Registre de Sortie du Distributeur de Programme | 24 | Output of the distributor; receives RAPP at each branch (return address). | COURS p.14-15, p.42, p.54 | `rsdp` |
-| `srr` / `rmr` | *SIMU reserve register (emulator)* / registre spécial de mise en réserve | 15 *(hyp.)* | Holds RAPP (the ordinary branch) while the distributor runs the extraordinary branch of a SIMU. | COURS p.17 | `simu_reserve` |
-| `pdc` / `cdp` (×2) | *program distributor chain (emulator)* / chaîne propre du DP | 2 × 15 *(hyp.)* | Head and tail of the sequences waiting for the distributor itself (SIMU, LIBE). Its link with the reserve register is not stated (U-39). | COURS p.36-38 | `pd_chain` |
+| `pdc` / `cdp` (×2) | *program distributor chain (emulator)* / chaîne propre du DP | 2 × 15 *(hyp.)* | Head and tail of the sequences waiting for the distributor itself (SIMU, LIBE): the PD's own registers B and C. B is the "special reserve register" that receives the ordinary branch of a SIMU (COURS p.17). | COURS p.17, p.36-38 | `pd_chain` |
 
 **One instruction, step by step** [COURS p.14-15]: the number of the element being served goes
 into RNE; its IAR is copied into RAPA (through the MAP matrix and register Z); RAPP = RAPA + 1;

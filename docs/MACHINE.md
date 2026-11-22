@@ -103,8 +103,7 @@ l'élément servi, PAR chez BAT72) ; Z s'affiche `z`, car aucune source anglaise
 | RAPP (Registre Adresse de Programme Progressé) | `ipar` / `RAPP` | 15 b | RAPA + 1 ; recopié dans RAPA pour l'instruction suivante, ou dans le RAI après la directive qui lance l'élément | DP | COURS p.14-15 |
 | REDP (Registre d'Entrée du Distributeur de Programme) | `pdir` / `REDP` | 24 b | reçoit chaque instruction lue | DP | COURS p.14 |
 | RSDP (Registre de Sortie du Distributeur de Programme) | `pdor` / `RSDP` | 24 b | sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI) | DP | COURS p.14-15, p.42, p.54 |
-| Registre spécial de mise en réserve | `srr` / `rmr` | non donnée (U-39) | reçoit RAPP (branche ordinaire) pendant que le DP traite la branche extraordinaire d'un SIMU | DP | COURS p.17 |
-| Chaîne propre du DP | `pdc` / `cdp` (×2) | 2 registres (taille non donnée, U-39) | séquences en attente du DP (SIMU, LIBE) ; lien avec le registre de mise en réserve : U-39 | DP | COURS p.36-38 |
+| Chaîne propre du DP (registres B et C du DP) | `pdc` / `cdp` (×2) | 2 registres (taille non donnée, U-39) | tête et queue des séquences en attente du DP (SIMU, LIBE) ; B est le « registre spécial de mise en réserve » de COURS p.17 | DP | COURS p.17, p.36-38 |
 | Registre A (analyse) | `A` / `A` | 24 b | reçoit le catène qualitatif ; testé par les branchements 01-24 | UC | B61 p.23, p.31 ; COURS p.54 |
 | Registre B (opérateur) | `B` / `B` | 24 b | calculs sur les 15 bits droits | UC | B61 p.32 ; COURS p.55 |
 | RAI (Registre d'Adresse Instruction ; IAR, PAR) | `IAR` / `RAI` | 128 × 21 b : 15 d'adresse + 2 de clé par 3 + **indice d'occupation dédoublé** (2) + 2 de contrôle de sélection | prochaine instruction de chaque élément | matrice MAP de l'UC | B61 p.22 ; COURS p.8, p.14 ; ONDE §2.2.1 p.16 |
@@ -241,17 +240,40 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
 - **Catène vierge** obligatoire après chaque coupure (sur la branche ordinaire pour SIMU) :
   bits 1-15 = lien de chaîne ; bits 19-18 = compteur d'appels du JOIN ; exécutée, elle vaut un
   branchement « jamais » (7 bits de gauche à 0). [COURS p.35, p.42 ; B61 p.25]
+- **Activation** : une coupure charge le RAI de l'élément cité avec l'adresse de la catène
+  vierge qui la suit (coupure + 1) ; l'élément commence donc par l'exécuter, comme un
+  branchement « jamais ». [COURS p.24, p.42]
 - **Chaîne de reprise** : FIFO chaînée (registres B/C + catènes vierges) ; évite blocage et
-  interblocage. [B61 p.24-25 ; COURS p.24-31]
-- **SIMU** : le DP traite d'abord la branche extraordinaire, la suite ordinaire passant par sa
-  chaîne propre ; en cascade, chaque branche commence par une coupure. [COURS p.36-37]
+  interblocage. [B61 p.24-25 ; COURS p.24-31] Si l'élément cité est actif : si C est vide,
+  B = C = coupure + 1 ; sinon l'adresse coupure + 1 est écrite dans la catène vierge d'adresse
+  C, puis C = coupure + 1. À sa libération : RAI ← B ; B ← contenu de la catène vierge
+  d'adresse B, remise à 0 ; si B devient 0, C ← 0. Les séquences reprennent dans l'ordre où
+  elles se sont présentées. [COURS p.24-26]
+- **Exploitation d'une coupure normale**, dans l'ordre : (1) mettre en activité l'élément cité,
+  ou mettre la séquence en attente sur sa chaîne ; (2) exploiter la chaîne propre du DP ;
+  (3) exploiter la chaîne de l'élément demandeur, ou le libérer ; (4) seulement alors, servir
+  une DI, qui n'est pas forcément celle de l'élément cité. [COURS p.38]
+- **SIMU** : RAPA ← adresse de la branche extraordinaire, traitée d'abord ; RAPP (la catène
+  vierge de la branche ordinaire) va dans les registres B et C propres au DP, chaînés comme
+  ceux d'un élément ; le « registre spécial de mise en réserve » de COURS p.17 est ce B.
+  Cascades permises sur les deux branches ; chaque branche commence par une coupure, sauf
+  une qui continue de travailler pour l'élément qui a appelé la cascade. [COURS p.17, p.36-37]
 - **JOIN** : coupure avec m = 1, 2 ou 3 conditions supplémentaires (bits 19-18) ; noté dans le
   C.C. de la coupure [B61 p.31] ou dans le X de la catène vierge [COURS p.52] selon le profil.
-- **Coupures spéciales** : « sans libération » de l'élément demandeur (C.C. A) et « sans
-  observation de la disponibilité » (C.C. B), pour les programmes d'incident. [COURS p.39, p.51]
+  La coupure n'est effective qu'à son (m + 1)-ième appel ; les appels sont comptés dans les
+  positions 18-19 de la catène vierge qui la suit ; possible sur toute coupure sauf STOP.
+  [COURS p.17-18, p.34-35] Sort des séquences arrivées avant la dernière : U-26.
+- **Coupures spéciales** : « sans libération » de l'élément demandeur (C.C. A), qui ne permet
+  donc pas l'exploitation de sa chaîne, et « sans observation de la disponibilité » (C.C. B),
+  qui fait passer la séquence avant celles qui attendent sur la chaîne de l'élément et suppose
+  son RAI libéré par une coupure de l'autre type ; pour les programmes d'incident.
+  [COURS p.39, p.51]
 - **Éléments virtuels** : PROT/LIBE sur une catène-image ; bit 24 = indice d'occupation,
   bits 1-15 = tête de chaîne (errata COURS p.31) ; 2e catène-image = queue. [COURS p.27-31 ;
-  B61 p.25]
+  B61 p.25] PROT sur un élément libre pose l'indice et la séquence continue ; sur un élément
+  occupé, elle attend sur sa chaîne, puis étapes (2), (3), (4). LIBE sans séquence en attente
+  enlève l'indice ; sinon la première séquence en attente passe dans la chaîne propre du DP et
+  sa catène vierge est effacée ; la séquence en cours continue dans les deux cas. [COURS p.37]
   Comparaison (contexte) : le sémaphore de Dijkstra (1968) associe aussi une liste d'attente
   à une variable partagée (opérations P/V), mais l'ordre de sortie de la liste y est
   explicitement indéfini [DIJ68 p.345, note 2] ; la chaîne d'un élément virtuel est FIFO

@@ -49,6 +49,7 @@ class Image:
     words: dict[int, int] = field(default_factory=dict)
     listing: list[Listing] = field(default_factory=list)
     elements: dict[int, str] = field(default_factory=dict)  # directive address → element kind
+    joins: dict[int, int] = field(default_factory=dict)  # cut address → join count m
     entry: int = 0
 
     @property
@@ -136,6 +137,8 @@ class Assembler:
             elif to in self.cuts:
                 ident = self.cuts[to]
                 word = self._cut(line, ident, lines[k + 1] if k + 1 < len(lines) else None, where)
+                if word.m:
+                    image.joins[here] = word.m
                 if ident in data.ELEMENT_KINDS or ident in ("desk",):
                     element = ident
             elif to in self.address_ops:

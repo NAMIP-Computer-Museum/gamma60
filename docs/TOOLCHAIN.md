@@ -20,7 +20,8 @@ Chaîne historique [MAI ; B61 p.28-30] :
   `python -m gamma60 asm prog.g60b` (adresse, code A groupé par champs, ligne source). Fonctions
   d'adresse : `R` (étiquette, ou numéro de ligne de la feuille relatif à l'origine) et `M`
   (mémoire de manœuvre) deviennent un écart différentiel (bit d) ; `S` = bit s. Origine :
-  ligne `; origine: n` (0 par défaut). Seules les directives d'ARIT et de LOGI sont codées
+  ligne `; origine: n` ; par défaut 256, après la table des registres B / C des chaînes de
+  reprise (U-30, `program_origin_default`). Seules les directives d'ARIT et de LOGI sont codées
   (disposition reconstruite, U-01) ; les autres éléments arrivent au J5-J8.
 - **J6** : assemblage (code C), distribution (code D) → UT.
 

@@ -39,7 +39,9 @@ def test_programs_assemble(name, profile):
     image = assemble(
         parse((PROGRAMS / f"{name}.g60b").read_text(encoding="utf-8")), data.get_profile(profile)
     )
-    assert image.entry == 0 and len(image.words) == image.program.end
+    origin = image.program.origin
+    assert origin == 256  # after the table of the recall chain registers (U-30)
+    assert image.entry == origin and len(image.words) == image.program.end - origin
 
 
 def test_other_elements_are_not_assembled_yet():
@@ -51,14 +53,15 @@ def test_cut_carries_the_element_number():
     image = asm("; langue: en\nS: ARIT\n VIERGE\n STOP\nT: LOGI\n VIERGE\n STOP\n")
     assert word(image, "S") == code_a.Word(CUT, "normal", x=2)  # ARIT: 2 (U-44)
     assert word(image, "T") == code_a.Word(CUT, "normal", x=1)
-    assert decode(image.words[2]) == code_a.Word(CUT, "STOP")
+    assert decode(image.words[image.program.origin + 2]) == code_a.Word(CUT, "STOP")
 
 
 def test_join_count_in_both_notations():
     b61 = asm("; langue: en\nS: ARIT 2\n VIERGE\n STOP\n")
     cours = asm("; langue: fr\nS: ARIT\n VIERGE 2\n STOP\n")  # COURS: X of the blank catena
     assert word(b61, "S").m == word(cours, "S").m == 2
-    assert cours.words[1] == 0  # the blank catena stays blank (bits 19-18: counter)
+    assert cours.words[cours.program.origin + 1] == 0  # stays blank (bits 19-18: counter)
+    assert b61.joins == {b61.labels["S"]: 2}
 
 
 def test_address_functions():
@@ -75,10 +78,17 @@ def test_address_functions():
     image = asm(text)
     end, data_addr = image.program.end, image.labels["DATA"]
     assert word(image, "A1") == code_a.Word(ADDRESS, "load", car=0, x=data_addr)
-    assert word(image, "A2") == code_a.Word(ADDRESS, "load", car=1, d=True, x=data_addr - 3)
+    here = image.labels
+    assert word(image, "A2") == code_a.Word(
+        ADDRESS, "load", car=1, d=True, x=data_addr - here["A2"]
+    )
     assert word(image, "A3") == code_a.Word(ADDRESS, "load", car=2, s=True, x=data_addr)
-    assert word(image, "B1") == code_a.Word(BRANCH, 31, d=True, x=(2 - 5) & 0o77777)  # negative
-    assert word(image, "C1") == code_a.Word(CENTRAL, "transfer_to_A", d=True, x=end + 1 - 6)
+    assert word(image, "B1") == code_a.Word(
+        BRANCH, 31, d=True, x=(2 - 5) & 0o77777
+    )  # line 2: back 3
+    assert word(image, "C1") == code_a.Word(
+        CENTRAL, "transfer_to_A", d=True, x=end + 1 - here["C1"]
+    )
 
 
 def test_origin_and_line_numbers():
@@ -119,6 +129,6 @@ def test_errors(text):
 def test_listing():
     image = assemble(parse((PROGRAMS / "test-arith01.g60b").read_text(encoding="utf-8")))
     lines = listing_lines(image)
-    assert lines[0].startswith("00000  01 000 00 0 0 000000000000010") and "ARIT" in lines[0]
+    assert lines[0].startswith("00256  01 000 00 0 0 000000000000010") and "ARIT" in lines[0]
     assert "(data)" in lines[7] and "NUM" in lines[7]
     assert listing_lines(image) == lines  # stable

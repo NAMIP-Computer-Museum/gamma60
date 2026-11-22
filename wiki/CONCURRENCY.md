@@ -208,3 +208,25 @@ And three consequences follow:
 | Queue storage | linked list through the blank catenae of the waiting code | linked list of thread control blocks |
 
 The Program Distributor is the conductor: it never computes on data, it only hands out work, keeps the queues, and lets every element work on its own for as long as possible.
+
+---
+
+## In the emulator
+
+Since milestone J4, the emulator runs these mechanisms as the sources describe them
+([`docs/MACHINE.md`](../docs/MACHINE.md) §7):
+
+- a cut loads the instruction address register of the named element with the address of the
+  blank catena that follows it, which the element then executes as a "never" branch;
+- recall chains are FIFO queues whose head and tail (registers B and C of each element) sit in a
+  table at the start of memory (an assumption, U-30), with their links in the blank catenae;
+- SIMU puts the ordinary branch on the Program Distributor's own chain and runs the
+  extraordinary branch first; joins count their arrivals in bits 19-18 of the blank catena;
+- PROT / LIBE implement virtual elements on two image catenae.
+
+Try `python -m gamma60 run tests/programs/parallele.g60b --trace`: the division of ARIT runs
+while LOGI multiplies, and the join on ARIT waits for both branches. `--trace=regs` shows the
+chain registers (`i1`, `i2` for each element, `pdc1`, `pdc2` for the Program Distributor).
+`--gantt` draws an ASCII timeline of the elements, and `--gantt=seq` one row per sequence:
+the two branches of `parallele.g60b` are busy at the same time, while in `forkjoin_tumlin.g60b`
+the second ARIT branch waits on ARIT's recall chain (`.`) until the first one is done.

@@ -1,9 +1,11 @@
-"""The J3 machine: engine, store, Data Distributor, Program Distributor, ARIT and LOGI.
+"""The machine (J3-J4): engine, store, Data Distributor, Program Distributor, ARIT and LOGI.
 
-A code B program is assembled into code A, loaded at its origin (default 0) and started by
-the PD as one of its own sequences (an emulator convention until the GGZ loader of J7). The
-run ends when no event is left: ``halted`` if every element is idle, ``blocked`` otherwise,
-``incident`` after an incident.
+A code B program is assembled into code A, loaded at its origin (default 256, after the table
+of the recall chain registers, U-30) and started by the PD as one of its own sequences (an
+emulator convention until the GGZ loader of J7). The run ends when no event is left: ``halted``
+if every element is idle and every chain empty, ``blocked`` otherwise, ``incident`` after an
+incident. In diagnostic mode, a join that never fired (its blank catena still counts arrivals)
+makes the run ``blocked``.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from gamma60 import codeb, data
+from gamma60.catena import bits
 from gamma60.data_distributor import DataDistributor
 from gamma60.elements.base import IDLE
 from gamma60.elements.processing import Arithmetic, Logical
@@ -91,12 +94,25 @@ class Machine:
         self.engine.run(max_events=max_events)
         if self.status == "running":
             active = [e.name for e in self.elements.values() if e.state != IDLE]
-            if active or self.dp.busy:
+            if active or self.dp.busy or self.dp.pd_b:
                 self.status = "blocked"
                 self.message = f"no event left, still active: {', '.join(active) or 'PD'}"
             else:
                 self.status = "halted"
+            if self.mode == "diagnostic":
+                self._check_joins()
         return Result(self.status, self.message, self, self.image)
+
+    def _check_joins(self) -> None:
+        """Diagnostic: a join whose blank catena still counts arrivals never fired."""
+        for address, m in sorted(self.image.joins.items()):
+            count = bits(self.memory.raw(address + 1).value, 19, 18)
+            if count:
+                line = self.image.line_at(address)
+                where = f"line {line.source_line}" if line else f"address {address:05d}"
+                self.status = "blocked"
+                self.message = f"join never reached at {where}: {count} of {m + 1} arrivals"
+                self.engine.record("machine", "warning", text=self.message)
 
 
 def build(text: str, profile: str | None = None, mode: str = "faithful", observer=None) -> Machine:

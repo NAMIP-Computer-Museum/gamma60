@@ -35,7 +35,7 @@ MESSAGES = {
         "help": (
             "commands: <Enter>/s step   r registers   m <address|label> [n] memory\n"
             "          b <address|label> breakpoint   d <address|label> delete it   c continue\n"
-            "          l legend   q quit   h help"
+            "          w <element> stop when the PD serves it   l legend   q quit   h help"
         ),
         "next": "next:",
         "break": "break at",
@@ -43,6 +43,7 @@ MESSAGES = {
         "emulator": "emulator label",
         "attested": "attested name",
         "unknown": "unknown address or label",
+        "watch": "watch",
         "waiting": "waiting",
         "incident": "incident",
         "starvation": "starvation: waiting for",
@@ -64,7 +65,8 @@ MESSAGES = {
         "help": (
             "commandes : <Entrée>/s pas   r registres   m <adresse|étiquette> [n] mémoire\n"
             "            b <adresse|étiquette> point d'arrêt   d <adresse|étiquette> l'enlever\n"
-            "            c continuer   l légende   q quitter   h aide"
+            "            w <élément> arrêt quand le DP le sert   c continuer   l légende\n"
+            "            q quitter   h aide"
         ),
         "next": "suivant :",
         "break": "arrêt en",
@@ -72,6 +74,7 @@ MESSAGES = {
         "emulator": "libellé de l'émulateur",
         "attested": "nom attesté",
         "unknown": "adresse ou étiquette inconnue",
+        "watch": "surveillance",
         "waiting": "en attente",
         "incident": "incident",
         "starvation": "famine : attend depuis",
@@ -199,12 +202,18 @@ def machine_snapshot(machine, names: Names) -> dict[str, dict[str, str]]:
             names.label("rsdp"): f"{r.rsdp:06X}",
             names.label("a"): _positions(r.a),
             names.label("b"): f"{r.b:06X}",
+            names.label("pd_chain", 1): f"{machine.dp.pd_b:05d}",
+            names.label("pd_chain", 2): f"{machine.dp.pd_c:05d}",
         }
     }
     for kind, element in machine.elements.items():
+        b = machine.memory.raw(machine.dp.chain_b(element)).value & MASK15
+        c = machine.memory.raw(machine.dp.chain_c(element)).value & MASK15
         regs = {
             names.label("rai"): f"{machine.dp.iar.address[element.number]:05d}",
             "": names.say(f"state_{element.state}"),
+            names.label("chain_head_tail", 0): f"{b:05d}",
+            names.label("chain_head_tail", 1): f"{c:05d}",
         }
         for ident in ELEMENT_REGISTERS.get(kind, ()):
             value = getattr(element.unit, ident.split("_", 1)[1])
@@ -216,7 +225,20 @@ def machine_snapshot(machine, names: Names) -> dict[str, dict[str, str]]:
     return state
 
 
-MACHINE_LEGEND = ["rne", "rapa", "rapp", "redp", "rsdp", "a", "b", "rai", "qualitative", "rac"]
+MACHINE_LEGEND = [
+    "rne",
+    "rapa",
+    "rapp",
+    "redp",
+    "rsdp",
+    "a",
+    "b",
+    "pd_chain",
+    "rai",
+    "chain_head_tail",
+    "qualitative",
+    "rac",
+]
 
 
 def describe(machine, dp, names: Names) -> str:
@@ -331,6 +353,7 @@ class Stepper:
     inp: TextIO | None = None  # None: sys.stdin / sys.stdout at run time
     out: TextIO | None = None
     breakpoints: set[int] = field(default_factory=set)
+    watched: set[str] = field(default_factory=set)  # elements (display names): stop when served
     running: bool = False
     _before: dict = field(default_factory=dict, init=False)
     _interp: object = field(default=None, init=False)
@@ -352,9 +375,13 @@ class Stepper:
             for text in format_state(state, changed, touched):
                 self._say(text)
         self._before = state
-        if self.running and dp.instr_address not in self.breakpoints:
+        unit = self.names.element(dp.element.kind) if dp.element is not None else None
+        watched = unit in self.watched
+        if self.running and dp.instr_address not in self.breakpoints and not watched:
             return
-        if self.running:
+        if self.running and watched:
+            self._say(f"{self.names.say('watch')} {unit}")
+        elif self.running:
             self._say(f"{self.names.say('break')} {dp.instr_address:05d}")
         self.running = False
         self._say(self.names.say("next") + " " + describe(machine, dp, self.names))
@@ -422,6 +449,8 @@ class Stepper:
                     self.breakpoints.add(self._address(words[1]))
                 elif cmd == "d":
                     self.breakpoints.discard(self._address(words[1]))
+                elif cmd == "w":
+                    self.watched.add(words[1].upper())
                 elif cmd == "l":
                     ids = (
                         [

@@ -33,8 +33,8 @@ arit_registers_preserved_between_sequences:
   unknown: U-25
 
 join:
-  value: {test: before_activation, counter_reset: on_trigger}
-  status: hypothesis
+  value: {test: before_activation, counter_reset: on_trigger, early_arrival: ends_sequence}
+  status: hypothesis           # une séquence arrivée avant la dernière se termine comme sur un STOP
   unknown: U-26
 
 desk:
@@ -46,6 +46,16 @@ recall_chain_registers:      # I1/I2 (B/C) de chaque élément réel, « adresse
   value: {location: memory_table, base_address: 0, catenae_per_element: 2}
   status: hypothesis
   unknown: U-30
+
+program_origin_default:      # origine d'un programme sans « ; origine: » : après la table B/C (128 × 2)
+  value: 256
+  status: hypothesis
+  unknown: U-30
+
+requester_release:           # étape (3) d'une coupure [COURS p.38] quand l'étape (2) a redonné du travail
+  value: keep_if_operating   # à l'élément demandeur (exemple de COURS p.37) : il n'est pas libéré
+  status: hypothesis
+  unknown: U-45
 
 arit_unary_operands:         # RSI/ISI, AVA/PVA : O1, R ; ROF/ARR : P + S, R seul [COURS p.71-72] (U-31 résolu)
   reverse_sign: [O1, R]

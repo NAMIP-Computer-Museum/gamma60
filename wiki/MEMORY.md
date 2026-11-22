@@ -273,6 +273,9 @@ address  0 ┌──────────────────────
   32,767   └──────────────────────────────────────────────┘
 ```
 
+In the emulator (since J4), the I1/I2 table takes addresses 0-255 (2 catenae for each of the 128
+element numbers) and a program is loaded at address 256 unless it gives `; origine:` (U-30).
+
 Several programs (UT) share the store at once: this is what multiprogramming means here. A
 program can be launched only if the elements **and the memory zone** it needs are free. [B61
 p.47-48]

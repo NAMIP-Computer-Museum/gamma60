@@ -12,7 +12,6 @@ from gamma60 import debug, machine, seq
 from gamma60.__main__ import main
 from gamma60.catena import MASK15
 from gamma60.data_distributor import INSTRUCTION
-from gamma60.program_distributor import MachineUnsupported
 
 sys.path.insert(0, str(Path(__file__).parent))
 from test_seq import _cases, _program_for
@@ -98,7 +97,8 @@ def test_logi_follows_the_cours_formulas(profile, cycle):
 def test_pd_reads_every_instruction_through_the_dd():
     _result, m = run("    L 0 X\n    31 NEXT\nNEXT: TRA N - 0 - P\n    STOP\nX: NUM +1\n")
     fetches = [r for r in m.engine.trace if r.what == "transfer" and r.get("nature") == INSTRUCTION]
-    assert len(fetches) == m.dp.executed == 5  # cut, L, 31, TRA, then STOP when ARIT is served
+    # cut, its blank catena (IAR <- cut + 1, a never branch), L, 31, TRA, then STOP
+    assert len(fetches) == m.dp.executed == 6
     assert all(r.get("element") == "PD" for r in fetches)
 
 
@@ -116,17 +116,11 @@ def test_cuts_activate_and_release_elements():
     assert cuts == ["ARIT", "LOGI", "ARIT"]
 
 
-@pytest.mark.parametrize(
-    "body",
-    [
-        "    SIMU OTHER\n    VIERGE\n    STOP\nOTHER: STOP\n",
-        "    LOGI 1\n    VIERGE\n    STOP\n",  # join
-        "    PROT IMG\n    VIERGE\n    STOP\nIMG: ZONE 2\n",
-    ],
-)
-def test_concurrency_is_for_j4(body):
-    with pytest.raises(MachineUnsupported):
-        run(body)
+def test_join_never_reached_in_diagnostic_mode():
+    body = "    LOGI 1\n    VIERGE\n    STOP\n"  # a join waiting for 2 arrivals, reached once
+    assert run(body)[0].status == "halted"  # faithful: nothing to notice
+    result, _ = run(body, mode="diagnostic")
+    assert result.status == "blocked" and "join never reached at line 4: 1 of 2" in result.message
 
 
 def test_decoded_directive_error():
@@ -272,7 +266,7 @@ def test_stepper_on_the_machine():
     result = machine.run_file(PROGRAMS / "test-arith01.g60b", observer=stepper)
     assert result.status == "halted"
     text = out.getvalue()
-    assert "next:" in text and "cpar" in text and "START:" in text and "00000  START" in text
+    assert "next:" in text and "cpar" in text and "START:" in text and "00256  START" in text
 
 
 # --- command line ---------------------------------------------------------------------------------
@@ -291,15 +285,14 @@ def test_cli_trace_variants(capsys):
     assert "instr." in capsys.readouterr().out
 
 
-def test_cli_simu_needs_seq(capsys):
-    assert main(["run", str(PROGRAMS / "forkjoin_tumlin.g60b")]) == 2
-    assert "try --seq" in capsys.readouterr().out
-    assert main(["run", str(PROGRAMS / "forkjoin_tumlin.g60b"), "--seq"]) == 0
+def test_cli_simu_runs_on_the_machine(capsys):
+    assert main(["run", str(PROGRAMS / "forkjoin_tumlin.g60b")]) == 0
+    assert "F          +43 1320|000000" in capsys.readouterr().out
 
 
 def test_cli_asm(capsys):
     assert main(["asm", str(PROGRAMS / "test-arith01.g60b")]) == 0
-    assert "00005  1111" in capsys.readouterr().out
+    assert "00261  1111" in capsys.readouterr().out
     assert main(["asm", str(PROGRAMS / "namip_classement.g60b")]) == 2
 
 
@@ -317,8 +310,8 @@ def test_cli_dump_zones(capsys):
     args = ["run", str(PROGRAMS / "arit_logi.g60b"), "--dump", "S", "2", "--dump", "32767", "3"]
     assert main(args) == 0
     out = capsys.readouterr().out
-    assert "memory 00025 - 00026:" in out
-    assert "00025  S        424200  key" in out  # S = +42 (exponent 42, digits 42...)
+    assert "memory 00281 - 00282:" in out
+    assert "00281  S        424200  key" in out  # S = +42 (exponent 42, digits 42...)
     assert "32768  outside the store" in out
 
 
@@ -326,7 +319,7 @@ def test_cli_dump_zones(capsys):
 def test_cli_dump_all(capsys, seq_flag):
     assert main(["run", str(PROGRAMS / "test-arith01.g60b"), *seq_flag, "--dump", "all"]) == 0
     out = capsys.readouterr().out
-    assert "memory 00000 - 00012:" in out and "00011  R        413142" in out
+    assert "memory 00256 - 00268:" in out and "00267  R        413142" in out
 
 
 def test_cli_dump_errors(capsys):

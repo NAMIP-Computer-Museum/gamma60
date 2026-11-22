@@ -4,6 +4,8 @@
   [--names en|fr] [--mode faithful|diagnostic] [--seq]``: run a code B program on the machine
   (J3: assembler, Program Distributor, Data Distributor, ARIT, LOGI); ``--seq``: sequential
   interpreter of J1 (needed for SIMU and joins until J4);
+  ``--gantt[=elem|seq]`` (ASCII timeline by element or by sequence, ``--gantt-scale``,
+  ``--gantt-from``, ``--gantt-to``), ``--dump <zone>``;
 - ``python -m gamma60 asm <program.g60b>``: assembly listing (code A beside code B);
 - ``python -m gamma60 dd <scenario.yaml>``: Data Distributor scenario (J2).
 """
@@ -14,7 +16,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from gamma60 import codeb, data, debug, machine, seq, synthetic
+from gamma60 import codeb, data, debug, gantt, machine, seq, synthetic
 from gamma60.number import NotANumber
 from gamma60.program_distributor import MachineUnsupported
 from gamma60.toolchain.assembler import AsmUnsupported, assemble, listing_lines
@@ -39,6 +41,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     run.add_argument("--mode", choices=["faithful", "diagnostic"], default="faithful")
     run.add_argument("--seq", action="store_true", help="sequential interpreter of J1")
+    run.add_argument(
+        "--gantt",
+        nargs="?",
+        const="elem",
+        choices=["elem", "seq"],
+        help="ASCII timeline at the end of the run: by element (elem) or by sequence (seq)",
+    )
+    run.add_argument("--gantt-scale", type=int, metavar="US", help="microseconds per character")
+    run.add_argument("--gantt-from", type=int, default=0, metavar="US", help="window start")
+    run.add_argument("--gantt-to", type=int, metavar="US", help="window end")
     run.add_argument(
         "--dump",
         nargs="+",
@@ -89,6 +101,9 @@ def dispatch(args) -> int:
         return 2
     args.zones = zones
     if args.seq:
+        if args.gantt:
+            print("error: --gantt needs the machine (not --seq)")
+            return 2
         return run_seq(args, program, profile, names)
     return run_machine(args, program, profile, names)
 
@@ -149,6 +164,18 @@ def run_machine(args, program, profile, names: debug.Names) -> int:
             print(f"  {names.element(element.kind):<5} {n} directive(s), {busy} µs")
     _print_numbers(program, result.number)
     _dump(args, program, m.memory)
+    if args.gantt:
+        chart = gantt.Gantt(
+            m,
+            names,
+            args.gantt_scale,
+            args.gantt_from,
+            args.gantt_to,
+            program_name=Path(args.program).name,
+        )
+        print()
+        for line in chart.by_element() if args.gantt == "elem" else chart.by_sequence():
+            print(line)
     return 0 if result.status == "halted" else 1
 
 

@@ -119,15 +119,6 @@ registers:
     location: central_unit
     role: "sortie du DP ; reçoit RAPP à chaque branchement (adresse de retour, rangée par RI)"
     source: "COURS p.15, p.42, p.54"
-  - id: simu_reserve
-    name: {en: null, fr: null}
-    long: {en: "SIMU reserve register (emulator)", fr: "registre spécial de mise en réserve"}
-    display: {en: srr, fr: rmr}
-    owner: program_distributor
-    bits: {value: 15, status: hypothesis, unknown: U-39}   # lien avec la chaîne propre du DP : U-39
-    location: central_unit
-    role: "reçoit RAPP (branche ordinaire) pendant que le DP traite la branche extraordinaire d'un SIMU"
-    source: "COURS p.17"
   - id: pd_chain
     name: {en: null, fr: null}
     long: {en: "program distributor chain (emulator)", fr: "chaîne propre du DP (Distributeur de Programme)"}
@@ -136,8 +127,8 @@ registers:
     bits: {value: 15, status: hypothesis, unknown: U-39}
     count: 2
     location: central_unit
-    role: "tête et queue des séquences en attente du DP (SIMU, LIBE)"
-    source: "COURS p.36-38"
+    role: "B et C du DP : tête et queue de sa chaîne de reprise (SIMU, LIBE) ; B est le « registre spécial de mise en réserve » de COURS p.17"
+    source: "COURS p.17, p.36-38"
 
   # --- registres de chaque élément -----------------------------------------------------------
   - id: chain_head_tail
