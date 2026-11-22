@@ -27,3 +27,21 @@ synthetic_subcodes:
      subtract_B_15: 9, compare_B_15: 10, substitute_quantity_in_B: 11, substitute_instruction: 12,
      switch_branch_always: 13, switch_branch_never: 14, reverse_switches: 15, fill_ones: 16,
      fill_zeros: 17, iteration_control: 18, counter_progression: 19}
+
+# Disposition des directives d'ARIT et de LOGI (TK 1111, « sans variable libre », bits 20-1) :
+# RECONSTRUITE (U-01). Directive = rang dans directives.yaml (elements.<élément>.directives).
+# Désignateurs : 0-3 RAC avec progression, 4-7 RAC 0-3 sans progression (Z U D T / Z F S T),
+# 8 = registre (P pour ARIT, L pour LOGI) ; un champ inutilisé par la directive vaut 0.
+element_layouts:
+  synthetic: true
+  status: hypothesis
+  unknown: U-01
+  arithmetic:
+    directive: [20, 17]       # 13 directives
+    mode_point: [16, 12]      # 0-15 : sans C.C.1, V = 0-15 ; 16-26 : P, V = 0-10 ; 27 : N ; 28 : A
+    double: 11                # C.C.2 D
+    operands: [10, 1]         # O1 × 72 + O2 × 9 + R (O1, R : 9 valeurs ; O2 : 8, pas de P)
+  logical:
+    directive: [20, 17]       # 15 directives
+    length: [16, 12]          # l = 0-24
+    r: [11, 8]                # R : 0-8

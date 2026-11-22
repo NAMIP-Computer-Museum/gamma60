@@ -68,7 +68,10 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - Environnement : `python -m venv .venv` puis `.venv/Scripts/pip install -e .[dev]`
 - Tests : `pytest -q` · Lint : `ruff check . && ruff format --check .`
 - Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b [--profile COURS]
-  [--trace | --trace=regs | --step] [--names en|fr]` (interpréteur séquentiel : ARIT et LOGI)
+  [--trace | --trace=regs | --trace=dd | --step] [--names en|fr] [--mode diagnostic]
+  [--dump <adresse|étiquette> [n] | --dump all]`
+  (machine J3 : DP, DD, ARIT, LOGI ; `--seq` : interpréteur J1, pour SIMU / JOIN jusqu'au J4)
+- Listing d'assemblage : `python -m gamma60 asm tests/programs/<nom>.g60b`
 - Scénario du Distributeur de Données : `python -m gamma60 dd tests/scenarios/<nom>.yaml
   [--profile COURS] [--trace] [--names fr] [--mode diagnostic]`
 

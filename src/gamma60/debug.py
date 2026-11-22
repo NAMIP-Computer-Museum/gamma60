@@ -5,9 +5,10 @@ with ``--names en|fr``: UPPER CASE = name attested in that language, lower case 
 proposed by the emulator (not validated). The debugger only *reads* the state of the
 simulation: a run gives the same trace with or without it.
 
-J2 step 1 covers the sequential interpreter of J1 (``seq.py``): register A, the registers and
-CARs of ARIT and LOGI, their qualitative catena. The Data Distributor, the Program
-Distributor and the other elements add their registers in later steps.
+It observes the sequential interpreter of J1 (``seq.py``) and, from J3, the machine
+(``machine.py``): registers of the Program Distributor (RNE, RAPA, RAPP, REDP, RSDP, A, B),
+IAR and state of each element, registers and CARs of ARIT and LOGI; the Data Distributor is
+traced cycle by cycle (:class:`DDTrace`).
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import TextIO
 
-from gamma60 import data
+from gamma60 import code_a, data
 from gamma60.catena import MASK15
 
 #: element kind → register ids shown for it (besides its CARs and qualitative catena)
@@ -53,6 +54,11 @@ MESSAGES = {
         "quantity": "qty",
         "instruction": "instr",
         "gates": "gates",
+        "pd": "PD",
+        "state_idle": "idle",
+        "state_waiting": "waiting",
+        "state_operating": "operating",
+        "time": "time",
     },
     "fr": {
         "help": (
@@ -77,6 +83,11 @@ MESSAGES = {
         "quantity": "quant.",
         "instruction": "instr.",
         "gates": "vannes",
+        "pd": "DP",
+        "state_idle": "repos",
+        "state_waiting": "attente",
+        "state_operating": "opération",
+        "time": "durée",
     },
 }
 
@@ -152,7 +163,9 @@ def _number(n) -> str:
 
 
 def snapshot(interp, names: Names) -> dict[str, dict[str, str]]:
-    """Registers of the interpreter, grouped by unit: {unit: {label: value}} (ordered)."""
+    """Registers grouped by unit: {unit: {label: value}} (ordered)."""
+    if hasattr(interp, "dp"):
+        return machine_snapshot(interp, names)
     state: dict[str, dict[str, str]] = {"CU": {names.label("a"): _positions(interp.register_a)}}
     for kind in ("arithmetic", "logical"):
         unit = interp.units.get(kind)
@@ -172,6 +185,49 @@ def snapshot(interp, names: Names) -> dict[str, dict[str, str]]:
             regs[names.label("rac", i)] = f"{address:05d}"
         state[names.element(kind)] = regs
     return state
+
+
+def machine_snapshot(machine, names: Names) -> dict[str, dict[str, str]]:
+    """Registers of the J3 machine: Program Distributor, then each element."""
+    r = machine.dp.regs
+    state = {
+        names.say("pd"): {
+            names.label("rne"): "-" if r.rne is None else f"{r.rne:03d}",
+            names.label("rapa"): f"{r.rapa:05d}",
+            names.label("rapp"): f"{r.rapp:05d}",
+            names.label("redp"): f"{r.redp:06X}",
+            names.label("rsdp"): f"{r.rsdp:06X}",
+            names.label("a"): _positions(r.a),
+            names.label("b"): f"{r.b:06X}",
+        }
+    }
+    for kind, element in machine.elements.items():
+        regs = {
+            names.label("rai"): f"{machine.dp.iar.address[element.number]:05d}",
+            "": names.say(f"state_{element.state}"),
+        }
+        for ident in ELEMENT_REGISTERS.get(kind, ()):
+            value = getattr(element.unit, ident.split("_", 1)[1])
+            regs[names.label(ident)] = _number(value) if kind == "arithmetic" else _bits24(value)
+        regs[names.label("qualitative")] = _positions(element.qualitative)
+        for i, address in enumerate(machine.dd.racs.of(element.name)):
+            regs[names.label("rac", i)] = f"{address:05d}"
+        state[names.element(kind)] = regs
+    return state
+
+
+MACHINE_LEGEND = ["rne", "rapa", "rapp", "redp", "rsdp", "a", "b", "rai", "qualitative", "rac"]
+
+
+def describe(machine, dp, names: Names) -> str:
+    """``time  address  element  code A  code B`` of the instruction the PD has just read."""
+    line = machine.image.line_at(dp.instr_address)
+    unit = names.element(dp.element.kind) if dp.element is not None else "-"
+    source = line.text if line else ""
+    return (
+        f"{machine.engine.now:7d}  {dp.instr_address:05d}  {unit:<5}  "
+        f"{code_a.text(dp.regs.redp):<31} {source}"
+    )
 
 
 def changes(before: dict, after: dict) -> set[tuple[str, str]]:
@@ -194,7 +250,7 @@ def format_state(state: dict, changed: set | None = None, units: Iterable[str] |
         if unit not in state:
             continue
         cells = [
-            f"{label}{'*' if (unit, label) in changed else ''} {value}"
+            f"{label}{'*' if (unit, label) in changed else ''} {value}".strip()
             for label, value in state[unit].items()
         ]
         line = f"      {unit:<5} "
@@ -249,12 +305,22 @@ class RegisterTrace:
         if error:
             print(f"      ! {error}", file=self.out)
 
-    def header(self) -> None:
+    def header(self, machine: bool = False) -> None:
         print(f"{self.names.say('registers')} ({self.names.language}) :", file=self.out)
-        everything = ["a", "qualitative", "rac", *ELEMENT_REGISTERS["arithmetic"]]
-        everything += ELEMENT_REGISTERS["logical"]
+        everything = MACHINE_LEGEND if machine else ["a", "qualitative", "rac"]
+        everything = [*everything, *ELEMENT_REGISTERS["arithmetic"], *ELEMENT_REGISTERS["logical"]]
         for text in self.names.legend(everything):
             print(text, file=self.out)
+
+    def instruction(self, machine, dp) -> None:
+        """J3 machine: the instruction just read, then the registers changed since the last one."""
+        state = snapshot(machine, self.names)
+        changed = changes(self._before, state) if self._before else set()
+        touched = [u for u in state if any(c[0] == u for c in changed)]
+        for text in format_state(state, changed, touched):
+            print(text, file=self.out)
+        print(describe(machine, dp, self.names), file=self.out)
+        self._before = state
 
 
 @dataclass
@@ -276,6 +342,24 @@ class Stepper:
     def _say(self, text: str) -> None:
         print(text, file=self.out)
 
+    def instruction(self, machine, dp) -> None:
+        """J3 machine: pause before executing the instruction the PD has just read."""
+        self._interp = _View(machine.image.program, machine.memory)
+        state = snapshot(machine, self.names)
+        if not self.running and self._before:
+            changed = changes(self._before, state)
+            touched = [u for u in state if any(c[0] == u for c in changed)]
+            for text in format_state(state, changed, touched):
+                self._say(text)
+        self._before = state
+        if self.running and dp.instr_address not in self.breakpoints:
+            return
+        if self.running:
+            self._say(f"{self.names.say('break')} {dp.instr_address:05d}")
+        self.running = False
+        self._say(self.names.say("next") + " " + describe(machine, dp, self.names))
+        self._prompt(machine)
+
     def _address(self, token: str) -> int:
         labels = self._interp.program.labels
         if token in labels:
@@ -285,11 +369,8 @@ class Stepper:
         raise ValueError(f"{self.names.say('unknown')} {token!r}")
 
     def _memory(self, start: int, count: int) -> None:
-        by_address = {a: name for name, a in self._interp.program.labels.items()}
-        for address in range(start, start + count):
-            cat = self._interp.memory.raw(address)
-            label = by_address.get(address, "")
-            self._say(f"      {address:05d}  {label:<8} {cat.value:06X}  key {cat.key}")
+        for text in dump_lines(self._interp.program, self._interp.memory, start, count):
+            self._say(text)
 
     def before(self, interp, step: int, line, element: str | None) -> None:
         self._interp = interp
@@ -342,9 +423,16 @@ class Stepper:
                 elif cmd == "d":
                     self.breakpoints.discard(self._address(words[1]))
                 elif cmd == "l":
-                    for text in self.names.legend(
-                        legend_ids(snapshot(interp, self.names), self.names)
-                    ):
+                    ids = (
+                        [
+                            *MACHINE_LEGEND,
+                            *ELEMENT_REGISTERS["arithmetic"],
+                            *ELEMENT_REGISTERS["logical"],
+                        ]
+                        if hasattr(interp, "dp")
+                        else legend_ids(snapshot(interp, self.names), self.names)
+                    )
+                    for text in self.names.legend(ids):
                         self._say(text)
                 else:
                     self._say(self.names.say("help"))
@@ -352,7 +440,64 @@ class Stepper:
                 self._say(f"? {exc}")
 
 
-Observer = RegisterTrace | Stepper
+# --- memory dump --------------------------------------------------------------------------------
+
+
+def resolve_address(program, token: str) -> int:
+    """An address given as a label of the program or as a decimal number."""
+    if token in program.labels:
+        return program.labels[token]
+    if re.fullmatch(r"\d+", token):
+        return int(token)
+    raise ValueError(f"unknown address or label {token!r}")
+
+
+def dump_zone(program, spec: list[str]) -> tuple[int, int]:
+    """``[start]``, ``[start, n]`` or ``["all"]`` (the program and its working memories)."""
+    if spec == ["all"]:
+        return program.origin, program.end - program.origin
+    if not 1 <= len(spec) <= 2 or (len(spec) == 2 and not spec[1].isdigit()):
+        raise ValueError(f"invalid zone {' '.join(spec)!r}: <address|label> [n] or all")
+    return resolve_address(program, spec[0]), int(spec[1]) if len(spec) == 2 else 1
+
+
+def dump_lines(program, memory, start: int, count: int) -> list[str]:
+    """One line per catena: address, label, 24 bits in hexadecimal, check key (raw, unchecked)."""
+    by_address = {a: name for name, a in program.labels.items()}
+    lines = []
+    for address in range(start, start + count):
+        if not 0 <= address < memory.size:
+            lines.append(f"      {address:05d}  outside the store ({memory.size} catenae)")
+            break
+        cat = memory.raw(address)
+        label = by_address.get(address, "")
+        lines.append(f"      {address:05d}  {label:<8} {cat.value:06X}  key {cat.key}")
+    return lines
+
+
+@dataclass
+class _View:
+    """What the stepper needs from a run: labels and the store."""
+
+    program: object
+    memory: object
+
+
+@dataclass
+class InstructionTrace:
+    """``--trace`` on the J3 machine: one line per instruction read by the PD."""
+
+    names: Names
+    out: TextIO | None = None
+
+    def __post_init__(self) -> None:
+        self.out = self.out or sys.stdout
+
+    def instruction(self, machine, dp) -> None:
+        print(describe(machine, dp, self.names), file=self.out)
+
+
+Observer = RegisterTrace | Stepper | InstructionTrace
 
 
 # --- Data Distributor ---------------------------------------------------------------------------

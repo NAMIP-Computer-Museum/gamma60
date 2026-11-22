@@ -67,3 +67,29 @@ class RacMatrix:
     @property
     def used(self) -> int:
         return self._next
+
+
+@dataclass
+class IarMatrix:
+    """The MAP matrix: one IAR per element number, with its busy indicator [ONDE §2.2.1]."""
+
+    size: int = field(default_factory=lambda: register("rai")["count"])
+    address: list[int] = field(init=False)
+    busy: list[bool] = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.address = [0] * self.size
+        self.busy = [False] * self.size
+
+
+@dataclass
+class PDRegisters:
+    """Registers of the Program Distributor and of the central unit [COURS p.13-16, p.54-55]."""
+
+    rne: int | None = None  # element being served (None: free)
+    rapa: int = 0  # current program address
+    rapp: int = 0  # RAPA + 1
+    redp: int = 0  # last instruction read
+    rsdp: int = 0  # output: directive sent, or return address after a branch
+    a: int = 0  # analysis register
+    b: int = 0  # operator register

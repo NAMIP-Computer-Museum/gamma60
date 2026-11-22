@@ -299,6 +299,6 @@ def test_numbered_lines():
 
 
 def test_cli_run(capsys):
-    assert main(["run", str(FORKJOIN), "--trace"]) == 0
+    assert main(["run", str(FORKJOIN), "--seq", "--trace"]) == 0
     out = capsys.readouterr().out
     assert "status: halted" in out and "+43 1320|000000" in out

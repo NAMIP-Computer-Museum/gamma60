@@ -32,6 +32,10 @@ Le type de catène (TK) est un **code préfixe** lu à gauche :
   « jamais ».
 - Valeurs binaires des sous-codes (sorte de coupure, type d'adresse, n° de directive centrale,
   directives d'élément) : **inconnues** (U-01) ; voir `data/encoding.yaml`.
+- Directives d'ARIT et de LOGI (sans variable libre, bits 20-1) : disposition **reconstruite**
+  (U-01, `data/encoding.yaml`, `element_layouts`). ARIT : directive (4 bits, rang dans
+  `directives.yaml`), C.C.1 et V réunis (5 bits), D (1 bit), O1 / O2 / R réunis (10 bits) ;
+  LOGI : directive (4), l (5), R (4). Numéro d'élément des coupures (champ X) : U-44.
 - Exemple (COURS p.44) : « 31, 10 lignes plus loin, en différentiel » =
   `00 11111 1 0 000000000001010`.
 

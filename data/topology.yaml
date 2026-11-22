@@ -41,3 +41,8 @@ circuit_assignment:          # circuit d'un élément quand sa classe en a plusi
   value: alternate           # alternance dans l'ordre de la configuration
   status: hypothesis
   unknown: U-32
+
+element_numbers:             # numéro d'élément (RNE, champ X des coupures) du premier élément de chaque type
+  value: {desk: 0, logical: 1, arithmetic: 2, comparator: 3, transcoder: 4, drum: 100}
+  status: hypothesis         # seuls les tambours sont donnés : « à partir de 100 » [COURS p.51]
+  unknown: U-44

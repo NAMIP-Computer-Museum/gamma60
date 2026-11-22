@@ -1,0 +1,96 @@
+; langue: en
+; Calcul de pi par la formule de Machin : pi = 16 arctan(1/5) - 4 arctan(1/239).
+; arctan(1/x) = 1/x - 1/(3 x^3) + 1/(5 x^5) - ... : un sous-programme ATAN ajoute les termes
+; jusqu'à ce qu'un terme ne change plus la somme (précision de la machine : 10 chiffres).
+;
+; Sous-programme : l'appel « 31 ATAN » met l'adresse de retour dans RSDP ; ATAN la range dans
+; RET par PI (RI en fr) et revient par « 31 RET S » (branchement à l'adresse contenue dans RET)
+; [COURS p.53-54]. Paramètres : X = x, X2 = x² ; résultat : SOM.
+; Opérandes d'ARIT : RAC chargés par L, désignés sans progression (Z F S T = RAC 0-3) ; P = registre.
+; Calculs en mode arrondi (C.C. R en en, A en fr = N puis ARR [COURS p.68]) : en mode N, les
+; troncatures cumulées coûtent environ 5 unités sur le 10e chiffre ; arrondi : 3,141592653.
+START:  ARIT
+        VIERGE
+        L     0     C5
+        L     1     X
+        TRA   N     - Z - F            ; X = 5
+        L     0     C25
+        L     1     X2
+        TRA   N     - Z - F            ; X2 = 25
+        31    ATAN                     ; SOM = arctan(1/5)
+        L     0     SOM
+        L     1     A1
+        TRA   N     - Z - F            ; A1 = arctan(1/5)
+        L     0     C239
+        L     1     X
+        TRA   N     - Z - F            ; X = 239
+        L     0     C57121
+        L     1     X2
+        TRA   N     - Z - F            ; X2 = 239² = 57121
+        31    ATAN                     ; SOM = arctan(1/239)
+        L     0     A1
+        L     1     C16
+        L     2     T1
+        MUL   R     - Z F S            ; T1 = 16 arctan(1/5)
+        L     0     SOM
+        L     1     C4
+        L     2     T2
+        MUL   R     - Z F S            ; T2 = 4 arctan(1/239)
+        L     0     T1
+        L     1     T2
+        L     2     VALPI
+        SUB   R     - Z F S            ; VALPI = T1 - T2
+        STOP
+;
+; --- sous-programme ATAN : SOM = arctan(1/X) -------------------------------------------
+ATAN:   PI    RET                      ; adresse de retour (RSDP) -> RET
+        L     0     UN
+        L     1     X
+        L     2     PUI
+        DIV   R     - Z F S            ; PUI = 1 / x : premier terme
+        L     0     PUI
+        L     1     SOM
+        TRA   N     - Z - F            ; SOM = 1 / x
+        L     0     UN
+        L     1     DEN
+        TRA   N     - Z - F            ; DEN = 1
+TERME:  L     0     PUI
+        L     1     X2
+        DIV   R     - Z F P            ; P = PUI / x²
+        L     0     PUI
+        RSI   - P - Z                  ; PUI = - P : les signes alternent
+        L     0     DEN
+        L     1     DEUX
+        ADD   R     - Z F Z            ; DEN = DEN + 2
+        L     0     PUI
+        L     1     DEN
+        DIV   R     - Z F P            ; P = PUI / DEN : le terme, signé
+        L     1     SOM
+        L     2     NSOM
+        ADD   R     - P F S            ; NSOM = P + SOM
+        CAL   - S F -                  ; NSOM comparé à SOM (A, positions 1-6)
+        03    FINAT                    ; égalité : le terme ne change plus la somme
+        TRA   N     - S - F            ; SOM = NSOM
+        31    TERME
+FINAT:  31    RET         S            ; retour à l'appelant
+;
+; --- constantes et variables ----------------------------------------------------------------
+UN:     NUM   +1
+DEUX:   NUM   +2
+C4:     NUM   +4
+C5:     NUM   +5
+C16:    NUM   +16
+C25:    NUM   +25
+C239:   NUM   +239
+C57121: NUM   +57121
+X:      NUM   +0
+X2:     NUM   +0
+PUI:    NUM   +0                       ; (-1)^k / x^(2k+1)
+DEN:    NUM   +0                       ; 2k + 1
+SOM:    NUM   +0                       ; somme partielle
+NSOM:   NUM   +0
+A1:     NUM   +0
+T1:     NUM   +0
+T2:     NUM   +0
+VALPI:  NUM   +0                       ; résultat
+RET:    ZONE  1                        ; adresse de retour du sous-programme

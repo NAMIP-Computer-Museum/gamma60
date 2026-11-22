@@ -2,10 +2,25 @@
 memory: {cycle_us_from_profile: true}
 arithmetic:
   other_us: {value: 100, status: hypothesis, unknown: U-08}   # directives sans temps publié
+  directive_time:              # temps global de chaque directive : clé de profiles.yaml (times_us)
+    value: {add: arit_add, subtract: arit_add, multiply: arit_mul, divide: arit_div,
+            divide_with_remainder: arit_div, compare_absolute: arit_cmp, compare_algebraic: arit_cmp}
+    status: hypothesis         # SOU = ADD, DIR = DIV ; absent du profil → other_us
+    unknown: U-08
+  internal: {value: global_minus_transfers, status: hypothesis, unknown: U-08}   # temps interne = global − cycles de transfert
   note: "temps globaux, transferts compris ; temps interne non séparé (U-08)"
 comparator_b61_us_per_catena: {OWC: 30, TSS: 30, TWC: 50, DEL: 10}   # B61 p.36-37
 comparator_cours_cycles: {CMP: "5+3L", CDB: "5+5L", EFL: "2+L", TRR: "2+3L"}   # COURS p.78
 logical_cours_cycles: {directive_feed: 6, ADD: 12, SOU: 24, MUL: "6+12n", store_result: 3}   # COURS p.120-121
+logical_cycles:                # temps de LOGI en cycles mémoire, l = longueur, n = nombre de 1 du multiplicateur
+  source: "COURS p.120-121"
+  directives: {transfer_shift_to_K: "6 + l/2", transfer_shift_to_L: "6 + l/2", shift_left_L: "l/2",
+               insert_K_in_L: "l/2", fill_zeros_L: "l/2", fill_ones_L: "l/2", transfer_K_to_L: "12",
+               add: "12", complement_L: "12", intersection: "12", union: "12",
+               binary_logical_compare: "12", subtract: "24", multiply: "6 + 12*n - l/2",
+               divide: "24 + 12*(24 - l)"}
+  store_result: 3
+  profile_b61: {value: same_cycles, status: hypothesis, unknown: U-08}   # mêmes cycles × 10 µs
 transcoder_us_per_character: [15, 20]
 drum: {revolution_us: 20000, average_access_us: 10000, positions_per_track: 200, physical_per_track: 204}
 tape: {start_stop_gap_cm: 2, density_catenae_per_cm: 27.5, speed_m_s: 1.90}
@@ -16,4 +31,6 @@ paper_tape_punch: {per_character_us: 40000}
 desk_typewriter: {per_character_us: 100000}
 program_distributor:
   per_directive_cycles: {value: 6, status: hypothesis, unknown: U-08}
+  instruction_cycles: {value: 1, status: hypothesis, unknown: U-08}   # exécution d'une instruction après sa lecture
+  directive_send_cycles: {value: 4, status: hypothesis, unknown: U-08}  # envoi d'une directive : ≈ 6 cycles avec la lecture [COURS p.120]
   validation: "≈100 µs de DP pour ≈50 ms de bloc bande (B61 p.24)"

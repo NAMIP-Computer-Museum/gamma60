@@ -10,7 +10,9 @@
 | Module | Rôle |
 |---|---|
 | `data.py` | accès aux tables de `data/` ; `resolve()` des hypothèses `{value, status, unknown}` (J0) |
-| `seq.py` | interpréteur séquentiel provisoire du code B (J1) : coupures ARIT / LOGI, adresses, branchements, SIMU / JOIN / STOP ; remplacé par le DP au J3 |
+| `codeb.py` | analyse du code B (`.g60b`, langues `fr` / `en`, en-têtes `; langue:`, `; profil:`, `; origine:`), commune à l'interpréteur et à l'assembleur (J3) |
+| `code_a.py` | code A : préfixes TK et champs [COURS p.33-52] ; sous-codes et disposition des directives d'ARIT et de LOGI reconstruits (U-01) ; `encode`, `decode`, forme binaire groupée par champs (J3) |
+| `seq.py` | interpréteur séquentiel du code B (J1), sans temps ; gardé pour SIMU et JOIN jusqu'au J4 (`run --seq`) |
 | `engine.py` | file d'événements, horloge simulée, traces et écouteurs (J2) |
 | `catena.py` | catène 27 bits ; clé selon le profil : `parity9_mod3_15` (B61) ou `mod7_24bits` (COURS) ; codages DCB / alpha / binaire |
 | `number.py` | nombres semi-logarithmiques : mantisse entière 10 chiffres, exposant biaisé 40, clé mod 7 |
@@ -18,15 +20,16 @@
 | `registers.py` | matrice des RAC (MAQ) au J2, tailles lues dans `registers.yaml` ; au J3 : RAI (MAP), RNE, RAPA, RAPP, REDP, RSDP, A et B, indices d'occupation |
 | `data_distributor.py` | DD / DT (J2) : file des DTQ, 1 transfert par cycle, chaîne de priorité (`priorities.yaml`), vannes par circuit de classe sur les canaux DDC / DCC (`topology.yaml`), multiplexeur c34 à tour de rôle ; le DP lit à l'adresse de son RAPA |
 | `synthetic.py` | éléments synthétiques (continus, périodiques avec échéance) et scénarios YAML (`tests/scenarios/`) pour tester le DD (J2) |
-| `program_distributor.py` | PD / DP : file des DI ; lit le programme par des DTQ ; interprétation C, A, B, directives centrales ; chaînes de reprise ; JOIN ; SIMU ; éléments virtuels |
+| `program_distributor.py` | PD / DP (J3) : file des DI (priorité par classe) ; cycle RNE, A, RAPA ← RAI, RAPP, lecture par le DD dans REDP ; fonctions d'adresse d / s ; instructions d'adresse, branchements, 20 directives centrales ; envoi des directives par RSDP (RAI ← RAPP) ; coupures normales et STOP. Au J4 : chaînes de reprise, JOIN, SIMU, éléments virtuels |
 | `core/arit.py`, `core/logi.py` | calcul pur d'ARIT et de LOGI, sans temps (J1), appelé par les éléments |
-| `elements/base.py` | machine à états d'un élément (repos, attente DI, servi, exécution : calcul / attente DTQ / transfert) |
-| `elements/arit.py`, `logi.py`, `comp.py`, `tran.py` | éléments de traitement (directives de `data/directives.yaml`) |
+| `elements/base.py` | machine à états d'un élément (repos, attente, opération) ; travail d'une directive écrit comme un générateur de commandes (lecture, écriture par le DD, attente) (J3) |
+| `elements/processing.py` | ARIT et LOGI comme éléments (J3) : opérandes et résultats par le DD, calcul de `core/`, durées de `timings.yaml` ; `comp.py`, `tran.py` au J5-J8 |
 | `elements/drum.py`, `mata.py`, `cards.py`, `printer.py`, `tape_paper.py`, `desk.py` | mémoires auxiliaires et E/S |
 | `system/ggz.py` | superviseur minimal : tables des éléments et des UT, chargement, attribution des E/S |
-| `toolchain/` | transposition code B → code A, assemblage (code C), distribution (code D) → UT |
-| `debug.py` | traces et débogueur (J2, enrichi à chaque jalon) : libellés de `registers.yaml` selon `--names en` ou `fr`, `--trace=regs`, `--step` (registres, mémoire, points d'arrêt) ; lecture seule sur l'état de la simulation |
-| `__main__.py` | `python -m gamma60 run <prog> [--profile] [--trace]` (J1) ; `asm` au J3 |
+| `toolchain/` | `assembler.py` (J3) : code B → image en code A, deux passes, fonctions d'adresse R / M (différentiel) et S, listing ; au J6 : assemblage (code C), distribution (code D) → UT |
+| `machine.py` | la machine J3 : moteur, mémoire, DD, DP, ARIT et LOGI ; chargement de l'image et démarrage par le DP (convention de l'émulateur jusqu'au chargeur GGZ du J7) |
+| `debug.py` | traces et débogueur (J2, enrichi à chaque jalon) : libellés de `registers.yaml` selon `--names en` ou `fr`, `--trace=regs`, `--step` (registres, mémoire, points d'arrêt), `--dump` (zone mémoire en fin d'exécution : adresse, étiquette, 24 bits en hexadécimal, clé) ; lecture seule sur l'état de la simulation |
+| `__main__.py` | `run <prog>` sur la machine (`--seq` : interpréteur J1), `asm <prog>` (listing), `dd <scénario>` |
 
 ## Interfaces clés
 - Un élément ne parle qu'à deux arbitres : `request_instruction()` (DI, ITR chez BAT72) et

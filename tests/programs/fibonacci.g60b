@@ -1,0 +1,32 @@
+; langue: en
+; Suite de Fibonacci : les N premiers termes F1 = 1, F2 = 1, Fk = Fk-2 + Fk-1 (N >= 2),
+; rangés dans RESULT, un nombre semi-logarithmique de 2 catènes par terme.
+; N est la constante en mémoire N (BIN) ; RESULT doit réserver 2 x N catènes.
+;
+; Les trois RAC d'ARIT forment une fenêtre glissante : CAR0 -> Fk-2, CAR1 -> Fk-1, CAR2 -> Fk ;
+; chaque ADD avance chacun des trois de 2 (un nombre = 2 catènes) [COURS p.68].
+; La boucle est comptée par le contrôle d'itération IC (DI en fr) sur Q et Q1, qui contiennent
+; N - 2 en binaire : A position 15 tant qu'il reste des additions, 14 à la fin [COURS p.56-57].
+START:  ARIT
+        VIERGE
+        LB    N           S            ; B (15 bits de droite) <- contenu de N
+        SB    2                        ; B <- N - 2 : nombre d'additions
+        PB    Q                        ; Q  <- N - 2 (compteur)
+        PB    Q1                       ; Q1 <- N - 2 (valeur de rechargement)
+        L     3     UN                 ; CAR3 -> constante 1 (utilisé sans progression : T)
+        L     2     RESULT             ; CAR2 -> F1
+        TRA   N     - T - 2            ; F1 = 1 (CAR2 -> F2)
+        TRA   N     - T - 2            ; F2 = 1 (CAR2 -> F3)
+        L     0     RESULT             ; CAR0 -> F1
+        L     1     RESULT
+        A     1     2                  ; CAR1 -> F2
+BOUCLE: IC    Q                        ; reste-t-il des additions ?
+        14    FIN                      ; position 14 de A : compteur épuisé
+        ADD   N     - 0 1 2            ; Fk = Fk-2 + Fk-1 ; les trois RAC avancent de 2
+        31    BOUCLE
+FIN:    STOP
+N:      BIN   20                       ; nombre de termes
+UN:     NUM   +1
+Q:      ZONE  1
+Q1:     ZONE  1
+RESULT: ZONE  40                       ; 2 x N catènes

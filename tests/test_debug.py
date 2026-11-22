@@ -159,17 +159,17 @@ def test_delete_breakpoint():
 
 
 def test_cli_trace_regs_in_french(capsys):
-    assert main(["run", str(FORKJOIN), "--trace=regs", "--names", "fr"]) == 0
+    assert main(["run", str(FORKJOIN), "--seq", "--trace=regs", "--names", "fr"]) == 0
     text = capsys.readouterr().out
     assert "registres (fr)" in text and "RAC0" in text and "rcq" in text
 
 
 def test_cli_step_quit(monkeypatch, capsys):
     monkeypatch.setattr("sys.stdin", io.StringIO("q\n"))
-    assert main(["run", str(FORKJOIN), "--step"]) == 1
+    assert main(["run", str(FORKJOIN), "--seq", "--step"]) == 1
     assert "status: quit" in capsys.readouterr().out
 
 
 def test_cli_trace_steps_unchanged(capsys):
-    assert main(["run", str(FORKJOIN), "--trace"]) == 0
+    assert main(["run", str(FORKJOIN), "--seq", "--trace"]) == 0
     assert "SIMU I2 R" in capsys.readouterr().out

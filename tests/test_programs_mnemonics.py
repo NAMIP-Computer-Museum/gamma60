@@ -13,7 +13,7 @@ import pytest
 from gamma60 import data
 
 PROGRAMS = sorted((Path(__file__).parent / "programs").glob("*.g60b"))
-PSEUDO = {"VIERGE", "NUM", "ZONE"}  # assembler pseudo-instructions (docs/TOOLCHAIN.md)
+PSEUDO = {"VIERGE", "NUM", "BIN", "ZONE"}  # assembler pseudo-instructions (docs/TOOLCHAIN.md)
 LINE = re.compile(r"^\s*(?:\d{3}\s+)?(?:\w+:\s*)?(?P<to>\S+)?")
 
 
@@ -28,7 +28,7 @@ def test_program_mnemonics_known(path):
     lang = declared_language(path)
     cuts = data.cut_index(lang)
     general = data.address_index(lang) | data.central_index(lang)
-    element = None  # element named by the last cut
+    element = None  # element named by the last cut on an element (as the assembler does)
     for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         line = raw.split(";", 1)[0]
         to = LINE.match(line).group("to") if line.strip() else None
@@ -38,7 +38,8 @@ def test_program_mnemonics_known(path):
             assert to in ("00", "31") or 1 <= int(to) <= 24, f"{path.name}:{number} branch {to}"
             continue
         if to in cuts:
-            element = cuts[to]
+            if cuts[to] in data.load("topology")["classes"]:  # STOP, SIMU, PROT...: same element
+                element = cuts[to]
             continue
         if to in general:
             continue

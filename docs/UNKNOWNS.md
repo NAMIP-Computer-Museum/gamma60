@@ -6,14 +6,14 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 
 | Id | Question | État des sources | Hypothèse / décision | Réglage |
 |---|---|---|---|---|
-| U-01 | Valeurs binaires des sous-codes (sorte de coupure, type d'adresse, n° de directive centrale, directives d'élément) | **Partiel** : préfixes TK et champs connus [COURS p.33-52] ; valeurs non données | table synthétique stable, marquée reconstruite | `data/encoding.yaml` |
+| U-01 | Valeurs binaires des sous-codes (sorte de coupure, type d'adresse, n° de directive centrale, directives d'élément) | **Partiel** : préfixes TK et champs connus [COURS p.33-52] ; valeurs non données | table synthétique stable, marquée reconstruite ; au J3 : disposition des directives d'ARIT et de LOGI sur 20 bits (`element_layouts`) | `data/encoding.yaml` |
 | U-02 | Place des C.C. en code A | **Résolu en partie** : C.C. des coupures = m (bits 19-18), C.C. des adresses = n° RAC (19-18) ; directives d'élément sans variable libre : 20 bits propres (?) | — | `encoding.yaml` |
 | U-03 | Ordre complet des priorités DTQ (mis en œuvre par le DD au J2 : nature de l'élément, puis quantité avant instruction, puis U-41) | principes [B61 p.24 ; COURS p.6] ; pas de liste | urgence physique ; quantités avant instructions à nature égale ; exception lecteur de cartes | `priorities.yaml` |
 | U-04 | Ordre complet des priorités DI | « préétabli » ; classes décroissantes [MAI] | classes 0 > 1 > 2 > 3 > 4 | `priorities.yaml` |
 | U-05 | C.C.1 d'ARIT | **Partiel** : P programmée, N normalisée, A normalisée avec arrondi [COURS p.67-68 ; TFR p.2 « P, N ou A »] ; B61 donne « P, N ou R » sans définir R [table p.62] | R (langue `en`) = A (langue `fr`) : *rounded* / arrondi, cf. ARR → ROF | `directives.yaml` |
 | U-06 | Positions 1-6 du qualitatif d'ARIT | **Résolu** : > < = ≥ ≤ ≠ [B61 p.35 ; COURS p.72] | — | `qualitative.yaml` |
-| U-07 | Profils du catène qualitatif | **Partiel** : ARIT, COMP, LOGI (CBL, COURS p.119), bandes, cartes, registre A (CB, DI) ; manquent imprimante, tambour, TRAN, et les positions laissées par les autres directives | à compléter ; qualitatif remis à 0 à chaque directive | `qualitative.yaml`, `behavior.yaml` |
-| U-08 | Durées | **Partiel** : LOGI et COMP en cycles [COURS] ; DP ≈ 6 cycles par directive ; temps interne d'ARIT non séparé des transferts | voir `timings.yaml` | `timings.yaml` |
+| U-07 | Profils du catène qualitatif | **Partiel** : ARIT, COMP, LOGI (CBL, COURS p.119), bandes, cartes, registre A (CB, DI) ; manquent imprimante, tambour, TRAN, et les positions laissées par les autres directives | à compléter ; qualitatif remis à 0 à chaque directive ; la même règle vaut pour le registre A après CB (positions 1-6 seules décrites, COURS p.55) | `qualitative.yaml`, `behavior.yaml` |
+| U-08 | Durées | **Partiel** : LOGI et COMP en cycles [COURS] ; DP ≈ 6 cycles par directive ; temps interne d'ARIT non séparé des transferts | voir `timings.yaml` ; au J3 : temps interne d'ARIT = temps global − cycles de transfert, SOU = ADD, DIR = DIV ; LOGI : cycles du COURS × cycle du profil (B61 compris) ; DP : 1 cycle d'exécution par instruction après sa lecture, envoi d'une directive en 4 cycles (≈ 6 avec la lecture, COURS p.120) | `timings.yaml` |
 | U-09 | Classe de LOGI | c0 [ONDE ; BAT72 p.100] / c1 [MAI] | c0 | `topology.yaml` (surcharge : `configs/*.yaml`) |
 | U-10 | Enchaînement après l'opération d'un élément d'E/S | **Partiel** : distinction préparatoire / opératoire [COURS p.40-42] | DI après chaque directive ; le DP poursuit la séquence | `behavior.yaml` |
 | U-11 | Réaction à une erreur de clé ou de mod 7 | incident signalé (qualitatif) | incident + arrêt en mode faithful | `behavior.yaml` |
@@ -49,6 +49,7 @@ Quand une source tranche une question, la déplacer dans `MACHINE.md` avec sa r�
 | U-41 | Départage de deux DTQ de même rang (même nature, même type) | ordre « préétabli » sans détail [B61 p.24] ; tambours numérotés à partir de 100 [COURS p.51] | ordre des éléments dans la configuration | `priorities.yaml` (`dtd.tie_break`) |
 | U-42 | Instant de service d'une DTQ levée en cours de cycle | non décrit | au prochain début de cycle ; cycles alignés sur t = 0 | `behavior.yaml` (`dd_cycle_grid`) |
 | U-43 | Ordre de service entre les éléments du multiplexeur c3-c4 | le multiplexeur « intercale » les catènes des éléments lents [ONDE §3.4-3.5] | à tour de rôle derrière une seule vanne ; le circuit prend le rang de sa demande la plus prioritaire | `topology.yaml` (`multiplexer.service`) |
+| U-44 | Numéros des éléments (RNE, champ X des coupures en code A) | RNE de 7 bits ⇒ 128 éléments ; tambours numérotés « à partir de 100 » [COURS p.51] ; rien pour les autres | pupitre 0, LOGI 1, ARIT 2, COMP 3, TRAN 4, tambours 100 + ; les éléments suivants d'un même type prennent les numéros suivants | `topology.yaml` (`element_numbers`) |
 
 ## Pistes documentaires
 - Bosset, ICIP 1959 (logique interne) ; Duverger 1958 et 1961 ; brochure Bull de programmation

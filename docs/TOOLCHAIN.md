@@ -14,6 +14,16 @@ Chaîne historique [MAI ; B61 p.28-30] :
    ou d'élément, longueur de zone) fournies par ordres pupitre ou cartes **code D2** ⇒
    **UT** exécutable, figée. GGU ajoute D1 (paramètres de lancement) et D3 (jobs).
 
+## État dans l'émulateur
+- **J3** : `src/gamma60/toolchain/assembler.py` transpose le code B (`fr` ou `en`) en une image
+  mémoire en code A, en deux passes (étiquettes, puis codage), avec un listing :
+  `python -m gamma60 asm prog.g60b` (adresse, code A groupé par champs, ligne source). Fonctions
+  d'adresse : `R` (étiquette, ou numéro de ligne de la feuille relatif à l'origine) et `M`
+  (mémoire de manœuvre) deviennent un écart différentiel (bit d) ; `S` = bit s. Origine :
+  ligne `; origine: n` (0 par défaut). Seules les directives d'ARIT et de LOGI sont codées
+  (disposition reconstruite, U-01) ; les autres éléments arrivent au J5-J8.
+- **J6** : assemblage (code C), distribution (code D) → UT.
+
 ## Formats proposés pour l'émulateur
 - **Code B** : fichier texte `.g60b`, une instruction par ligne, champs séparés par des
   espaces ou en colonnes fixes (T.O. 4, C.C. 2, X 5, A.F. 2), étiquettes symboliques
@@ -27,7 +37,8 @@ Chaîne historique [MAI ; B61 p.28-30] :
   Une ligne peut commencer par un numéro de ligne à 3 chiffres (comme les feuilles de
   programmation d'époque, ex. `namip_classement.g60b`), puis une étiquette `ETIQ:`.
   Pseudo-instructions (non historiques) : `VIERGE [m]` (catène vierge ; `m` = compte du JOIN en
-  notation COURS), `NUM ±d` (nombre semi-logarithmique sur 2 catènes, forme normalisée),
+  notation COURS), `NUM ±d` (nombre semi-logarithmique sur 2 catènes, forme normalisée), `BIN n` (entier binaire
+  sur un catène, 0 ≤ n < 2^24, pour les compteurs du registre B et des directives DI / PC),
   `ZONE n` (réserve n catènes à zéro).
   Champs des directives sans variable libre : ARIT `[C.C.] V O1 O2 R` (4 cases, `-` = vide ;
   C.C. = 1re lettre P / N / A (`fr`) ou R (`en`), 2e lettre D) ; LOGI `V R`. Les fonctions

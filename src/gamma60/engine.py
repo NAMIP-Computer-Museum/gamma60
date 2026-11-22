@@ -89,3 +89,7 @@ class Engine:
         for listener in self.listeners:
             listener(rec)
         return rec
+
+    def stop(self) -> None:
+        """Drop every pending event (end of the run after an incident)."""
+        self._queue.clear()

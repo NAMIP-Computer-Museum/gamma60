@@ -1,0 +1,33 @@
+; langue: fr
+; Une séquence qui passe d'ARIT à LOGI puis revient à ARIT (coupures normales, J3) :
+; S = A + B (ARIT) ; M = MOT1 et MOT2, sur 24 bits (LOGI, intersection) ; T = S x 2 (ARIT).
+; Chaque coupure active l'élément cité et libère l'élément précédent [COURS p.38].
+DEBUT:  ARIT
+        VIERGE
+        G     0     A
+        G     1     B
+        G     2     S
+        ADD   N     - 0 1 2            ; S = A + B
+        LOGI
+        VIERGE
+        G     0     MOT1
+        G     1     MOT2
+        G     2     M
+        TCK   0     0                  ; K <- MOT1
+        TCL   0     1                  ; L <- MOT2
+        INT   24    2                  ; L <- L et K, rangé en M
+        ARIT
+        VIERGE
+        G     0     S
+        G     1     DEUX
+        G     2     T
+        MUL   N     - 0 1 2            ; T = S x 2
+        STOP
+A:      NUM   +17
+B:      NUM   +25
+S:      NUM   +0
+DEUX:   NUM   +2
+T:      NUM   +0
+MOT1:   NUM   +123456
+MOT2:   NUM   +654321
+M:      ZONE  1

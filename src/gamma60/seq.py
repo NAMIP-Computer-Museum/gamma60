@@ -6,101 +6,31 @@ ARIT and LOGI, address instructions, branches, ``SIMU`` / join / ``STOP`` (execu
 deterministic sequential order: the named branch first, as in COURS p.36-37) and the ARIT and
 LOGI directives. Anything else raises :class:`Unsupported`.
 
-Code B layout (docs/TOOLCHAIN.md): optional 3-digit line number, optional ``LABEL:``, T.O.,
-then the fields. ARIT directives: ``[C.C.] V O1 O2 R`` (``-`` = empty); LOGI directives:
-``V R``. Pseudo-instructions: ``VIERGE [m]``, ``NUM ±d``, ``ZONE n``.
+Parsing of code B is in :mod:`gamma60.codeb` (shared with the assembler).
 """
 
 from __future__ import annotations
 
 import re
 from collections import deque
-from collections.abc import Sequence
 from dataclasses import dataclass, field
 from fractions import Fraction
 from pathlib import Path
 
 from gamma60 import data
 from gamma60.catena import MASK15, bits, set_bits
+from gamma60.codeb import DATA, Line, Program, ProgramError, Syntax, binary_value, parse, split_af
 from gamma60.core.arit import ArithmeticUnit, Incident, fit
 from gamma60.core.logi import LogicalUnit
 from gamma60.memory import Memory
 from gamma60.number import Number
 
-AF_TOKENS = {"R", "S", "RS", "M", "MS"}
-PSEUDO = {"VIERGE", "NUM", "ZONE"}
 SUPPORTED_ELEMENTS = {"arithmetic", "logical"}
 NUMBERED_SPECIAL = {"virtual_engage", "virtual_release", "fork"}
 
 
-class ProgramError(ValueError):
-    """The program text is invalid."""
-
-
 class Unsupported(NotImplementedError):
     """Valid code B that the J1 interpreter does not execute yet."""
-
-
-@dataclass
-class Line:
-    source_line: int
-    address: int
-    label: str | None
-    to: str
-    args: list[str]
-    size: int
-
-
-@dataclass
-class Program:
-    lines: list[Line]
-    labels: dict[str, int]
-    language: str
-    profile: str | None
-    end: int  # first address after the program: base of the working memories
-
-    def at(self, address: int) -> Line:
-        for line in self.lines:
-            if line.address == address:
-                return line
-        raise ProgramError(f"no instruction at address {address}")
-
-
-def parse(text: str) -> Program:
-    language, profile = data.default_language(), None
-    lines: list[Line] = []
-    labels: dict[str, int] = {}
-    address = 0
-    for number, raw in enumerate(text.splitlines(), 1):
-        if m := re.match(r";\s*langue:\s*(\w+)", raw):
-            language = m.group(1)
-        if m := re.match(r";\s*profil:\s*(\w+)", raw):
-            profile = m.group(1)
-        tokens = raw.split(";", 1)[0].split()
-        if not tokens:
-            continue
-        if re.fullmatch(r"\d{3}", tokens[0]):
-            address = int(tokens.pop(0))
-        label = None
-        if tokens and tokens[0].endswith(":"):
-            label = tokens.pop(0)[:-1]
-            if label in labels:
-                raise ProgramError(f"line {number}: label {label} defined twice")
-            labels[label] = address
-        if not tokens:
-            raise ProgramError(f"line {number}: label without instruction")
-        to, args = tokens[0], tokens[1:]
-        size = 1
-        if to == "NUM":
-            size = 2
-        elif to == "ZONE":
-            size = int(args[0])
-        lines.append(Line(number, address, label, to, args, size))
-        address += size
-    if language not in data.languages():
-        raise ProgramError(f"unknown language {language!r}")
-    end = max((ln.address + ln.size for ln in lines), default=0)
-    return Program(lines, labels, language, profile, end)
 
 
 @dataclass
@@ -136,19 +66,7 @@ class Interpreter:
         self.cuts = data.cut_index(lang)
         self.address_ops = data.address_index(lang)
         self.central = data.central_index(lang)
-        d = data.load("directives")
-        self.no_progress = [
-            str(data.resolve(c)) for c in d["operand_designators"]["car_no_progression"][lang]
-        ]
-        cc1 = d["elements"]["arithmetic"]["cc1"]
-        self.cc1_modes = {
-            data.spelling(cc1["programmed_point"]["mnemonic"], lang): "P",
-            data.spelling(cc1["normalized"]["mnemonic"], lang): "N",
-            data.spelling(cc1["normalized_rounded"]["mnemonic"], lang): "A",
-        }
-        self.cc2_double = data.spelling(
-            d["elements"]["arithmetic"]["cc2"]["double_length"]["mnemonic"], lang
-        )
+        self.syntax = Syntax(lang)
         for line in self.program.lines:
             if line.to == "NUM":
                 value = Fraction(line.args[0].replace(",", "."))
@@ -156,6 +74,8 @@ class Interpreter:
                 first, second = p.to_catenae()
                 self.memory.write(line.address, first)
                 self.memory.write(line.address + 1, second)
+            elif line.to == "BIN":
+                self.memory.write(line.address, binary_value(line.args[0]))
 
     # -- operands ----------------------------------------------------------------------------
 
@@ -171,27 +91,6 @@ class Interpreter:
         if "S" in af:
             x = self.memory.read(x & MASK15) & MASK15
         return x & MASK15
-
-    @staticmethod
-    def split_af(args: Sequence[str], fields: int) -> tuple[list[str], str]:
-        """Split ``fields`` mandatory fields from the address function (R, S, M...)."""
-        args = list(args)
-        head, tail = args[:fields], args[fields:]
-        af = "".join(tail)
-        if len(head) < fields or (tail and not all(t in AF_TOKENS for t in tail)):
-            raise ProgramError(f"invalid fields {' '.join(args)!r}")
-        return head, af
-
-    def designator(self, token: str, allow: str):
-        if token == "-":
-            return None
-        if token in "0123":
-            return ("rac", int(token), True)
-        if token in self.no_progress:
-            return ("rac", self.no_progress.index(token), False)
-        if token in allow:
-            return token
-        raise ProgramError(f"invalid operand designator {token!r}")
 
     def _rac_io(self, element: str, width: int):
         racs = self.racs.setdefault(element, [0, 0, 0, 0])
@@ -216,7 +115,7 @@ class Interpreter:
 
     def run(self, entry: str | int | None = None) -> Result:
         if entry is None:
-            pc = next(ln.address for ln in self.program.lines if ln.to not in ("NUM", "ZONE"))
+            pc = next(ln.address for ln in self.program.lines if ln.to not in DATA)
         else:
             pc = self.program.labels[entry] if isinstance(entry, str) else entry
         element: str | None = None
@@ -258,10 +157,10 @@ class Interpreter:
         to = line.to
         if to == "VIERGE":
             return ("next",)  # a blank catena executes as a "never" branch [COURS p.42]
-        if to in ("NUM", "ZONE"):
+        if to in DATA:
             raise ProgramError(f"line {line.source_line}: execution reached data")
         if re.fullmatch(r"\d{2}", to):
-            args, af = self.split_af(line.args, 1)
+            args, af = split_af(line.args, 1)
             target = self.resolve_x(args[0], af)
             cond = int(to)
             taken = cond == 31 or (1 <= cond <= 24 and bits(self.register_a, cond, cond))
@@ -291,7 +190,7 @@ class Interpreter:
         if blank.to != "VIERGE":
             raise ProgramError(f"line {line.source_line}: a cut must be followed by VIERGE")
         if cut == "fork":
-            args, af = self.split_af(line.args, 1)
+            args, af = split_af(line.args, 1)
             return ("fork", self.resolve_x(args[0], af), blank_address + 1)
         if cut in NUMBERED_SPECIAL:
             raise Unsupported(f"line {line.source_line}: {line.to} (milestone J4)")
@@ -313,7 +212,7 @@ class Interpreter:
     def _address(self, line: Line, op: str, element: str | None):
         if element is None:
             raise ProgramError(f"line {line.source_line}: address instruction before any cut")
-        args, af = self.split_af(line.args, 2)
+        args, af = split_af(line.args, 2)
         car, x = int(args[0]), self.resolve_x(args[1], af)
         racs = self.racs.setdefault(element, [0, 0, 0, 0])
         if op == "load":
@@ -327,17 +226,7 @@ class Interpreter:
         return ("next",)
 
     def _arit(self, line: Line, op: str) -> None:
-        args = list(line.args)
-        cc = args.pop(0) if len(args) == 5 else ""
-        if len(args) != 4:
-            raise ProgramError(f"line {line.source_line}: ARIT expects [C.C.] V O1 O2 R")
-        mode = self.cc1_modes.get(cc[:1]) if cc[:1] != self.cc2_double else None
-        double = self.cc2_double in cc
-        if cc and mode is None and not double:
-            raise ProgramError(f"line {line.source_line}: invalid C.C. {cc!r}")
-        v, o1, o2, r = args
-        if v != "-" and not v.isdigit():
-            raise ProgramError(f"line {line.source_line}: invalid V field {v!r}")
+        f = self.syntax.arit(line.args, f"line {line.source_line}: ")
         load_raw, store_raw = self._rac_io("arithmetic", 2)
 
         def load(d):
@@ -350,12 +239,12 @@ class Interpreter:
         try:
             unit.execute(
                 op,
-                mode=mode,
-                double=double,
-                point=None if v == "-" else int(v),
-                o1=self.designator(o1, "P"),
-                o2=self.designator(o2, ""),
-                r=self.designator(r, "P"),
+                mode=f.mode,
+                double=f.double,
+                point=f.point,
+                o1=f.o1,
+                o2=f.o2,
+                r=f.r,
                 load=load,
                 store=store,
             )
@@ -363,16 +252,14 @@ class Interpreter:
             self.register_a = unit.qualitative
 
     def _logi(self, line: Line, op: str) -> None:
-        if len(line.args) != 2:
-            raise ProgramError(f"line {line.source_line}: LOGI expects V R")
-        v, r = line.args
+        f = self.syntax.logi(line.args, f"line {line.source_line}: ")
         load_raw, store_raw = self._rac_io("logical", 1)
         unit = self.units.setdefault("logical", LogicalUnit())
         try:
             unit.execute(
                 op,
-                length=int(v),
-                r=self.designator(r, "L"),
+                length=f.length,
+                r=f.r,
                 load=lambda d: load_raw(d)[0],
                 store=lambda d, value: store_raw(d, [value]),
             )
@@ -389,3 +276,6 @@ def run_file(path: str | Path, profile: str | None = None, **kwargs) -> Result:
 def run_text(text: str, profile: str | None = None, **kwargs) -> Result:
     program = parse(text)
     return Interpreter(program, data.get_profile(profile or program.profile), **kwargs).run()
+
+
+__all__ = ["Interpreter", "Line", "Program", "ProgramError", "Result", "Unsupported", "parse"]
