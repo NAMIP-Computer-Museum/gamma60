@@ -52,6 +52,8 @@ The [wiki](wiki/) presents the machine in English:
 - [Instructions](wiki/INSTRUCTIONS.md) — codes A, B, C, D and every instruction, in English and French forms.
 - [Known installations](wiki/INSTALLATIONS.md) — the 16 customers, the deployment calendar and photos.
 - [Facts and anecdotes](wiki/TRIVIA.md) — the stories around the machine, from its name to *Alphaville*.
+- [Command line](wiki/MAN.md) — the `gamma60` man page: running, assembling and observing programs
+  (traces, step-by-step debugger, memory dumps, ASCII timelines).
 - [References](wiki/REFERENCES.md) — Bull publications, related work and later analyses.
 
 ## For contributors
