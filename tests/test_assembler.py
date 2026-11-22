@@ -46,7 +46,7 @@ def test_programs_assemble(name, profile):
 
 def test_other_elements_are_not_assembled_yet():
     with pytest.raises(AsmUnsupported):
-        assemble(parse((PROGRAMS / "namip_classement.g60b").read_text(encoding="utf-8")))
+        assemble(parse((PROGRAMS / "facture.g60b").read_text(encoding="utf-8")))
 
 
 def test_cut_carries_the_element_number():

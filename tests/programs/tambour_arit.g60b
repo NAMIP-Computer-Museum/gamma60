@@ -1,0 +1,50 @@
+; langue: en
+; Recouvrement d'une mémoire auxiliaire et d'un calcul (J5) :
+;   branche TAMB : écrire 8 catènes sur le tambour 1 à l'adresse 1000, puis les relire ailleurs ;
+;                  l'attente de rotation (jusqu'à 20 ms par accès) domine
+;   branche CALC : 30 divisions sur ARIT pendant ce temps (boucle comptée par IC)
+; puis regroupement (JOIN à 2 arrivées) et STOP.
+; DAO prend l'adresse tambour continue du code B (0-25 599) ; l'assembleur la code
+; piste x 256 + position [COURS p.154]. Le RAE final est dans le qualitatif du tambour.
+START:  SIMU        CALC         R     ; la branche CALC d'abord, TAMB sur la chaîne du DP
+        VIERGE
+TAMB:   DRUM        1
+        VIERGE
+        L     0     SOURCE
+        DAO         1000               ; tambour : piste 5, position 0
+        TCD         8                  ; mémoire -> tambour, 8 catènes
+        L     0     COPIE
+        DAO         1000
+        TDC         8                  ; tambour -> mémoire : relecture
+        31          FIN          R
+CALC:   ARIT
+        VIERGE
+        LB    N           S
+        PB    Q
+        PB    Q1
+        L     0     X
+        L     1     Y
+        L     2     R
+BOUCLE: IC    Q
+        14    FINC
+        DIV   N     - Z F S            ; R = X / Y, sans progression des RAC
+        31    BOUCLE
+FINC:   31          FIN          R
+FIN:    ARIT  1                        ; regroupement : effectif à la 2e arrivée
+        VIERGE
+        STOP
+SOURCE: BIN   11
+        BIN   22
+        BIN   33
+        BIN   44
+        BIN   55
+        BIN   66
+        BIN   77
+        BIN   88
+COPIE:  ZONE  8
+N:      BIN   30
+Q:      ZONE  1
+Q1:     ZONE  1
+X:      NUM   +22
+Y:      NUM   +7
+R:      NUM   +0

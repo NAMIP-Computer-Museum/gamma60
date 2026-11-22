@@ -14,7 +14,8 @@ GAMMA60(1)                  Bull Gamma 60 emulator                  GAMMA60(1)
 python -m gamma60 run program.g60b [--profile B61|COURS] [--mode faithful|diagnostic]
                   [--names en|fr] [--trace[=steps|regs|dd]] [--step]
                   [--gantt[=elem|seq]] [--gantt-scale US] [--gantt-from US] [--gantt-to US]
-                  [--dump ZONE] ... [--seq]
+                  [--dump ZONE] ... [--seq] [--config NAME]
+                  [--tape N=FILE] ... [--drum K=FILE] ... [--dump-tape N] ...
 
 python -m gamma60 asm program.g60b [--profile B61|COURS]
 
@@ -37,10 +38,11 @@ course, COURS). The language is declared on the first line of the program (`; la
 They are assembled into **code A** (one instruction per catena) and loaded into memory, at
 address 256 by default.
 
-What the emulator runs today (milestone J4): the Program Distributor (cuts, address
+What the emulator runs today (milestone J5): the Program Distributor (cuts, address
 instructions, branches, the 20 central directives, recall chains, SIMU, joins, virtual
-elements), the Data Distributor, and the arithmetic (ARIT) and logical (LOGI) calculators.
-Drums, tapes, cards, printers, the comparator and the transcoder come with later milestones.
+elements), the Data Distributor, the arithmetic (ARIT) and logical (LOGI) calculators, the
+general comparator (COMP), the magnetic drums and the tape uniselectors with their drives
+(discontinuous mode). The transcoder, cards, printers, paper tape and the desk come later.
 
 Everything the sources leave open is an explicit, adjustable assumption in `data/*.yaml`,
 listed in [`docs/UNKNOWNS.md`](../docs/UNKNOWNS.md) (U-xx).
@@ -81,6 +83,26 @@ listed in [`docs/UNKNOWNS.md`](../docs/UNKNOWNS.md) (U-xx).
 :   Use the sequential interpreter of milestone J1 instead of the machine: no time, no Program
     Distributor, ARIT and LOGI only. Kept as a reference for results. Not compatible with
     `--gantt`.
+
+**--config** *NAME*
+:   Machine configuration in `data/configs/` (default `max`: 8 memory blocks, ARIT, LOGI, COMP,
+    4 drums, 10 uniselectors, 48 tape drives wired as on B61 p.54). `rtt_1963` is the RTT
+    installation of 1963.
+
+### Media
+
+**--tape** *N*`=`*FILE*
+:   Mount a reel on tape drive *N* (repeatable). *FILE* is YAML: `blocks:` a list of blocks
+    (lists of catenae, as numbers or `"0x…"` strings) and tape marks (`mark`), and optionally
+    `write_protected: true`. Drives without a reel are empty.
+
+**--drum** *K*`=`*FILE*
+:   Initial contents of drum *K* (repeatable): YAML `{address: [catenae…]}`, with the
+    continuous code B addresses 0-25 599. Otherwise the drum holds zeros.
+
+**--dump-tape** *N*
+:   At the end of the run, list the blocks of drive *N* (repeatable): length and first
+    catenae of each block, tape marks, current position.
 
 ### Names
 
@@ -140,16 +162,14 @@ With **dd**, **--trace** gives the same per-cycle lines.
     (n catenae, default 1) or `all` (the whole program and its working memories). Repeatable.
 
 **--gantt**, **--gantt=elem**
-:   ASCII timeline by element, printed at the end of the run. Rows: `PD` (letter of the element
-    served, `F` the PD working for itself, `S` STOP), one row per element that worked
-    (`[DIV===]` a directive, `~` waiting for the PD, `.` idle), `mem` (catenae transferred by
-    the DD in the column), and markers `^` for SIMU and join arrivals.
+:   ASCII timeline by element, printed at the end of the run: the Program Distributor, each
+    element that worked, the memory traffic, and the SIMU and join events. A legend follows.
+    Every code is listed in [TIMELINE CODES](#timeline-codes).
 
 **--gantt=seq**
-:   ASCII timeline by sequence, one row per sequence, named after the label where it starts:
-    `A`, `L`… the element working for it, `F` the PD for itself, `~` waiting for the PD, `.`
-    waiting on a recall chain; it ends with `>` (SIMU or join passed), `|` (join not yet
-    complete) or `S` (STOP).
+:   ASCII timeline by sequence, one row per sequence, named after the label where it starts,
+    showing which element works for it, when it waits and how it ends. A legend follows. See
+    [TIMELINE CODES](#timeline-codes).
 
 **--gantt-scale** *US*
 :   Microseconds per character. Default: the smallest round value (1, 2, 5, 10, 25, 50…) that
@@ -157,6 +177,102 @@ With **dd**, **--trace** gives the same per-cycle lines.
 
 **--gantt-from** *US*, **--gantt-to** *US*
 :   Window of the timeline. A bar cut by the window has no bracket on that side.
+
+## TIMELINE CODES
+
+Both timelines are plain ASCII. Column *c* covers [*c* × *scale*, (*c* + 1) × *scale*[
+microseconds from the start of the window; the ruler and every row have exactly one character
+per column, and the last column holds the end of the run. A legend in the language of `--names`
+is printed under each timeline, with the letters of the elements present.
+
+### Both views
+
+| Code | Where | Meaning |
+|---|---|---|
+| title line | first line | program, profile, total time, `(A-B us)` for a window, `1 char = N us` |
+| `us` / `seq.` | start of the second line | title of the axis (view by element / by sequence) |
+| numbers | second line | time in microseconds, each one starting on its tick |
+| `\|` | ruler | labelled tick, every 20 columns |
+| `+` | ruler | half tick, every 10 columns |
+| `-` | ruler | other columns |
+
+### View by element (`--gantt`)
+
+Row `PD` (`DP` with `--names fr`), the Program Distributor:
+
+| Code | Meaning |
+|---|---|
+| `A`, `L`, `C`, `D`, `M`… | the PD reads an instruction for that element (first letter of its name, see below) |
+| `F` | the PD works for itself: start, SIMU, its own recall chain |
+| `S` | STOP |
+| `.` | the PD is free |
+
+When several instructions fall in one column, an element letter wins over `F`.
+
+One row per element that worked, titled `ARIT`, `LOGI`, `COMP`, `DRUM1`, `MATA2`…
+(`TAMB1`, `DERU2`… with `--names fr`):
+
+| Code | Meaning |
+|---|---|
+| `[` | start of a directive |
+| `]` | end of a directive |
+| `ADD`, `DIV`, `TCD`, `TRA`… | code B mnemonic of the directive, in the language of `--names`, when it fits in the bar |
+| `K`, `L` | short forms of TSK / TCK (load K) and TSL / TCL (load L) |
+| `=` | the rest of a directive |
+| `===` (no brackets) | a directive shorter than 3 columns: the element is busy |
+| `=` instead of `[` or `]` | bar cut by `--gantt-from` / `--gantt-to`: the directive began before, or ends after, the window |
+| `~` | the element waits for the PD (instruction request raised) |
+| `.` | idle |
+
+Row `mem`, the Data Distributor:
+
+| Code | Meaning |
+|---|---|
+| `1` … `9` | catenae transferred in the column (9 or more: `9`) |
+| `.` | no transfer |
+
+Event markers, on the two lines under `mem`:
+
+| Code | Meaning |
+|---|---|
+| `^` | an event in this column |
+| `20 us SIMU` | a SIMU forks the sequence at that time |
+| `1000 us JOIN 1/2` | arrival number 1 at a join that waits for 2 |
+
+### View by sequence (`--gantt=seq`)
+
+Row title: the label where the sequence starts (entry point, branch of a SIMU, or the label of
+a join once passed), cut to 6 characters; `@00266` (its address) when there is no label.
+
+| Code | Meaning |
+|---|---|
+| `A`, `L`, `C`, `D`, `M`… | an element works for this sequence: the PD reads its instructions for that element, or the element executes its directive |
+| `F` | the PD works for itself for this sequence (SIMU, blank catena of the PD's chain) |
+| `~` | the sequence waits for the PD (instruction request, or the PD's own chain) |
+| `.` | the sequence waits on the recall chain of a busy element |
+| blank | the sequence does not exist yet, or has ended |
+| `>` | ends by a fork (SIMU) or a join passed: the work goes on under the label of the join |
+| `\|` | stops at a join not yet complete |
+| `S` | ends by STOP |
+
+`.` means *idle* on an element row but *waiting on a recall chain* on a sequence row.
+
+### Element letters
+
+First letter of the displayed name, so it depends on `--names`:
+
+| Element | `en` | `fr` |
+|---|---|---|
+| ARIT | `A` | `A` |
+| LOGI | `L` | `L` |
+| COMP | `C` | `C` |
+| drum | `D` (DRUM) | `T` (TAMB) |
+| uniselector | `M` (MATA) | `D` (DERU) |
+
+`D` thus means a drum in English and a uniselector in French; the legend under each timeline
+gives the letters actually used (`A=ARIT D=DRUM1,DRUM2`). With the card units, the printer,
+the paper tape and the transcoder (milestone J8) several elements will share a letter (`C`,
+`P`, `T`): this will be resolved then.
 
 ## EXAMPLES
 
@@ -210,12 +326,34 @@ LOGI   .~~~.....[K]~~~~...[L]~.[MUL===================================]~........
 mem    21212111.12111.131.1..1.............12121......................12131111.22.....121
        ^                                       ^                         ^
        ^ 20 us SIMU ; 1000 us JOIN 1/2 ; 1660 us JOIN 2/2
+
+legend:
+  [DIV===] directive (code B mnemonic)   === short directive   ~ waiting for the PD   . idle
+  PD: letter of the element served (A=ARIT L=LOGI)   F the PD for itself   S STOP   . free
+  mem: catenae transferred by the DD in the column (1-9, . none)   ^ events listed above
 ```
 
-The same run by sequence, and a program whose two branches share the only ARIT:
+The same run by sequence: BRA stops at the join (`|`), BRL passes it (`>`) and the work goes
+on as FIN:
 
 ```
 $ python -m gamma60 run tests/programs/parallele.g60b --gantt=seq
+...
+START  >
+BRL     F~~LLLLLLLL~~~~~~LLLLL~LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL>
+BRA       FF~~~~~AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|
+FIN                                                                       AAAA~AAAAAAAAAS
+
+legend:
+  letter of the element working for the sequence (A=ARIT L=LOGI)   F the PD for itself
+  ~ waiting for the PD   . waiting on a recall chain (busy element)   blank: not running
+  end: > fork (SIMU) or join passed   | stops at a join not yet complete   S STOP
+```
+
+A program whose two branches share the only ARIT: the second one waits on ARIT's recall
+chain (`.`) until the first is done:
+
+```
 $ python -m gamma60 run tests/programs/forkjoin_tumlin.g60b --gantt=seq
 ```
 
@@ -241,6 +379,26 @@ watch LOGI
 status: quit
 ```
 
+Read a block from tape drive 3 into memory, then show the reel and the buffer:
+
+```
+$ python -m gamma60 run tests/programs/lecture_bande.g60b --tape 3=tests/media/bloc_128.yaml       --dump-tape 3 --dump TAMPON 2
+...
+memory 00268 - 00269:
+      00268  TAMPON   000001  key 1
+      00269           000002  key 2
+drive 3: 3 block(s), position 1
+    0   128 catenae  000001 000002 000003 000004 000005 000006 ...
+    1  tape mark
+    2    16 catenae  111111 222222 333333 444444 000005 000006 ...
+```
+
+A drum transfer hiding 30 divisions of ARIT behind the rotation of the drum:
+
+```
+$ python -m gamma60 run tests/programs/tambour_arit.g60b --gantt
+```
+
 A Data Distributor scenario: the drum is served before ARIT and never misses its position:
 
 ```
@@ -255,6 +413,9 @@ $ python -m gamma60 dd tests/scenarios/drum_arit.yaml --trace --names fr
 
 `tests/scenarios/*.yaml`
 :   Data Distributor scenarios for the **dd** command.
+
+`tests/media/*.yaml`
+:   Tape reels for **--tape** (e.g. `bloc_128.yaml`).
 
 `data/*.yaml`
 :   Tables of the machine and every assumption (profiles, timings, priorities, code A
@@ -271,7 +432,8 @@ $ python -m gamma60 dd tests/scenarios/drum_arit.yaml --trace --names fr
 
 **2**
 :   Invalid program (`error: …`), code not supported yet (`not assembled yet`, `not supported
-    yet`), invalid `--dump` zone, or `--gantt` with `--seq`.
+    yet`), invalid `--dump` zone, `--gantt` with `--seq`, or a drive or drum missing from the
+    configuration.
 
 ## NOTES
 

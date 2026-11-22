@@ -293,7 +293,7 @@ def test_cli_simu_runs_on_the_machine(capsys):
 def test_cli_asm(capsys):
     assert main(["asm", str(PROGRAMS / "test-arith01.g60b")]) == 0
     assert "00261  1111" in capsys.readouterr().out
-    assert main(["asm", str(PROGRAMS / "namip_classement.g60b")]) == 2
+    assert main(["asm", str(PROGRAMS / "facture.g60b")]) == 2
 
 
 def test_cli_program_error(capsys, tmp_path):

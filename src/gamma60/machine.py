@@ -1,4 +1,8 @@
-"""The machine (J3-J4): engine, store, Data Distributor, Program Distributor, ARIT and LOGI.
+"""The machine (J3-J5): engine, store, Data Distributor, Program Distributor and the elements.
+
+The elements come from a configuration (``data/configs/``, default ``max``): ARIT, LOGI, COMP,
+the drums and the uniselectors with their tape drives (wired as on B61 p.54). Element numbers:
+``topology.yaml`` (U-44).
 
 A code B program is assembled into code A, loaded at its origin (default 256, after the table
 of the recall chain registers, U-30) and started by the PD as one of its own sequences (an
@@ -17,14 +21,29 @@ from gamma60 import codeb, data
 from gamma60.catena import bits
 from gamma60.data_distributor import DataDistributor
 from gamma60.elements.base import IDLE
+from gamma60.elements.comparator import Comparator
+from gamma60.elements.drum import Drum
 from gamma60.elements.processing import Arithmetic, Logical
+from gamma60.elements.tape import TapeDrive, Uniselector
 from gamma60.engine import Engine
 from gamma60.memory import Memory
 from gamma60.number import Number
 from gamma60.program_distributor import ProgramDistributor
 from gamma60.toolchain.assembler import Image, assemble
 
-ELEMENT_CLASSES = {"arithmetic": Arithmetic, "logical": Logical}
+SINGLE_ELEMENTS = {"arithmetic": Arithmetic, "logical": Logical, "comparator": Comparator}
+DEFAULT_CONFIG = "max"
+
+
+def uniselector_wiring(config: str, unit: int) -> list[int]:
+    """Drives wired to uniselector ``unit`` (1-10): two groups of five [B61 p.54 ; COURS p.144]."""
+    table = (
+        data.load(f"configs/{config}").get("uniselector_wiring")
+        or data.load(f"configs/{DEFAULT_CONFIG}")["uniselector_wiring"]
+    )
+    group, index = divmod(unit - 1, 5)
+    low, high = table[f"U{index + 1}"]
+    return list(range(low + 24 * group, high + 24 * group + 1))
 
 
 @dataclass
@@ -49,21 +68,39 @@ class Machine:
     profile: data.Profile
     mode: str = "faithful"
     observer: object | None = None  # debug observer: called after each instruction read
+    config: str = DEFAULT_CONFIG
     engine: Engine = field(init=False)
     memory: Memory = field(init=False)
     dd: DataDistributor = field(init=False)
     dp: ProgramDistributor = field(init=False)
     elements: dict[str, object] = field(init=False, default_factory=dict)
+    tape_drives: dict[int, TapeDrive] = field(init=False, default_factory=dict)
     status: str = field(init=False, default="running")
     message: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
         self.engine = Engine()
-        self.memory = Memory(self.profile, self.profile.memory_blocks_max)
-        self.dd = DataDistributor(self.engine, self.memory, self.profile, mode=self.mode)
+        cfg = data.get_config(self.config)
+        p = self.profile  # blocks of the configuration, within the bounds of the profile
+        blocks = min(max(cfg.memory_blocks, p.memory_blocks_min), p.memory_blocks_max)
+        self.memory = Memory(p, blocks)
+        self.dd = DataDistributor(
+            self.engine, self.memory, self.profile, mode=self.mode, classes=cfg.classes
+        )
         numbers = data.resolve(data.load("topology")["element_numbers"])
-        for kind, cls in ELEMENT_CLASSES.items():
-            self.elements[kind] = cls(self, number=numbers[kind])
+        units = data.resolve(data.load("topology")["unit_numbers"])
+        for kind, cls in SINGLE_ELEMENTS.items():
+            if cfg.elements.get(kind, 0):
+                self.elements[kind] = cls(self, number=numbers[kind])
+        for k in range(1, cfg.elements.get("drum", 0) + 1):
+            number = units["drum"]["first"] + units["drum"]["step"] * (k - 1)
+            self.elements[f"drum{k}"] = Drum(self, f"DRUM{k}", number, k)
+        for n in range(1, cfg.elements.get("tape_units", 0) + 1):
+            self.tape_drives[n] = TapeDrive(n)
+        for k in range(1, cfg.elements.get("uniselector", 0) + 1):
+            number = units["uniselector"]["first"] + units["uniselector"]["step"] * (k - 1)
+            wired = uniselector_wiring(self.config, k)
+            self.elements[f"uniselector{k}"] = Uniselector(self, f"MATA{k}", number, k, wired)
         self.dp = ProgramDistributor(self)
         for address, value in self.image.words.items():
             self.memory.write(address, value)
@@ -115,10 +152,16 @@ class Machine:
                 self.engine.record("machine", "warning", text=self.message)
 
 
-def build(text: str, profile: str | None = None, mode: str = "faithful", observer=None) -> Machine:
+def build(
+    text: str,
+    profile: str | None = None,
+    mode: str = "faithful",
+    observer=None,
+    config: str = DEFAULT_CONFIG,
+) -> Machine:
     program = codeb.parse(text)
     prof = data.get_profile(profile or program.profile)
-    return Machine(assemble(program, prof), prof, mode, observer)
+    return Machine(assemble(program, prof), prof, mode, observer, config)
 
 
 def run_text(text: str, profile: str | None = None, **kwargs) -> Result:

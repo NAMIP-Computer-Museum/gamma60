@@ -103,3 +103,16 @@ dd_cycle_grid:               # instant de service d'une DTQ (U-42)
   unknown: U-42
 
 dd_starvation_cycles: 50     # mode diagnostic : alerte si une DTQ attend plus de N cycles (réglage moderne)
+
+drum:                        # tambour (U-46)
+  value: {missed_position: wait_one_revolution, address_overflow: incident}
+  status: hypothesis         # un catène servi trop tard : un tour perdu [B61 p.24]
+  unknown: U-46
+
+tape:                        # bobines (U-48)
+  value: {write_truncates_following_blocks: true, write_protect_position: 16, overrun: bad_read,
+          read_beyond_last_block: bad_read}
+  status: hypothesis         # interdiction d'écriture : 16 [COURS p.150] ou 15 [COURS p.144]
+  unknown: U-48
+
+operator_delay_us: 30000000  # délai de l'« opérateur » simulé (MAN, MAI, REM) : réglage moderne

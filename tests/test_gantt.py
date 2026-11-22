@@ -52,11 +52,12 @@ def test_bars_start_and_end_in_the_columns_of_their_dates():
     assert "[DIV" in row(lines, "ARIT") and "[MUL" in row(lines, "LOGI")
     stop = next(r.time for r in m.engine.trace if r.what == "stop")
     assert row(lines, "PD")[stop // 25] == "S"
-    marks = lines[-2][LABEL:]
+    mem = next(i for i, line in enumerate(lines) if line.startswith("mem"))
+    marks = lines[mem + 1][LABEL:]
     for r in m.engine.trace:
         if r.what == "join":
             assert marks[r.time // 25] == "^"
-    assert lines[-1].endswith("1000 us JOIN 1/2 ; 1660 us JOIN 2/2")
+    assert lines[mem + 2].endswith("1000 us JOIN 1/2 ; 1660 us JOIN 2/2")
 
 
 def test_mem_counts_the_transfers():
@@ -145,3 +146,26 @@ def test_gantt_does_not_change_the_run():
     Gantt(a, debug.Names("en")).by_sequence()
     b = machine.run_file(PROGRAMS / "parallele.g60b").machine
     assert a.engine.trace == b.engine.trace
+
+
+# --- legends ------------------------------------------------------------------------------------
+
+
+def test_legend_under_each_view():
+    _, g = chart()
+    lines = g.by_element()
+    start = lines.index("legend:")
+    legend = "\n".join(lines[start:])
+    assert "A=ARIT L=LOGI" in legend and "~ waiting for the PD" in legend and "mem:" in legend
+    assert "cut by the time window" not in legend  # only shown with a window
+    seq = g.by_sequence()
+    legend = "\n".join(seq[seq.index("legend:") :])
+    assert ". waiting on a recall chain" in legend and "| stops at a join" in legend
+
+
+def test_legend_with_a_window_and_in_french():
+    _, g = chart(language="fr", start=500, stop=1100)
+    lines = g.by_element()
+    legend = "\n".join(lines[lines.index("legende:") :])
+    assert "fenetre de temps" in legend and "DP :" in legend
+    assert all(ord(c) < 128 for line in lines for c in line)  # plain ASCII in both languages

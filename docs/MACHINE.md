@@ -372,6 +372,17 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
 - Temps : B61 30 / 50 / 10 µs par catène ; COURS 5+3L, 5+5L, 2+L, 2+3L cycles.
 - Incidents : 16-17 décomptage, 18-19 comparaison, 20-21 transfert, 22 directive décodée
   erronée, 23 longueur > 255, 24 regroupement.
+- Directives : X = longueur en catènes (≤ 255) ; une longueur nulle n'exécute rien et laisse le
+  qualitatif vierge ; RAC 0 implicite ; le C.C. nomme le RAC 1 ou 2 quand un seul est utilisé
+  (CMP, TRR). [COURS p.75]
+- Déroulement : les demandes de transfert des opérandes sont émises en avance sur la
+  comparaison ; le travail s'arrête à la première inégalité ou au passage à 0 du décomptage ;
+  en fin de CMP, le RAC 0 contient l'adresse du dernier catène comparé + 3, le RAC 1 ou 2
+  + 2 ; en fin de CDB, les trois + 2 ; pour une longueur de 1 ou 2, contenu initial + longueur.
+  EFL et TRR : RAC avancés de la longueur. [COURS p.75-77]
+- Qualitatif de CDB : 1 x > p et q ; 2 x < p et q ; 3 p ≤ x ≤ q ; 4 x = p ; 5 x = q ;
+  6 p < x < q ; 7 x nul ; 8 x tout à 1. CMP : 1 > ; 2 < ; 3 = ; 4-10 lus sur un scan partiel
+  (U-49). [COURS p.76-77]
 
 ### TRAN (TRAD) [B61 p.37-39 ; COURS p.83-110]
 - Transcodage, mise en page, condensation/expansion, transposition ligne → colonne des cartes,
@@ -393,6 +404,14 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
   selon ONDE) ; tour 20 ms ; accès moyen 10 ms ; 100 µs [B61] ou 98 µs [COURS] par catène.
 - 1 RAC (adresse MC) ; adresse tambour dans le registre local RAE, posée par DAO :
   piste × 256 + position (0-199), adresses discontinues. Jusqu'à 4 tambours.
+- 98 µs par position (20 000 / 204) ; 100 µs en moyenne sur un long transfert, la zone de
+  4 positions servant à la commutation de piste : les « 100 µs » de B61 sont donc une moyenne.
+  [COURS p.152-153]
+- En code B, DAO prend l'adresse continue 0-25 599 ; le programme de transposition la convertit
+  en piste × 256 + position. RAE et RAC progressent à chaque catène ; au changement de piste,
+  le RAE progresse de 57. Après un transfert, le qualitatif porte le RAE final dans ses
+  15 positions de droite. [COURS p.153-154]
+- Un catène qui n'est pas servi à temps coûte un tour de 20 ms. [B61 p.24]
 
 ### Unisélecteurs et dérouleurs (MATA / DERU) [B61 p.13, p.26, p.53-55 ; COURS p.137-151]
 - L'élément est l'unisélecteur (≤ 10, 2 groupes de 5, 24 dérouleurs par groupe, 48 au total ;
@@ -409,6 +428,23 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
   occupation).
 - Modes discontinu / continu (« programmes standard ») ; blocs-marques de 16 catènes à 0 ;
   JUM (lecture sans transfert) ; DEL (zones défectueuses).
+- Le catène longueur donne, selon le COURS, le nombre de catènes du bloc : il n'est pas
+  transféré mais gardé dans un registre de l'unisélecteur ; en écriture, le bloc est composé en
+  mémoire avec ses deux catènes longueur, et le RAC pointe le premier. [COURS p.140-141]
+- Lecture avant : le RAC progresse ; lecture arrière : il est garni de l'adresse du dernier
+  catène et régresse ; l'image en mémoire est la même. [COURS p.141]
+- Marche discontinue : 5 ms d'accélération et 5 ms de décélération par bloc ; rebobinage à
+  3 m/s (4 min pour 730 m). [COURS p.138-139]
+- Directives : préparatoires (ECR / WRI, LAV / REF, LAR / REB), avec le n° du dérouleur,
+  rémanentes au-delà des coupures ; d'exécution, sans variable libre (TRA, SAU / JUM,
+  EFF / DEL, ECM / WRM) ; de service (REB / SPO, REM / SPN, MAN, MAI), après lesquelles
+  l'unisélecteur redemande aussitôt une instruction pendant que le dérouleur travaille seul et
+  signale son occupation (position 21) ; une directive d'exécution sur un dérouleur occupé
+  attend la fin du service. La coupure porte sur l'unisélecteur, qui a le RAC et la chaîne de
+  reprise. [COURS p.145-147]
+- Qualitatif : 15 ou 16 interdiction d'écriture (U-48), 18 mauvaise lecture ou enregistrement,
+  19 bloc-marque, 20 approche de fin de bande, 21 dérouleur occupé, avec 23 ; 24 incidents
+  nécessitant une intervention (sécurité d'appel, circuits). [COURS p.137-150]
 
 ### Cartes [B61 p.42-43]
 - 300 cartes/min ; magasin H1 3 000 ; piste secondaire S (800 vierges) ; case de réception

@@ -267,3 +267,65 @@ def text(value: int) -> str:
     if kind == ADDRESS:
         return f"{b[:3]} {b[3:5]} {b[5:7]} {b[7]} {b[8]} {b[9:]}"
     return f"{b[:4]} {b[4:]}"
+
+
+# --- element directives with a free variable (COMP, drum, uniselector: U-01) ----------------------
+
+FREE_VARIABLE_ELEMENTS = ("comparator", "drum", "uniselector")
+CC_DIRECTIVES = {"simple_compare", "transfer"}  # C.C. = CAR 1 or 2 [COURS p.75]
+
+
+def _free_layout(element: str) -> dict:
+    return _encoding()["free_variable_layouts"][element]
+
+
+def encode_free(
+    element: str, op: str, x: int = 0, cc: int = 0, d: bool = False, s: bool = False
+) -> int:
+    """Characteristic (bits 20-1) of a directive: type 20-18, d 17, s 16, X 15-1 [COURS p.41]."""
+    layout = _free_layout(element)
+    execution = _encoding()["free_variable_layouts"]["execution_order"]
+    if element == "uniselector" and op in execution:
+        type_, x, d, s = layout["execution"], execution.index(op), False, False
+    elif op in CC_DIRECTIVES and element == "comparator":
+        if cc not in (1, 2):
+            raise ValueError(f"{op} needs C.C. 1 or 2 (the CAR of the second operand)")
+        type_ = layout[f"{op}_{cc}"]
+    else:
+        type_ = layout[op]
+    if not 0 <= x <= 0o77777:
+        raise ValueError(f"X {x} outside 0-32767")
+    return (type_ << 17) | (int(d) << 16) | (int(s) << 15) | x
+
+
+def decode_free(element: str, characteristic: int) -> tuple[str, int, bool, bool, int]:
+    """(directive, C.C., d, s, X) of a characteristic."""
+    layout = _free_layout(element)
+    type_ = bits(characteristic, 20, 18)
+    d, s, x = (
+        bool(bits(characteristic, 17, 17)),
+        bool(bits(characteristic, 16, 16)),
+        bits(characteristic, 15, 1),
+    )
+    by_type = {v: k for k, v in layout.items()}
+    name = by_type.get(type_)
+    if name is None:
+        raise DecodeError(f"unknown {element} directive type {type_}")
+    if name == "execution":
+        order = _encoding()["free_variable_layouts"]["execution_order"]
+        if x >= len(order):
+            raise DecodeError(f"unknown {element} execution directive {x}")
+        return order[x], 0, False, False, 0
+    if element == "comparator" and name[-2:] in ("_1", "_2"):
+        return name[:-2], int(name[-1]), d, s, x
+    return name, 0, d, s, x
+
+
+def has_address_function(element: str, characteristic: int) -> bool:
+    """True when the PD must apply d / s to the X of this directive before sending it."""
+    if element not in FREE_VARIABLE_ELEMENTS:
+        return False
+    return not (
+        element == "uniselector"
+        and bits(characteristic, 20, 18) == _free_layout(element)["execution"]
+    )

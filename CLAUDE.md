@@ -69,7 +69,8 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - Tests : `pytest -q` · Lint : `ruff check . && ruff format --check .`
 - Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b [--profile COURS]
   [--trace | --trace=regs | --trace=dd | --step] [--names en|fr] [--mode diagnostic]
-  [--dump <adresse|étiquette> [n] | --dump all] [--gantt[=elem|seq]]`
+  [--dump <adresse|étiquette> [n] | --dump all] [--gantt[=elem|seq]] [--config max]
+  [--tape N=fichier.yaml] [--drum K=fichier.yaml] [--dump-tape N]`
   (machine : DP avec simultanéité, DD, ARIT, LOGI ; `--seq` : interpréteur J1, sans temps)
 - Listing d'assemblage : `python -m gamma60 asm tests/programs/<nom>.g60b`
 - Scénario du Distributeur de Données : `python -m gamma60 dd tests/scenarios/<nom>.yaml

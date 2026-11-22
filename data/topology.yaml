@@ -43,6 +43,13 @@ circuit_assignment:          # circuit d'un élément quand sa classe en a plusi
   unknown: U-32
 
 element_numbers:             # numéro d'élément (RNE, champ X des coupures) du premier élément de chaque type
-  value: {desk: 0, logical: 1, arithmetic: 2, comparator: 3, transcoder: 4, drum: 100}
+  value: {desk: 0, logical: 1, arithmetic: 2, comparator: 3, transcoder: 4, drum: 100, uniselector: 10}
   status: hypothesis         # seuls les tambours sont donnés : « à partir de 100 » [COURS p.51]
+  unknown: U-44
+
+unit_numbers:                # code B des coupures numérotées : X = numéro de l'unité (tambour k, unisélecteur k)
+  value:                     # → numéro d'élément = premier numéro + pas × (k - 1)
+    drum: {first: 100, step: 1}
+    uniselector: {first: 10, step: 2}   # deux numéros consécutifs par unisélecteur (marche continue) [COURS p.147]
+  status: hypothesis
   unknown: U-44

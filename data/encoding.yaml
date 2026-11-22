@@ -45,3 +45,33 @@ element_layouts:
     directive: [20, 17]       # 15 directives
     length: [16, 12]          # l = 0-24
     r: [11, 8]                # R : 0-8
+
+# Directives avec variable libre (TK 1111, type bits 20-18, d 17, s 16, X 15-1) [COURS p.40-41] :
+# types RECONSTRUITS (U-01) pour COMP, le tambour et les unisélecteurs. « 8 directives avec
+# variable libre au plus » par élément [COURS p.41]. Le type 7 de l'unisélecteur est réservé aux
+# directives d'exécution, sans variable libre [COURS p.145-146] : le X porte alors leur rang.
+free_variable_layouts:
+  synthetic: true
+  status: hypothesis
+  unknown: U-01
+  comparator:          # le C.C. de CMP / TRR (RAC 1 ou 2) est porté par le type [COURS p.75]
+    simple_compare_1: 0
+    simple_compare_2: 1
+    two_bounds_compare: 2
+    erase: 3
+    transfer_1: 4
+    transfer_2: 5
+  drum:
+    set_drum_origin: 0
+    core_to_drum: 1
+    drum_to_core: 2
+  uniselector:
+    write: 0
+    read_forward: 1
+    read_backward: 2
+    rewind: 3
+    rewind_and_request: 4
+    normal_request: 5
+    incident_request: 6
+    execution: 7       # X = 0 read_transfer, 1 skip_block, 2 erase, 3 write_tape_mark
+  execution_order: [read_transfer, skip_block, erase, write_tape_mark]

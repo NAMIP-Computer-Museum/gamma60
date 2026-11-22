@@ -25,10 +25,43 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from gamma60 import data
 from gamma60.code_a import CUT, ELEMENT
-from gamma60.debug import Names
+from gamma60.debug import Names, unit_name
 
 LABEL = 7
+
+#: legends printed under the timelines (plain ASCII in both languages)
+LEGEND = {
+    "en": {
+        "title": "legend",
+        "bar": "[DIV===] directive (code B mnemonic)   === short directive   ~ waiting for the PD"
+        "   . idle",
+        "cut": "=DIV===   no bracket on a side cut by the time window",
+        "pd": "{pd}: letter of the element served ({letters})   F the PD for itself   S STOP"
+        "   . free",
+        "mem": "mem: catenae transferred by the DD in the column (1-9, . none)"
+        "   ^ events listed above",
+        "seq": "letter of the element working for the sequence ({letters})   F the PD for itself",
+        "wait": "~ waiting for the PD   . waiting on a recall chain (busy element)   blank: not running",
+        "end": "end: > fork (SIMU) or join passed   | stops at a join not yet complete   S STOP",
+    },
+    "fr": {
+        "title": "legende",
+        "bar": "[DIV===] directive (mnemonique du code B)   === directive courte   ~ attente du DP"
+        "   . repos",
+        "cut": "=DIV===   pas de crochet du cote coupe par la fenetre de temps",
+        "pd": "{pd} : lettre de l'element servi ({letters})   F le DP pour lui-meme   S STOP"
+        "   . libre",
+        "mem": "mem : catenes transferes par le DD dans la colonne (1-9, . aucun)"
+        "   ^ evenements ci-dessus",
+        "seq": "lettre de l'element qui travaille pour la sequence ({letters})"
+        "   F le DP pour lui-meme",
+        "wait": "~ attente du DP   . attente sur une chaine de reprise (element occupe)"
+        "   blanc : hors sequence",
+        "end": "fin : > separation (SIMU) ou JOIN franchi   | arret sur un JOIN incomplet   S STOP",
+    },
+}
 TICK = 20  # columns between two labelled ticks; "+" half way
 SCALES = (1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000)
 SHORT = {
@@ -82,7 +115,7 @@ class Gantt:
         self.scale = self.scale or auto_scale(self.stop - self.start)
         self.columns = (self.stop - self.start) // self.scale + 1
         self.kind_of = {e.name: k for k, e in m.elements.items()}
-        self.letter = {k: self.names.element(k)[0] for k in m.elements}
+        self.letter = {k: self.names.element(e.kind)[0] for k, e in m.elements.items()}
         self.addr_label = {a: lab for lab, a in m.image.labels.items()}
         self._replay()
 
@@ -262,6 +295,13 @@ class Gantt:
         body = (name if inner >= len(name) else "") + "=" * inner
         row[c0 : c1 + 1] = list(left + body[:inner] + right)
 
+    def _mnemonic(self, kind: str, op: str) -> str:
+        """Code B mnemonic of a directive in the language of the names (K / L for TSK / TSL)."""
+        if op in ("transfer_shift_to_K", "transfer_shift_to_L"):
+            return SHORT[op]
+        by_op = {v: k for k, v in data.element_index(kind, self.names.language).items()}
+        return by_op.get(op) or SHORT.get(op, op[:3].upper())
+
     def by_element(self) -> list[str]:
         m = self.machine
         lines = [self.title(), *self.axis("us")]
@@ -276,8 +316,8 @@ class Gantt:
                     for c in range(cols[0], cols[1] + 1):
                         row[c] = "~"
             for a, b, op in element.log:
-                self._bar(row, a, b, SHORT.get(op, op[:3].upper()))
-            lines.append(self.names.element(kind).ljust(LABEL) + "".join(row))
+                self._bar(row, a, b, self._mnemonic(element.kind, op))
+            lines.append(unit_name(element, self.names)[: LABEL - 1].ljust(LABEL) + "".join(row))
         lines.append(
             "mem".ljust(LABEL) + "".join("." if n == 0 else str(min(n, 9)) for n in self.mem)
         )
@@ -288,6 +328,25 @@ class Gantt:
                 marks[self.col(t)] = "^"
             lines.append(" " * LABEL + "".join(marks).rstrip())
             lines.append(" " * LABEL + "^ " + " ; ".join(f"{t} us {s}" for t, s in shown))
+        keys = ["bar", "pd", "mem"]
+        if self.start or self.stop < self.machine.engine.now:
+            keys.insert(1, "cut")
+        return [*lines, "", *self._legend(keys)]
+
+    def _letters(self) -> str:
+        """``A=ARIT L=LOGI D=DRUM1,DRUM2`` for the elements that worked."""
+        groups: dict[str, list[str]] = {}
+        for element in self.machine.elements.values():
+            if element.log:
+                letter = self.names.element(element.kind)[0]
+                groups.setdefault(letter, []).append(unit_name(element, self.names))
+        return " ".join(f"{k}={','.join(v)}" for k, v in groups.items())
+
+    def _legend(self, keys: list[str]) -> list[str]:
+        text = LEGEND[self.names.language]
+        values = {"pd": self.names.say("pd"), "letters": self._letters()}
+        lines = [f"{text['title']}:"]
+        lines += ["  " + text[k].format(**values) for k in keys]
         return lines
 
     def by_sequence(self) -> list[str]:
@@ -296,4 +355,4 @@ class Gantt:
             if row.count(" ") == len(row):
                 continue
             lines.append(seq[: LABEL - 1].ljust(LABEL) + "".join(row).rstrip())
-        return lines
+        return [*lines, "", *self._legend(["seq", "wait", "end"])]

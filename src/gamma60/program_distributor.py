@@ -34,7 +34,17 @@ from typing import Any
 
 from gamma60 import data
 from gamma60.catena import MASK15, MASK24, bits, set_bits
-from gamma60.code_a import ADDRESS, ALWAYS, BRANCH, CENTRAL, ELEMENT, NEVER, DecodeError, decode
+from gamma60.code_a import (
+    ADDRESS,
+    ALWAYS,
+    BRANCH,
+    CENTRAL,
+    ELEMENT,
+    NEVER,
+    DecodeError,
+    decode,
+    has_address_function,
+)
 from gamma60.core.arit import compare_positions, set_position
 from gamma60.data_distributor import INSTRUCTION, PD, QUANTITY, READ, WRITE, Request
 from gamma60.elements.base import IDLE, OPERATING, WAITING
@@ -235,7 +245,15 @@ class ProgramDistributor:
             if element is None:
                 self.m.incident(f"directive at {address:05d} before any cut")
                 return True
-            r.rsdp = r.redp
+            characteristic = bits(r.redp, 20, 1)
+            if has_address_function(element.kind, characteristic):  # d / s on the X [COURS p.75]
+                xd = bits(characteristic, 15, 1)
+                if bits(characteristic, 17, 17):
+                    xd = (address + xd) & MASK15
+                if bits(characteristic, 16, 16):
+                    xd = (yield from self._read(xd)) & MASK15
+                characteristic = set_bits(set_bits(characteristic, 17, 16, 0), 15, 1, xd)
+            r.rsdp = set_bits(r.redp, 20, 1, characteristic)
             yield ("wait", self.send_us)
             self.iar.address[element.number] = r.rapp
             self.m.engine.record("PD", "directive", element=element.name, iar=r.rapp)

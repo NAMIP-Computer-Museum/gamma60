@@ -17,6 +17,7 @@ import sys
 from pathlib import Path
 
 from gamma60 import codeb, data, debug, gantt, machine, seq, synthetic
+from gamma60.elements.tape import TapeDrive
 from gamma60.number import NotANumber
 from gamma60.program_distributor import MachineUnsupported
 from gamma60.toolchain.assembler import AsmUnsupported, assemble, listing_lines
@@ -51,6 +52,21 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--gantt-scale", type=int, metavar="US", help="microseconds per character")
     run.add_argument("--gantt-from", type=int, default=0, metavar="US", help="window start")
     run.add_argument("--gantt-to", type=int, metavar="US", help="window end")
+    run.add_argument("--config", default="max", help="machine configuration (data/configs/)")
+    run.add_argument(
+        "--tape", action="append", default=[], metavar="N=FILE", help="mount a reel on drive N"
+    )
+    run.add_argument(
+        "--drum", action="append", default=[], metavar="K=FILE", help="contents of drum K"
+    )
+    run.add_argument(
+        "--dump-tape",
+        action="append",
+        type=int,
+        default=[],
+        metavar="N",
+        help="blocks of drive N at the end of the run",
+    )
     run.add_argument(
         "--dump",
         nargs="+",
@@ -144,7 +160,20 @@ def run_machine(args, program, profile, names: debug.Names) -> int:
     except AsmUnsupported as exc:
         print(f"not assembled yet: {exc}; try --seq")
         return 2
-    m = machine.Machine(image, profile, args.mode, _observer(args, names, True))
+    m = machine.Machine(image, profile, args.mode, _observer(args, names, True), args.config)
+    for spec in args.tape:
+        number, _, path = spec.partition("=")
+        if int(number) not in m.tape_drives:
+            print(f"error: no drive {number} in configuration {args.config}")
+            return 2
+        m.tape_drives[int(number)] = TapeDrive.load(int(number), path)
+    for spec in args.drum:
+        unit, _, path = spec.partition("=")
+        drum = m.elements.get(f"drum{unit}")
+        if drum is None:
+            print(f"error: no drum {unit} in configuration {args.config}")
+            return 2
+        drum.load(path)
     if args.trace == "dd":
         m.engine.listeners.append(debug.DDTrace(names))
     try:
@@ -164,6 +193,9 @@ def run_machine(args, program, profile, names: debug.Names) -> int:
             print(f"  {names.element(element.kind):<5} {n} directive(s), {busy} µs")
     _print_numbers(program, result.number)
     _dump(args, program, m.memory)
+    for number in args.dump_tape:
+        for line in m.tape_drives[number].summary():
+            print(line)
     if args.gantt:
         chart = gantt.Gantt(
             m,

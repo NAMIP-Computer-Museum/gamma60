@@ -24,7 +24,10 @@
 | `core/arit.py`, `core/logi.py` | calcul pur d'ARIT et de LOGI, sans temps (J1), appelé par les éléments |
 | `elements/base.py` | machine à états d'un élément (repos, attente, opération) ; travail d'une directive écrit comme un générateur de commandes (lecture, écriture par le DD, attente) (J3) |
 | `elements/processing.py` | ARIT et LOGI comme éléments (J3) : opérandes et résultats par le DD, calcul de `core/`, durées de `timings.yaml` ; `comp.py`, `tran.py` au J5-J8 |
-| `elements/drum.py`, `mata.py`, `cards.py`, `printer.py`, `tape_paper.py`, `desk.py` | mémoires auxiliaires et E/S |
+| `elements/comparator.py` | COMP (J5) : CMP, CDB, EFL, TRR, demandes anticipées et RAC finaux du COURS |
+| `elements/drum.py` | tambour (J5) : rotation, RAE, attente de position, tour perdu |
+| `elements/tape.py` | unisélecteurs et dérouleurs (J5) : bobines, blocs, blocs-marques, service autonome ; marche discontinue (continue : J5b) |
+| `elements/cards.py`, `printer.py`, `tape_paper.py`, `desk.py` | E/S des classes 3-4 (J8) |
 | `system/ggz.py` | superviseur minimal : tables des éléments et des UT, chargement, attribution des E/S |
 | `toolchain/` | `assembler.py` (J3) : code B → image en code A, deux passes, fonctions d'adresse R / M (différentiel) et S, listing ; au J6 : assemblage (code C), distribution (code D) → UT |
 | `machine.py` | la machine J3 : moteur, mémoire, DD, DP, ARIT et LOGI ; chargement de l'image et démarrage par le DP (convention de l'émulateur jusqu'au chargeur GGZ du J7) |

@@ -26,7 +26,8 @@ from gamma60.code_a import ADDRESS, BRANCH, CENTRAL, CUT, ELEMENT, Word
 from gamma60.codeb import DATA, Line, Program, ProgramError, Syntax, binary_value, split_af
 from gamma60.core.arit import fit
 
-ASSEMBLED_ELEMENTS = {"arithmetic", "logical"}
+ASSEMBLED_ELEMENTS = {"arithmetic", "logical", "comparator", "drum", "uniselector"}
+DRUM_POSITIONS = 200  # catenae per drum track [COURS p.152]
 
 
 class AsmUnsupported(NotImplementedError):
@@ -79,6 +80,7 @@ class Assembler:
         }
         numbers = data.resolve(data.load("topology")["element_numbers"])
         self.element_numbers = {k: v for k, v in numbers.items()}
+        self.unit_numbers = data.resolve(data.load("topology")["unit_numbers"])
 
     # -- operands ---------------------------------------------------------------------------
 
@@ -165,8 +167,10 @@ class Assembler:
                     )
                 if element == "arithmetic":
                     char = code_a.encode_arit(directive, self.syntax.arit(line.args, where))
-                else:
+                elif element == "logical":
                     char = code_a.encode_logi(directive, self.syntax.logi(line.args, where))
+                else:
+                    char = self._free(element, directive, line.args, here, where)
                 word = Word(ELEMENT, characteristic=char)
                 image.elements[here] = element
             self._put(image, here, code_a.encode(word), line)
@@ -189,11 +193,16 @@ class Assembler:
             kind = self.special_cuts[args.pop(0)]
             kind = {"no_release_of_requester": "no_release", "no_busy_check": "no_busy_check"}[kind]
         numbered = data.load("directives")["cuts"][ident].get("numbered")
-        if numbered:  # [C.C.] X [A.F.]: element number given by the program
+        if numbered:  # [C.C.] X [A.F.]: number of the unit (drum k, uniselector k)
             if len(args) >= 2 and args[1].isdigit():
                 cc = args.pop(0)
             head, af = split_af(args, 1)
             x, d, s = self._x(head[0], af, line.address, where)
+            unit = self.unit_numbers.get(ident)
+            if unit and not af and head[0].isdigit():  # unit k → element number (U-44)
+                if int(head[0]) < 1:
+                    raise ProgramError(f"{where}unit number {head[0]} (from 1)")
+                x = unit["first"] + unit["step"] * (int(head[0]) - 1)
         else:
             if args:
                 cc = args.pop(0)
@@ -201,6 +210,33 @@ class Assembler:
                 raise ProgramError(f"{where}unexpected fields {' '.join(args)!r}")
             x, d, s = self.element_numbers[ident], False, False
         return Word(CUT, kind, m=self._join(cc, blank), d=d, s=s, x=x)
+
+    def _free(self, element: str, op: str, args: list[str], here: int, where: str) -> int:
+        """Directive with a free variable: COMP, drum, uniselector (layouts: U-01)."""
+        args = list(args)
+        if (
+            element == "uniselector"
+            and op in code_a._encoding()["free_variable_layouts"]["execution_order"]
+        ):
+            if args:
+                raise ProgramError(f"{where}{op} has no free variable [COURS p.145]")
+            return code_a.encode_free(element, op)
+        cc = 0
+        if element == "comparator" and op in code_a.CC_DIRECTIVES:
+            if not args or args[0] not in ("1", "2"):
+                raise ProgramError(f"{where}C.C. 1 or 2 expected (CAR of the second operand)")
+            cc = int(args.pop(0))
+        head, af = split_af(args, 1)
+        x, d, s = self._x(head[0], af, here, where)
+        if element == "comparator" and not af and x > 255:
+            raise ProgramError(f"{where}length {x} > 255 [COURS p.75]")
+        if element == "drum" and op == "set_drum_origin" and not af:
+            # continuous drum address of code B → track × 256 + position in code A [COURS p.154]
+            track, position = divmod(x, DRUM_POSITIONS)
+            if track > 127:
+                raise ProgramError(f"{where}drum address {x} > 25599")
+            x = (track << 8) | position
+        return code_a.encode_free(element, op, x, cc, d, s)
 
     @staticmethod
     def _join(cc: str, blank: Line) -> int:

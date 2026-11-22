@@ -8,8 +8,9 @@ requests to the Data Distributor. It never reads the program itself.
 The work of a directive is written as a generator (:meth:`Element.operate`) that yields
 commands, so that the element waits for the DD without threads:
 
-- ``("read", car)`` → the catena read at the address of the CAR (it advances by one);
-- ``("write", car, value)`` → writes ``value`` at the address of the CAR;
+- ``("read", car[, step])`` → the catena read at the address of the CAR (which moves by
+  ``step``, +1 by default, −1 for a tape read backwards);
+- ``("write", car, value[, step])`` → writes ``value`` at the address of the CAR;
 - ``("wait", µs)`` → internal work;
 - ``("until", date)`` → wait until a date (no-op if it is already past).
 """
@@ -65,10 +66,10 @@ class Element:
             self.machine.element_incident(self, str(exc))
             return
         dd, engine = self.machine.dd, self.machine.engine
-        if cmd[0] == "read":
-            dd.request(self.port, cmd[1], READ)
-        elif cmd[0] == "write":
-            dd.request(self.port, cmd[1], WRITE, value=cmd[2])
+        if cmd[0] == "read":  # ("read", car[, step])
+            dd.request(self.port, cmd[1], READ, step=cmd[2] if len(cmd) > 2 else 1)
+        elif cmd[0] == "write":  # ("write", car, value[, step])
+            dd.request(self.port, cmd[1], WRITE, value=cmd[2], step=cmd[3] if len(cmd) > 3 else 1)
         elif cmd[0] == "wait":
             engine.after(max(0, cmd[1]), lambda: self._advance(None), f"{self.name} work")
         elif cmd[0] == "until":

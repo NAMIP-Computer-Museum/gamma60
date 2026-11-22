@@ -22,8 +22,20 @@ logical_cycles:                # temps de LOGI en cycles mémoire, l = longueur,
   store_result: 3
   profile_b61: {value: same_cycles, status: hypothesis, unknown: U-08}   # mêmes cycles × 10 µs
 transcoder_us_per_character: [15, 20]
-drum: {revolution_us: 20000, average_access_us: 10000, positions_per_track: 200, physical_per_track: 204}
-tape: {start_stop_gap_cm: 2, density_catenae_per_cm: 27.5, speed_m_s: 1.90}
+drum: {revolution_us: 20000, average_access_us: 10000, positions_per_track: 200, physical_per_track: 204, tracks: 128}   # COURS p.152-153
+drum_position_us: {value: "revolution_us / physical_per_track", status: hypothesis, unknown: U-46}   # 98 µs [COURS p.153] ; 100 µs = moyenne avec la commutation de piste
+tape: {start_stop_gap_cm: 2, density_catenae_per_cm: 27.5, speed_m_s: 1.90, rewind_m_s: 3}   # B61 p.13 ; COURS p.138-139
+tape_block:                    # durées d'un bloc en marche discontinue (U-47)
+  value: {acceleration_us: 5000, deceleration_us: 5000, pilot_catenae: 1, erase_cm: 12,
+          reel_m: 730, end_warning_m: 5, preparatory_cycles: 3, service_cycles: 3}
+  status: hypothesis           # 5 ms + 5 ms, effacement ~12 cm, approche de fin à ~5 m [COURS p.138-139, p.146]
+  unknown: U-47
+comparator_cycles:             # COURS p.78 : longueur effective (arrêt à la première inégalité)
+  simple_compare: "5 + 3*n"
+  two_bounds_compare: "5 + 5*n"
+  erase: "2 + n"
+  transfer: "2 + 3*n"
+drum_directive_cycles: {value: 3, status: hypothesis, unknown: U-46}   # réception d'une directive (DAO, début de transfert)
 card_reader: {per_card_us: 200000}
 printer: {per_line_us: 200000}
 paper_tape_reader: {per_character_us: 3333}

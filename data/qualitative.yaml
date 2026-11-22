@@ -16,6 +16,10 @@ comparator:   # COURS p.77-78 ; B61 p.36
   two_bounds: {1: "x > p et q", 2: "x < p et q", 3: "p <= x <= q", 4: "x = p", 5: "x = q",
                6: "p < x < q", 7: "x nul", 8: "x tout à 1"}
   simple: {1: ">", 2: "<", 3: "=", 4_10: "≥, ≤, ≠ et tests nul / tout à 1 des opérandes (OCR partiel)"}
+  simple_positions:          # lecture retenue des positions 4-10 de CMP [COURS p.76]
+    value: {4: ">=", 5: "<=", 6: "!=", 7: "op1_zero", 8: "op1_ones", 9: "op2_zero", 10: "op2_ones"}
+    status: hypothesis
+    unknown: U-49
   incidents: {16_17: "décomptage de longueur", 18_19: "comparaison", 20_21: "transfert canal",
               22: "directive décodée erronée", 23: "longueur > 255", 24: "regroupement"}
 uniselector:  # COURS p.138-151

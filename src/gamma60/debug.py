@@ -190,6 +190,34 @@ def snapshot(interp, names: Names) -> dict[str, dict[str, str]]:
     return state
 
 
+def unit_name(element, names: Names) -> str:
+    """Display name of an element: ARIT, LOGI, COMP, DRUM1 / TAMB1, MATA2 / DERU2…"""
+    unit = getattr(element, "unit", None)
+    base = names.element(element.kind)
+    return f"{base}{unit}" if isinstance(unit, int) else base
+
+
+def _extra_registers(element, names: Names) -> dict[str, str]:
+    """Registers of COMP, the drum and the uniselector (data/registers.yaml)."""
+    kind = element.kind
+    if kind == "comparator":
+        return {
+            names.label("comp_operand", 1): f"{element.operands[0]:06X}",
+            names.label("comp_operand", 2): f"{element.operands[1]:06X}",
+            names.label("comp_length"): f"{element.length:03d}",
+        }
+    if kind == "drum":
+        rae = element.rae
+        return {names.label("drum_rae"): f"{rae:05d} ({rae >> 8}/{rae & 0xFF})"}
+    if kind == "uniselector":
+        drive = f"#{element.drive.number}" if element.drive else "-"
+        return {
+            names.label("uniselector_block_length"): f"{element.block_length:04d}",
+            "": f"{element.mode or '-'} {drive}",
+        }
+    return {}
+
+
 def machine_snapshot(machine, names: Names) -> dict[str, dict[str, str]]:
     """Registers of the J3 machine: Program Distributor, then each element."""
     r = machine.dp.regs
@@ -206,7 +234,8 @@ def machine_snapshot(machine, names: Names) -> dict[str, dict[str, str]]:
             names.label("pd_chain", 2): f"{machine.dp.pd_c:05d}",
         }
     }
-    for kind, element in machine.elements.items():
+    for element in machine.elements.values():
+        kind = element.kind
         b = machine.memory.raw(machine.dp.chain_b(element)).value & MASK15
         c = machine.memory.raw(machine.dp.chain_c(element)).value & MASK15
         regs = {
@@ -218,10 +247,14 @@ def machine_snapshot(machine, names: Names) -> dict[str, dict[str, str]]:
         for ident in ELEMENT_REGISTERS.get(kind, ()):
             value = getattr(element.unit, ident.split("_", 1)[1])
             regs[names.label(ident)] = _number(value) if kind == "arithmetic" else _bits24(value)
+        extra = _extra_registers(element, names)
+        if "" in extra:  # state of a uniselector: mode and connected drive
+            regs[""] += " " + extra.pop("")
+        regs.update(extra)
         regs[names.label("qualitative")] = _positions(element.qualitative)
         for i, address in enumerate(machine.dd.racs.of(element.name)):
             regs[names.label("rac", i)] = f"{address:05d}"
-        state[names.element(kind)] = regs
+        state[unit_name(element, names)] = regs
     return state
 
 
@@ -244,7 +277,7 @@ MACHINE_LEGEND = [
 def describe(machine, dp, names: Names) -> str:
     """``time  address  element  code A  code B`` of the instruction the PD has just read."""
     line = machine.image.line_at(dp.instr_address)
-    unit = names.element(dp.element.kind) if dp.element is not None else "-"
+    unit = unit_name(dp.element, names) if dp.element is not None else "-"
     source = line.text if line else ""
     return (
         f"{machine.engine.now:7d}  {dp.instr_address:05d}  {unit:<5}  "
