@@ -12,7 +12,8 @@ commands, so that the element waits for the DD without threads:
   ``step``, +1 by default, −1 for a tape read backwards);
 - ``("write", car, value[, step])`` → writes ``value`` at the address of the CAR;
 - ``("wait", µs)`` → internal work;
-- ``("until", date)`` → wait until a date (no-op if it is already past).
+- ``("until", date)`` → wait until a date (no-op if it is already past);
+- ``("park",)`` → wait until :meth:`Element.resume` is called (e.g. a shared circuit).
 """
 
 from __future__ import annotations
@@ -74,8 +75,14 @@ class Element:
             engine.after(max(0, cmd[1]), lambda: self._advance(None), f"{self.name} work")
         elif cmd[0] == "until":
             engine.at(max(engine.now, cmd[1]), lambda: self._advance(None), f"{self.name} work")
+        elif cmd[0] == "park":  # waits until another unit calls resume() (shared circuit)
+            pass
         else:  # pragma: no cover - programming error
             raise ValueError(f"unknown command {cmd!r}")
+
+    def resume(self, value=None) -> None:
+        """Continue a parked work at the current date."""
+        self.machine.engine.after(0, lambda: self._advance(value), f"{self.name} resume")
 
     def _finish(self) -> None:
         now = self.machine.engine.now

@@ -26,7 +26,7 @@
 | `elements/processing.py` | ARIT et LOGI comme éléments (J3) : opérandes et résultats par le DD, calcul de `core/`, durées de `timings.yaml` ; `comp.py`, `tran.py` au J5-J8 |
 | `elements/comparator.py` | COMP (J5) : CMP, CDB, EFL, TRR, demandes anticipées et RAC finaux du COURS |
 | `elements/drum.py` | tambour (J5) : rotation, RAE, attente de position, tour perdu |
-| `elements/tape.py` | unisélecteurs et dérouleurs (J5) : bobines, blocs, blocs-marques, service autonome ; marche discontinue (continue : J5b) |
+| `elements/tape.py` | unisélecteurs et dérouleurs (J5, J5b) : bobines, blocs, blocs-marques, service autonome ; `UniselectorUnit` partagé par les deux éléments de programme d'un unisélecteur ; marches discontinue et continue (voir `TAPE.md`) |
 | `elements/cards.py`, `printer.py`, `tape_paper.py`, `desk.py` | E/S des classes 3-4 (J8) |
 | `system/ggz.py` | superviseur minimal : tables des éléments et des UT, chargement, attribution des E/S |
 | `toolchain/` | `assembler.py` (J3) : code B → image en code A, deux passes, fonctions d'adresse R / M (différentiel) et S, listing ; au J6 : assemblage (code C), distribution (code D) → UT |

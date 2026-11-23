@@ -26,10 +26,15 @@ drum: {revolution_us: 20000, average_access_us: 10000, positions_per_track: 200,
 drum_position_us: {value: "revolution_us / physical_per_track", status: hypothesis, unknown: U-46}   # 98 µs [COURS p.153] ; 100 µs = moyenne avec la commutation de piste
 tape: {start_stop_gap_cm: 2, density_catenae_per_cm: 27.5, speed_m_s: 1.90, rewind_m_s: 3}   # B61 p.13 ; COURS p.138-139
 tape_block:                    # durées d'un bloc en marche discontinue (U-47)
-  value: {acceleration_us: 5000, deceleration_us: 5000, pilot_catenae: 1, erase_cm: 12,
+  value: {acceleration_us: 5000, deceleration_us: 5000, pilot_catenae: 2, erase_cm: 12,
           reel_m: 730, end_warning_m: 5, preparatory_cycles: 3, service_cycles: 3}
-  status: hypothesis           # 5 ms + 5 ms, effacement ~12 cm, approche de fin à ~5 m [COURS p.138-139, p.146]
-  unknown: U-47
+  status: hypothesis           # 5 ms + 5 ms, effacement ~12 cm, approche de fin à ~5 m [COURS p.138-139, p.146] ;
+  unknown: U-47                # zone pilote : « l'emplacement de deux catènes » [COURS p.137] ; cycles : hypothèse ;
+                               # discontinu : rampes à vitesse uniformément variable, reste de l'espace de 2 cm à pleine vitesse
+tape_continuous:               # marche continue : les espaces défilent à la vitesse normale [COURS p.138]
+  value: {gap_us: "start_stop_gap_cm / speed", directive_must_be_waiting: true}
+  status: hypothesis           # directive pas encore arrivée à la fin du bloc : le ruban s'arrête (U-50)
+  unknown: U-50
 comparator_cycles:             # COURS p.78 : longueur effective (arrêt à la première inégalité)
   simple_compare: "5 + 3*n"
   two_bounds_compare: "5 + 5*n"

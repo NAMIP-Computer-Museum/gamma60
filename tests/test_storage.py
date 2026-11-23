@@ -209,7 +209,9 @@ def test_read_forward_one_block():
     assert zone(m, "T", 128) == BLOCK
     ((start, end, _),) = [e for e in log(m, "uniselector1") if e[2] == "read_transfer"]
     per = 190  # B61
-    assert end - start == pytest.approx(5000 + 5000 + (128 + 4) * per, abs=40)  # U-47
+    # 2 pilot zones of 2 catenae, 2 length catenae, 128 catenae [COURS p.137], 5 + 5 ms (U-47)
+    # + the rest of the 2 cm space at 1.90 m/s after 5 + 5 ms of ramps: 1.05 cm = 5526 us
+    assert end - start == pytest.approx(5000 + 5000 + 5526 + (128 + 2 + 4) * per, abs=40)
     assert m.tape_drives[3].position == 1
 
 

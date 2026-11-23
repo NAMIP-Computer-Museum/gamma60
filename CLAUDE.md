@@ -12,6 +12,7 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 - `docs/UNKNOWNS.md` — inconnues + hypothèse par défaut + réglage associé.
 - `docs/GLOSSARY.md` — sigles et abréviations, `en` / `fr`, forme développée.
 - `docs/EMULATOR_DESIGN.md` — architecture logicielle ; `docs/TOOLCHAIN.md` — chaîne d'outils.
+- `docs/TAPE.md` — bandes magnétiques : ruban, blocs, contrôles, marches discontinue et continue.
 - `docs/ROADMAP.md` — jalons et critères d'acceptation. Travailler jalon par jalon.
 - `docs/HARDWARE.md`, `docs/HISTORY.md` — contexte (non nécessaire à l'émulation).
 - `docs/SOURCES.md` — bibliographie ; PDF dans `archives/docs/`,

@@ -42,7 +42,8 @@ What the emulator runs today (milestone J5): the Program Distributor (cuts, addr
 instructions, branches, the 20 central directives, recall chains, SIMU, joins, virtual
 elements), the Data Distributor, the arithmetic (ARIT) and logical (LOGI) calculators, the
 general comparator (COMP), the magnetic drums and the tape uniselectors with their drives
-(discontinuous mode). The transcoder, cards, printers, paper tape and the desk come later.
+(discontinuous and continuous modes). The transcoder, cards, printers, paper tape and the desk
+come later.
 
 Everything the sources leave open is an explicit, adjustable assumption in `data/*.yaml`,
 listed in [`docs/UNKNOWNS.md`](../docs/UNKNOWNS.md) (U-xx).
@@ -222,6 +223,7 @@ One row per element that worked, titled `ARIT`, `LOGI`, `COMP`, `DRUM1`, `MATA2`
 | `===` (no brackets) | a directive shorter than 3 columns: the element is busy |
 | `=` instead of `[` or `]` | bar cut by `--gantt-from` / `--gantt-to`: the directive began before, or ends after, the window |
 | `~` | the element waits for the PD (instruction request raised) |
+| `:` | a tape directive waits for the transfer circuit of its uniselector, busy with the block of the other element (continuous mode) |
 | `.` | idle |
 
 Row `mem`, the Data Distributor:
@@ -243,6 +245,10 @@ Event markers, on the two lines under `mem`:
 
 Row title: the label where the sequence starts (entry point, branch of a SIMU, or the label of
 a join once passed), cut to 6 characters; `@00266` (its address) when there is no label.
+A sequence is shown from its birth (start of the run, SIMU, join passed), waiting for the PD
+until it is served. Sequences that start at the same label share a row (a loop that forks at
+each turn, the two elements of a uniselector in continuous mode): the row is filled only while
+one of them lives, and each of them shows its own end.
 
 | Code | Meaning |
 |---|---|
@@ -340,9 +346,9 @@ on as FIN:
 $ python -m gamma60 run tests/programs/parallele.g60b --gantt=seq
 ...
 START  >
-BRL     F~~LLLLLLLL~~~~~~LLLLL~LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL>
-BRA       FF~~~~~AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|
-FIN                                                                       AAAA~AAAAAAAAAS
+BRL    ~F~~LLLLLLLL~~~~~~LLLLL~LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL>
+BRA    ~~~FF~~~~~AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|
+FIN                                                                      ~AAAA~AAAAAAAAAS
 
 legend:
   letter of the element working for the sequence (A=ARIT L=LOGI)   F the PD for itself
@@ -391,6 +397,14 @@ drive 3: 3 block(s), position 1
     0   128 catenae  000001 000002 000003 000004 000005 000006 ...
     1  tape mark
     2    16 catenae  111111 222222 333333 444444 000005 000006 ...
+```
+
+Read a file in continuous mode: the two elements of uniselector 1 (`DERU 1`, `DERU 2`, i.e.
+`MATA 1`, `MATA 2`) take turns, and the tape never stops between blocks (`:` is a directive
+waiting for the block of the other element):
+
+```
+$ python -m gamma60 run tests/programs/bande_continue.g60b --tape 10=tests/media/fichier_6_blocs.yaml --gantt --names fr
 ```
 
 A drum transfer hiding 30 divisions of ARIT behind the rotation of the drum:

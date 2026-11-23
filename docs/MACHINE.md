@@ -426,7 +426,16 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
   230 µs [B61] / 315 µs [COURS] avec les espaces. Lecture 2 sens, écriture avant avec
   relecture. Registre de longueur de bloc ; mémoires par dérouleur (interdiction d'écriture,
   occupation).
-- Modes discontinu / continu (« programmes standard ») ; blocs-marques de 16 catènes à 0 ;
+- Modes discontinu / continu (« programmes standard ») [B61 p.54] ; en marche continue,
+  l'unisélecteur est un élément double : deux éléments de programme à numéros consécutifs, deux
+  RAI, deux RAC (chacun RAC 0), un seul circuit de transfert ; l'élément libre reçoit la
+  directive du bloc suivant ; les espaces défilent à vitesse normale ; 18 bloque la directive en
+  attente, 19 non ; pas de chaîne de reprise (« système fermé ») [COURS p.139, p.148-150].
+  Détails : `TAPE.md`.
+- Divergences COURS / B61 : densité ~20 / 27,5 catènes/cm ; 266 / 190 µs par catène ; capacité
+  1,2 / 1,6 M catènes (730 m) ; catène longueur en catènes / en bits [COURS p.137-139 ;
+  B61 p.13].
+- Blocs-marques de 16 catènes à 0 ;
   JUM (lecture sans transfert) ; DEL (zones défectueuses).
 - Le catène longueur donne, selon le COURS, le nombre de catènes du bloc : il n'est pas
   transféré mais gardé dans un registre de l'unisélecteur ; en écriture, le bloc est composé en

@@ -42,6 +42,7 @@ LEGEND = {
         "   . free",
         "mem": "mem: catenae transferred by the DD in the column (1-9, . none)"
         "   ^ events listed above",
+        "park": ": directive waiting for the transfer circuit of its uniselector (continuous mode)",
         "seq": "letter of the element working for the sequence ({letters})   F the PD for itself",
         "wait": "~ waiting for the PD   . waiting on a recall chain (busy element)   blank: not running",
         "end": "end: > fork (SIMU) or join passed   | stops at a join not yet complete   S STOP",
@@ -55,6 +56,7 @@ LEGEND = {
         "   . libre",
         "mem": "mem : catenes transferes par le DD dans la colonne (1-9, . aucun)"
         "   ^ evenements ci-dessus",
+        "park": ": directive en attente du circuit de son uniselecteur (marche continue)",
         "seq": "lettre de l'element qui travaille pour la sequence ({letters})"
         "   F le DP pour lui-meme",
         "wait": "~ attente du DP   . attente sur une chaine de reprise (element occupe)"
@@ -180,13 +182,30 @@ class Gantt:
         self.events: list[tuple[int, str]] = []
         self.seq_rows: dict[str, list[str]] = {}
         self.seq_first: dict[str, int] = {}
-        self.seq_end: dict[str, tuple[int, str]] = {}
+        # sequences sharing a label share a row: it is filled only while one of them lives
+        self.seq_spans: dict[str, list[list[int | None]]] = {}
+        self.seq_ends: dict[str, list[tuple[int, str]]] = {}
+        alive: dict[str, int] = {}
         self.chain_wait: dict[str, list[list[int | None]]] = {}
         raised: dict[str, int] = {}
         elem_seq: dict[str, str] = {}
         own_pending: dict[int, str] = {}
         chain_pending: dict[int, str] = {}
         self.directive_seq: dict[str, list[str]] = {k: [] for k in m.elements}
+
+        def born(seq: str, t: int) -> None:
+            if not alive.get(seq):
+                self.seq_spans.setdefault(seq, []).append([t, None])
+            alive[seq] = alive.get(seq, 0) + 1
+
+        def died(seq: str, t: int, ch: str) -> None:
+            self.seq_ends.setdefault(seq, []).append((t, ch))
+            if alive.get(seq):
+                alive[seq] -= 1
+                if alive[seq] == 0:
+                    self.seq_spans[seq][-1][1] = t
+
+        born(flow, 0)
 
         def mark(seq: str, t: int, ch: str) -> None:
             row = self.seq_rows.setdefault(seq, self._row(" "))
@@ -224,9 +243,13 @@ class Gantt:
                     a = r.get("address")
                     x = (a + word.x) & 0o77777 if word.d else word.x
                     own_pending[a + 1] = self._label_at(a + 2)
-                    self.seq_end[flow] = (r.time, ">")
+                    died(flow, r.time, ">")
+                    born(self._label_at(x), r.time)
+                    born(self._label_at(a + 2), r.time)
                     self.events.append((r.time, "SIMU"))
                     flow = self._label_at(x)
+                    if element in elem_seq:  # the first branch goes on with the element
+                        elem_seq[element] = flow
                 elif word.kind == ELEMENT and element in self.kind_of:
                     self.directive_seq[self.kind_of[element]].append(flow)
             elif what == "resume own chain":
@@ -246,12 +269,13 @@ class Gantt:
             elif what == "join":
                 arrival, expected = r.get("arrival"), r.get("expected")
                 self.events.append((r.time, f"JOIN {arrival}/{expected}"))
-                self.seq_end[flow] = (r.time, "|" if arrival < expected else ">")
+                died(flow, r.time, "|" if arrival < expected else ">")
                 if arrival == expected:
                     flow = self._label_at(r.get("address"))
+                    born(flow, r.time)
             elif what == "stop":
                 self._put(self.pd, r.time, "S")
-                self.seq_end[flow] = (r.time, "S")
+                died(flow, r.time, "S")
 
         for kind, element in m.elements.items():
             for (a, b, _op), seq in zip(element.log, self.directive_seq[kind], strict=False):
@@ -262,19 +286,19 @@ class Gantt:
                         row[c] = self.letter[kind]
 
         for seq, row in self.seq_rows.items():
-            end_t, end_ch = self.seq_end.get(seq, (self.stop, ""))
-            cols = self.span(self.seq_first[seq], end_t + 1)
-            if cols is None:
-                continue
-            for c in range(cols[0], cols[1] + 1):
-                if row[c] == " ":
-                    t = self.start + c * self.scale
-                    on_chain = any(
-                        a <= t < (b if b is not None else self.stop)
-                        for a, b in self.chain_wait.get(seq, [])
-                    )
-                    row[c] = "." if on_chain else "~"
-            if end_ch:
+            for first, last in self.seq_spans.get(seq, [[self.seq_first[seq], None]]):
+                cols = self.span(first, (self.stop if last is None else last) + 1)
+                if cols is None:
+                    continue
+                for c in range(cols[0], cols[1] + 1):
+                    if row[c] == " ":
+                        t = self.start + c * self.scale
+                        on_chain = any(
+                            a <= t < (b if b is not None else self.stop)
+                            for a, b in self.chain_wait.get(seq, [])
+                        )
+                        row[c] = "." if on_chain else "~"
+            for end_t, end_ch in self.seq_ends.get(seq, []):
                 self._put(row, end_t, end_ch)
 
     # -- views --------------------------------------------------------------------------------
@@ -317,6 +341,12 @@ class Gantt:
                         row[c] = "~"
             for a, b, op in element.log:
                 self._bar(row, a, b, self._mnemonic(element.kind, op))
+            for a, b in getattr(element, "parked", []):  # directive waiting for the circuit
+                cols = self.span(a, b)
+                if cols:
+                    for c in range(cols[0], cols[1] + 1):
+                        if row[c] in "=.":
+                            row[c] = ":"
             lines.append(unit_name(element, self.names)[: LABEL - 1].ljust(LABEL) + "".join(row))
         lines.append(
             "mem".ljust(LABEL) + "".join("." if n == 0 else str(min(n, 9)) for n in self.mem)
@@ -329,6 +359,8 @@ class Gantt:
             lines.append(" " * LABEL + "".join(marks).rstrip())
             lines.append(" " * LABEL + "^ " + " ; ".join(f"{t} us {s}" for t, s in shown))
         keys = ["bar", "pd", "mem"]
+        if any(getattr(e, "parked", None) for e in m.elements.values()):
+            keys.insert(1, "park")
         if self.start or self.stop < self.machine.engine.now:
             keys.insert(1, "cut")
         return [*lines, "", *self._legend(keys)]

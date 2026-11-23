@@ -24,7 +24,7 @@ from gamma60.elements.base import IDLE
 from gamma60.elements.comparator import Comparator
 from gamma60.elements.drum import Drum
 from gamma60.elements.processing import Arithmetic, Logical
-from gamma60.elements.tape import TapeDrive, Uniselector
+from gamma60.elements.tape import TapeDrive, Uniselector, UniselectorUnit
 from gamma60.engine import Engine
 from gamma60.memory import Memory
 from gamma60.number import Number
@@ -97,10 +97,13 @@ class Machine:
             self.elements[f"drum{k}"] = Drum(self, f"DRUM{k}", number, k)
         for n in range(1, cfg.elements.get("tape_units", 0) + 1):
             self.tape_drives[n] = TapeDrive(n)
-        for k in range(1, cfg.elements.get("uniselector", 0) + 1):
-            number = units["uniselector"]["first"] + units["uniselector"]["step"] * (k - 1)
-            wired = uniselector_wiring(self.config, k)
-            self.elements[f"uniselector{k}"] = Uniselector(self, f"MATA{k}", number, k, wired)
+        for k in range(
+            1, cfg.elements.get("uniselector", 0) + 1
+        ):  # two elements each [COURS p.147]
+            shared = UniselectorUnit(k, set(uniselector_wiring(self.config, k)))
+            for n in (2 * k - 1, 2 * k):
+                number = units["uniselector"]["first"] + units["uniselector"]["step"] * (n - 1)
+                self.elements[f"uniselector{n}"] = Uniselector(self, f"MATA{n}", number, n, shared)
         self.dp = ProgramDistributor(self)
         for address, value in self.image.words.items():
             self.memory.write(address, value)

@@ -50,6 +50,6 @@ element_numbers:             # numéro d'élément (RNE, champ X des coupures) d
 unit_numbers:                # code B des coupures numérotées : X = numéro de l'unité (tambour k, unisélecteur k)
   value:                     # → numéro d'élément = premier numéro + pas × (k - 1)
     drum: {first: 100, step: 1}
-    uniselector: {first: 10, step: 2}   # deux numéros consécutifs par unisélecteur (marche continue) [COURS p.147]
+    uniselector: {first: 10, step: 1}   # X = n° d'élément d'unisélecteur 1-20 : 2k-1 et 2k = unisélecteur k [COURS p.147-148]
   status: hypothesis
   unknown: U-44

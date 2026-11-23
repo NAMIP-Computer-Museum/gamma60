@@ -385,8 +385,10 @@ class ProgramDistributor:
         """Step (3): resume the requester's chain, or release it [COURS p.25-26, p.38]."""
         if requester is None:
             return
-        if self.release_rule == "keep_if_operating" and requester.state == OPERATING:
-            return  # U-45: the PD's own chain gave it new work
+        if self.release_rule == "keep_if_operating" and (
+            requester.state == OPERATING or requester in self.di
+        ):
+            return  # U-45: step (2) gave it new work (a directive, or its chain resumed)
         b = self.chain_b(requester)
         head = (yield from self._read(b)) & MASK15
         if head:
@@ -481,6 +483,16 @@ class ProgramDistributor:
             # before those waiting on the chain [COURS p.39]
             self._activate(target, blank)
         elif self.iar.busy[target.number]:
+            shared = getattr(target, "shared", None)
+            if (
+                self.m.mode == "diagnostic"
+                and shared is not None
+                and shared.handovers
+                and getattr(requester, "shared", None) is not shared
+            ):  # « système fermé »: no recall chain on an uniselector in continuous mode [COURS p.150]
+                self.m.engine.record(
+                    "PD", "warning", text=f"recall chain on {target.name} in continuous mode"
+                )
             yield from self._enqueue(self.chain_b(target), self.chain_c(target), blank, False)
             self.m.engine.record("PD", "queue", element=target.name, sequence=blank)
         else:
