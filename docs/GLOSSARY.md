@@ -74,8 +74,8 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | FOL | FUL | Fill L with Ones / Forçage à Un dans L | LOGI directive | L ← all ones. |
 | FZ | FZ | Fill with Zeros / Forçage à Zéro | Central directive | memory[X] ← all zeros. |
 | FZL | FZL | Fill L with Zeros / Forçage à Zéro dans L | LOGI directive | L ← all zeros. |
-| — | GGU | (expansion unknown) | System software | Operating system: kernel ≈ 3,800 words, memory maps, job handling (MAI). |
-| — | GGZ | (expansion unknown) | System software | Resident supervisor at the start of memory (MAI). |
+| — | GGU | Gestion Générale Un (MAIT ; « Gestion Générale des Unités de Traitement » per NAM: U-59) | System software | Successor of GGZ: kernel ≈ 3,800 words, memory maps, D1 launch, D3 jobs (MAIT). Never deployed according to LEC (U-59). |
+| — | GGZ | Gestion Générale Zéro | System software | First system software, on the « ruban Z » tape: resident supervisor at the start of memory, console-order monitor, D2 distribution (MAIT). |
 | H1, H2 | M1, M2 | Hopper / Magasin | Card C.C. | Card hoppers 1 and 2. |
 | IAR | RAI | Instruction Address Register | Register | Same as PAR. |
 | IC | DI | Iteration Control / Décomptage d'Itération | Central directive | Count down on memory[X], [X+1]; sets bit 14 or 15 of A. Beware: `DI` is also the French name of ITR. |
@@ -92,7 +92,7 @@ the facts and their sources are in [`docs/`](../docs/), which prevails.
 | LB | GB | Load B / Garnissage de B (15 positions) | Central directive | B ← X on the 15 right bits. |
 | LE *(hyp.)* | GE | Load Element number / Garnissage de l'Élément | Central directive | RNE ← X; English spelling assumed (U-28). |
 | LIBE | LIBE | LIBEration of a virtual element / LIBÉration d'élément virtuel | Cut | Release a lock (virtual element). |
-| LOGI | LOGI | Logical calculator / Calculateur logique | Element, cut | Binary serial element (class 0 per ONDE and BAT72, class 1 per MAI: U-09). |
+| LOGI | LOGI | Logical calculator / Calculateur logique | Element, cut | Binary serial element (class 0 per ONDE and BAT72, class 1 per MAIT: U-09). |
 | — | M | — / Mémoire de manœuvre | A.F. (COURS) | Operand is a working memory, placed at the end of the subprogram. |
 | MAI | MAI | MAnipulation, Incident | Tape directive | Handling request after an incident. |
 | MAN | MAN | MAnipulation, Normal | Tape directive | Normal handling request. |

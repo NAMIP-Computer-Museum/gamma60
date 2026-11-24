@@ -43,7 +43,7 @@ Short, sourced facts about the Gamma 60. Source keys are defined in
   *(ONDE)*
 - The wiring documentation was kept **on punched cards**. *(ONDE)*
 - The console allowed step-by-step execution (by cycle or by instruction) and a stop on a
-  displayed address: a hardware debugger. *(ONDE ; MAI)*
+  displayed address: a hardware debugger. *(ONDE ; MAIT)*
 
 ## Customers and career
 

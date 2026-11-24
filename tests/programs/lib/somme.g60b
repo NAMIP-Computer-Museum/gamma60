@@ -1,0 +1,26 @@
+; langue: fr
+; Sous-programme standard (J6) : somme binaire sur 24 bits de N catènes consécutives, par LOGI.
+; Écrit une fois, rangé en bibliothèque, il peut être implanté plusieurs fois à des adresses
+; différentes : il serait « inadmissible d'avoir à les reprogrammer chaque fois qu'on veut les
+; réutiliser » [COURS p.44 ; DR-E p.178] ; chaque implantation
+; reçoit ses propres liaisons (code C).
+; Inconnues :
+;   ?ZONE    adresse de la première catène à additionner ;
+;   ?N       nombre de catènes (constante du code C, ou symbole de distribution) ;
+;   ?RES     catène résultat (doit valoir 0 au départ : on y ajoute) ;
+;   ?RETOUR  où continuer après la somme.
+        REP   SOMME
+SOMME:  LOGI
+        VIERGE
+        G     0      ?ZONE             ; RAC 0 <- première catène
+        G     1      ?RES              ; RAC 1 <- résultat
+        TCL   0      U                 ; L <- résultat
+BOUCLE: DI    Q                        ; N catènes : compteur Q, rechargé par Q1
+        14    FINS
+        TCK   0      0                 ; K <- catène suivant
+        ADD   24     L                 ; L <- L + K
+        31    BOUCLE
+FINS:   ADD   0      U                 ; résultat <- L
+        31    ?RETOUR
+Q:      BIN   ?N
+Q1:     BIN   ?N

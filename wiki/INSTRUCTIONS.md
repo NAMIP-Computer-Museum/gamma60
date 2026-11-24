@@ -28,7 +28,7 @@ See also [ARCHITECTURE.md](ARCHITECTURE.md) (elements and classes),
 
 ## 1. The four codes
 
-The Gamma 60 programming chain uses four levels, called *codes*. [MAI ; B61 p.28-30]
+The Gamma 60 programming chain uses four levels, called *codes*. [MAIT ; B61 p.28-30]
 
 | Code | What it is | Who writes it | Status |
 |---|---|---|---|
@@ -89,14 +89,24 @@ After translation, each subprogram is an "assemblable subprogram": code A with b
 table of unknowns and labels. The **code C sheet** drives the assembly: numbered list of
 subprograms and of working zones (buffers, sort areas), links between subprograms
 (`SPy.Xn = SPz.Rm`), constants (`SPy.Xn = constant`), load address of the first subprogram,
-entry point. The assembler condenses, links, and lists what is still unknown. [MAI]
+entry point. The assembler condenses, links, and lists what is still unknown. [MAIT]
+
+In the emulator (J6), a subprogram declares its labels visible to code C with `REP LABEL…` and
+its unknowns as `?NAME` in a free variable (or `BIN ?NAME` for a whole catena); the code C sheet
+is a modern YAML file (`.g60c.yaml`). Neither format is historical: the period layout of the
+sheets is not known (U-52, U-53). See [MAN.md](MAN.md) (`transpose`, `assemble`) and
+[`docs/TOOLCHAIN.md`](../docs/TOOLCHAIN.md).
 
 ### 1.4 Code D: distribution and launch
 
 The remaining values (memory address, drum address, unit or element number, zone length) are
 supplied at **distribution** time, by console orders or **code D2** cards. The result is an
 executable, frozen **UT** (*unité de traitement*). The GGU system adds **D1** (launch
-parameters) and **D3** (jobs). [MAI ; B61 p.48]
+parameters) and **D3** (jobs). [MAIT ; B61 p.48]
+
+In the emulator (J6), code D2 is a YAML file (`.g60d.yaml`, one value per symbol, written as in
+code B) and the UT a JSON file (`.ut.json`) that `run` executes (U-54); D1 and D3 come with the
+GGZ (J7).
 
 ---
 
@@ -225,7 +235,7 @@ operands O1 and R for `ISI` (`RSI`) and `PVA` (`AVA`), and possibly R for `ARR` 
 
 ### 3.2 LOGI, logical calculator
 
-*Class 0 according to ONDE, class 1 according to MAI (U-09) · shared.* Works in binary on
+*Class 0 according to ONDE, class 1 according to MAIT (U-09) · shared.* Works in binary on
 registers K and L. X gives a shift or bit count (0-23); R = CAR 0-3, `Z F S T` / `Z U D T`,
 or `L`. [B61 table p.62-66]
 

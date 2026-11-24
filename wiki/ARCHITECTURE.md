@@ -138,7 +138,7 @@ ONDE announces "4 classes" but describes **five, numbered 0 to 4**:
 
 [ONDE §2.1, §3 ; docs/MACHINE.md §6.3] There are five sets of connection circuits: one for
 class 0, one for class 1, two for class 2, and one shared by classes 3 and 4. [ONDE §2.1]
-MAI places LOGI in class 1 instead of 0; the emulator uses class 0 by default (U-09).
+MAIT places LOGI in class 1 instead of 0; the emulator uses class 0 by default (U-09).
 
 The DT priority order follows the urgency of the elements, not their class number. For
 instance, the drum must be served before ARIT, or a whole revolution of 20 ms is lost.
@@ -162,11 +162,11 @@ its **hardware**. Mnemonics: cut name `en` / `fr`.
 - **Function:** the operator's station. It starts programs when the elements and the memory
   zone they need are free, logs the run on paper tape, and allows step-by-step execution
   (per cycle, per instruction) and stop on address. It is the only source of priority
-  interrupts. [B61 p.47-48 ; ONDE ; MAI]
+  interrupts. [B61 p.47-48 ; ONDE ; MAIT]
 - **Instructions:** typewriter input and output for the operator. B61 also says the desk is
   "not an I/O element", although a `DESK` cut exists (U-27).
 - **Hardware:** a typewriter (10 characters/s), a paper tape reader and punch, keyboards,
-  and 8 × 8 lights showing the state of 8 programs. [ONDE §3.1 ; B61 p.47-48 ; MAI]
+  and 8 × 8 lights showing the state of 8 programs. [ONDE §3.1 ; B61 p.47-48 ; MAIT]
 
 ![The control desk](../archives/images/Gamma60-console.jpg)
 

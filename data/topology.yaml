@@ -1,11 +1,11 @@
 # Raccordement des éléments aux canaux DDC / DCC (BAT72 fig. 1).
-# Sources : ONDE §2.1, §3.4-3.5 ; BAT72 p.100-101 ; MAI. Une configuration peut surcharger
+# Sources : ONDE §2.1, §3.4-3.5 ; BAT72 p.100-101 ; MAIT. Une configuration peut surcharger
 # « classes » (ex. classe de LOGI).
 
 classes:                     # classe de chaque type d'élément
   desk: 0                    # U-27 (statut d'élément discuté)
   logical:
-    value: 0                 # c0 [ONDE ; BAT72] / c1 [MAI]
+    value: 0                 # c0 [ONDE ; BAT72] / c1 [MAIT]
     status: hypothesis
     unknown: U-09
   arithmetic: 1

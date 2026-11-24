@@ -239,7 +239,7 @@ lives: queue links, lock images, buffers for input/output. [`docs/MACHINE.md`](.
 
 | In the central store | Placed by | Source |
 |---|---|---|
-| **Resident supervisor GGZ** (tables, operator dialogue, loading, buffers, incident handling) | system, at the **start** of memory | [MAI] |
+| **Resident supervisor GGZ** (tables, operator dialogue, loading, buffers, incident handling) | system, at the **start** of memory | [MAIT] |
 | **I1 / I2 of every real element** (called B / C in COURS): head and tail of its recall chain | system, at "specialised addresses" (exact addresses unknown, U-30) | [ONDE §2 ; COURS p.24-31] |
 | **Programs** (UT), with a **blank catena** after every cut, used at run time as queue link or join counter | loader; relative addresses (`R`) make code relocatable | [COURS p.24-31, p.47-49] |
 | **Virtual element images**: 2 catenae per lock (busy bit + head, tail) | programmer, anywhere (COURS uses 1,000 and 1,001) | [COURS p.27-31] |
@@ -260,7 +260,7 @@ after the code), not their sizes or addresses. Addresses below are **our assumpt
 
 ```
 address  0 ┌──────────────────────────────────────────────┐
-           │ GGZ resident supervisor (tables, buffers…)   │  [MAI]
+           │ GGZ resident supervisor (tables, buffers…)   │  [MAIT]
            │ I1/I2 of each real element (2 catenae each)  │  U-30: "specialised addresses"
            ├──────────────────────────────────────────────┤
            │ UT 1: code (cuts + blank catenae)            │

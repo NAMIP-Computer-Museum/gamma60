@@ -1,0 +1,27 @@
+; langue: fr
+; Sous-programme (J6) : traitement d'un bloc de 50 catènes, partie traitement de
+; bande_continue_task.g60b : LOGI additionne les catènes du bloc dans TOTAL et compte les blocs.
+; Inconnue : ?ZTR, catène qui contient l'adresse de la zone du bloc (substitution, S).
+        REP   TRAIT
+TRAIT:  LOGI                           ; somme sur 24 bits
+        VIERGE
+        G     0      ?ZTR   S          ; RAC 0 <- zone du bloc
+        G     1      TOTAL
+        G     2      NBLOC
+        G     3      UN
+        TCL   0      U                 ; L <- TOTAL
+BOUCLE: DI    Q                        ; 50 catènes : compteur Q, rechargé par Q1
+        14    FINT
+        TCK   0      0                 ; K <- catène suivant
+        ADD   24     L                 ; L <- L + K
+        31    BOUCLE
+FINT:   ADD   0      U                 ; TOTAL <- L
+        TCK   0      T                 ; K <- 1
+        TCL   0      D                 ; L <- NBLOC
+        ADD   24     D                 ; NBLOC <- NBLOC + 1
+        STOP                           ; fin de cette branche de traitement
+TOTAL:  BIN   0
+NBLOC:  BIN   0
+UN:     BIN   1
+Q:      BIN   50
+Q1:     BIN   50

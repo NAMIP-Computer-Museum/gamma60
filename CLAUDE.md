@@ -27,7 +27,7 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
   Valeur incertaine = `{value, status: hypothesis, unknown: U-xx}` (vérifié par les tests).
 - `archives/` — sources versionnées : `docs/` (PDF), `photos/` (photos de pages citées),
   `images/` (photos de la machine, contexte).
-- `tools/fetch_refs.sh` — extrait le texte des PDF d'`archives/docs/` vers `refs/txt/`.
+- `tools/fetch_refs.sh` — extrait le texte des PDF et pages HTML d'`archives/docs/` vers `refs/txt/`.
 - `COMM.md` — plan d'une présentation du projet (notes, hors émulateur).
 
 ## Règles non négociables
@@ -68,12 +68,15 @@ comportement dynamique de la machine (Distributeur de Programme, Distributeur de
 ## Commandes
 - Environnement : `python -m venv .venv` puis `.venv/Scripts/pip install -e .[dev]`
 - Tests : `pytest -q` · Lint : `ruff check . && ruff format --check .`
-- Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b [--profile COURS]
-  [--trace | --trace=regs | --trace=dd | --step] [--names en|fr] [--mode diagnostic]
+- Lancer un programme : `python -m gamma60 run tests/programs/<nom>.g60b|<u.t.>.ut.json [--profile COURS]
+  [--trace | --trace=regs | --trace=dd | --step | --break ETIQ[+k]] [--names en|fr] [--mode diagnostic]
   [--dump <adresse|étiquette> [n] | --dump all] [--gantt[=elem|seq]] [--config max]
   [--tape N=fichier.yaml] [--drum K=fichier.yaml] [--dump-tape N]`
   (machine : DP avec simultanéité, DD, ARIT, LOGI ; `--seq` : interpréteur J1, sans temps)
 - Listing d'assemblage : `python -m gamma60 asm tests/programs/<nom>.g60b`
+- Chaîne d'outils (J6, `docs/TOOLCHAIN.md`) : `transpose <sp>.g60b` → `.g60a.json` ;
+  `assemble <feuille>.g60c.yaml [--listing]` → `.g60pa.json` ; `distribute <feuille>.g60d.yaml`
+  → `.ut.json` ; `disasm <fichier> [--lang en|fr]` (exemples : `tests/programs/chaine/<chaîne>/`)
 - Scénario du Distributeur de Données : `python -m gamma60 dd tests/scenarios/<nom>.yaml
   [--profile COURS] [--trace] [--names fr] [--mode diagnostic]`
 

@@ -30,13 +30,22 @@ bifilaires blindés de 100 Ω [ONDE].
 - Bandes : mylar 12,7 mm, modulation de phase, 1,90 m/s, puits à dépression, démarrage/arrêt
   ≈ 1 ms ; commutation CEL par diodes silicium ; « dérouleur fictif » de maintenance [ONDE].
 - Cartes, imprimante, bande perforée : voir MACHINE.md §8.
+- Configuration maximale citée par MAIT §b : jusqu'à 10 unisélecteurs regroupant jusqu'à 48
+  dérouleurs (bobines de 730 m, 6 min 20 s, 1,6 M mots ; ou 1 100 m, 9 min 30 s, 2,4 M mots) ;
+  jusqu'à 4 tambours (accès moyen 10 ms, 26 K mots) ; jusqu'à 20 éléments d'entrée-sortie sur
+  2 multiplexeurs au plus : jusqu'à 4 lecteurs et lecteurs-perforateurs de cartes (300 cartes
+  par minute), jusqu'à 8 imprimantes à simple ou double entraînement (300 ou 600 lignes par
+  minute), lecteurs-perforateurs de bande, machines à écrire.
 
 ## Construction
 Boîtiers (6 × 16,5 cm) et plaquettes de diodes (13,5 × 8 cm) ; section = 4 structures ;
 alvéole = 28 sections ; baies de 6 ou 9 alvéoles ; fiches AMP serties ; alimentation 220 V
 non stabilisée + régulation par baie ; test marginal ; « simulateur banal » ; documentation de
 câblage sur cartes perforées [ONDE]. Surface d'installation jusqu'à ≈ 370 m².
+Salle type selon NAM 2018/3 : 300 à 400 m², faux plancher d'environ 30 cm, groupe
+moteur-générateur d'environ 300 kVA, séquenceur à tubes pour la mise sous tension des unités
+dans l'ordre, climatisation à 18 °C et 60 % d'humidité relative.
 
 ## Pupitre
 Machine à écrire ; pas-à-pas par cycle, par instruction canonique, par instruction complète ;
-arrêt sur adresse affichée (« comparaison pupitre ») ; 8 × 8 voyants pour 8 programmes [ONDE ; MAI].
+arrêt sur adresse affichée (« comparaison pupitre ») ; 8 × 8 voyants pour 8 programmes [ONDE ; MAIT].

@@ -12,8 +12,14 @@ import pytest
 
 from gamma60 import data
 
-PROGRAMS = sorted((Path(__file__).parent / "programs").glob("*.g60b"))
-PSEUDO = {"VIERGE", "NUM", "BIN", "ZONE"}  # assembler pseudo-instructions (docs/TOOLCHAIN.md)
+PROGRAMS = sorted((Path(__file__).parent / "programs").rglob("*.g60b"))  # J6: lib/, chaine/
+PSEUDO = {
+    "VIERGE",
+    "NUM",
+    "BIN",
+    "ZONE",
+    "REP",
+}  # assembler pseudo-instructions (docs/TOOLCHAIN.md)
 LINE = re.compile(r"^\s*(?:\d{3}\s+)?(?:\w+:\s*)?(?P<to>\S+)?")
 
 

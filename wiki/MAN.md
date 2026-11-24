@@ -11,18 +11,24 @@ GAMMA60(1)                  Bull Gamma 60 emulator                  GAMMA60(1)
 ## SYNOPSIS
 
 ```
-python -m gamma60 run program.g60b [--profile B61|COURS] [--mode faithful|diagnostic]
-                  [--names en|fr] [--trace[=steps|regs|dd]] [--step]
+python -m gamma60 run program.g60b|unit.ut.json [--profile B61|COURS]
+                  [--mode faithful|diagnostic] [--names en|fr] [--trace[=steps|regs|dd]]
+                  [--step] [--break LABEL[+k]] ...
                   [--gantt[=elem|seq]] [--gantt-scale US] [--gantt-from US] [--gantt-to US]
                   [--dump ZONE] ... [--seq] [--config NAME]
                   [--tape N=FILE] ... [--drum K=FILE] ... [--dump-tape N] ...
 
 python -m gamma60 asm program.g60b [--profile B61|COURS]
 
+python -m gamma60 transpose subprogram.g60b [-o FILE] [--profile B61|COURS]
+python -m gamma60 assemble sheet.g60c.yaml [-o FILE] [--listing]
+python -m gamma60 distribute values.g60d.yaml|sheet.g60c.yaml|program.g60pa.json [-o FILE]
+python -m gamma60 disasm FILE [--lang en|fr] [--raw]
+
 python -m gamma60 dd scenario.yaml [--profile B61|COURS] [--mode faithful|diagnostic]
                   [--names en|fr] [--trace]
 
-python -m gamma60 [run|asm|dd] --help
+python -m gamma60 [run|asm|transpose|assemble|distribute|disasm|dd] --help
 ```
 
 ## DESCRIPTION
@@ -36,9 +42,13 @@ Programs are written in **code B**, the symbolic code of the period, in either o
 languages: `en` (mnemonics of the 1961 brochure, B61) or `fr` (mnemonics of the programming
 course, COURS). The language is declared on the first line of the program (`; langue: en`).
 They are assembled into **code A** (one instruction per catena) and loaded into memory, at
-address 256 by default.
+address 256 by default. Since milestone J6 the whole tool chain of the period is emulated:
+subprograms are transposed into assemblable code A with blanks, linked by a **code C** sheet,
+and their remaining values given by **code D2**, which yields a frozen processing unit (UT);
+`run` on a `.g60b` goes through this chain. The file formats are modern (the period layouts
+are not known): see [`docs/TOOLCHAIN.md`](../docs/TOOLCHAIN.md).
 
-What the emulator runs today (milestone J5): the Program Distributor (cuts, address
+What the emulator runs today (milestone J6): the Program Distributor (cuts, address
 instructions, branches, the 20 central directives, recall chains, SIMU, joins, virtual
 elements), the Data Distributor, the arithmetic (ARIT) and logical (LOGI) calculators, the
 general comparator (COMP), the magnetic drums and the tape uniselectors with their drives
@@ -50,15 +60,48 @@ listed in [`docs/UNKNOWNS.md`](../docs/UNKNOWNS.md) (U-xx).
 
 ## COMMANDS
 
-**run** *program.g60b*
+**run** *program.g60b* | *unit.ut.json*
 :   Assemble the program, load it and run it on the machine until no event is left. Print the
     final status, the simulated time, the number of directives and the busy time of each
-    element, then the value of every `NUM` label of the program.
+    element, then the value of every `NUM` label of the program. A `.g60b` goes through the
+    whole chain (transposition, code C with one article, empty code D2, UT) and must have no
+    unknown left; a `.ut.json` is a processing unit made by **distribute** (its labels are
+    `ARTICLE.LABEL` when it has several articles).
 
 **asm** *program.g60b*
 :   Assemble the program and print the listing: one line per catena, with its address, the
     code A grouped by fields and the code B source line. Data (`NUM`, `BIN`, `ZONE`) are shown
     in hexadecimal, where BCD digits can be read directly.
+
+**transpose** *subprogram.g60b*
+:   Transpose a subprogram into an assemblable subprogram (`.g60a.json`, beside the source or
+    `-o`): code A numbered from 0 with blanks, the table of its unknowns (`?NAME`: X1, X2…)
+    and of its repères (`REP`: R1, R2…), the relocations, and the debug tables. Prints both
+    tables.
+
+**assemble** *sheet.g60c.yaml*
+:   Assembly driven by a code C sheet: articles (subprograms and zones), links
+    `ARTICLE.Xn = ARTICLE.Rm`, constants, implantation, entry, exit (linked to `FIN_UT`, a
+    STOP added after the articles) and distribution symbols. Writes the assembled program
+    (`.g60pa.json`) and prints the layout and the symbols left; `--listing` prints the code A
+    in place, each blank marked with its symbol.
+
+**distribute** *values.g60d.yaml*
+:   Distribution: the code D2 sheet gives one value per symbol, written as in code B (unit
+    number of a cut, continuous drum address…). Writes the processing unit (`.ut.json`). A
+    code C sheet or an assembled program can be given instead when nothing is left to
+    distribute.
+
+**disasm** *file*
+:   Code A → code B, catena by catena, for a `.ut.json`, `.g60pa.json`, `.g60a.json`, or a
+    `.g60b` (through the chain, as **run**): mnemonics in the language of the file or
+    `--lang`, targets shown as labels, `NUM` decoded to its exact decimal value, the original
+    code B line as a comment when known. The files of the chain hold the code A in
+    hexadecimal. `--raw` reads only the catenae, as they are in memory: no labels, no source,
+    no data marks (a data catena that decodes is shown as an instruction), and the element of
+    a directive is the one of the last cut read. Labels are rebuilt from the code A:
+    `Lnnnnn` for a code target (branch, SIMU, switch directives), `Dnnnnn` for a data address;
+    the X of LE, LB, AB, SB, CB, A and S is a quantity and stays a number.
 
 **dd** *scenario.yaml*
 :   Run a Data Distributor scenario with synthetic elements (milestone J2) and print, for each
@@ -117,7 +160,8 @@ listed in [`docs/UNKNOWNS.md`](../docs/UNKNOWNS.md) (U-xx).
 
 **--trace**, **--trace=steps**
 :   One line per instruction read by the Program Distributor: simulated time (us), address,
-    element served, code A grouped by fields, code B source line.
+    symbolic address (`LABEL+k`, or `ARTICLE.LABEL+k` for a UT of several articles), element
+    served, code A grouped by fields, line number and code B source line.
 
 **--trace=regs**
 :   The same lines, each followed by the registers changed since the previous one, marked
@@ -143,7 +187,7 @@ With **dd**, **--trace** gives the same per-cycle lines.
     |---|---|
     | *Enter*, `s` | next instruction; the registers it changed are shown, marked `*` |
     | `r` | all registers |
-    | `m` *address\|label* [*n*] | *n* catenae of memory (default 1): address, label, hexadecimal, key |
+    | `m` *address\|label* [*n*] | *n* catenae of memory (default 1): address, `LABEL+k`, hexadecimal, key |
     | `b` *address\|label* | breakpoint |
     | `d` *address\|label* | delete the breakpoint |
     | `w` *element* | stop whenever the PD serves this element (`w LOGI`) |
@@ -153,13 +197,18 @@ With **dd**, **--trace** gives the same per-cycle lines.
     | `q` | quit (status `quit`, exit status 1) |
 
     The end of the input acts as `c`. The debugger only reads the state of the machine: the
-    run is the same with or without it.
+    run is the same with or without it. A *label* may be `LABEL`, `LABEL+k`, `LABEL-k`,
+    `ARTICLE.LABEL`, or a bare `LABEL` that only one article of a UT has.
+
+**--break** *LABEL[+k]*
+:   Run freely until the PD reads the instruction at this address, then stop as **--step**
+    does. Repeatable. Same forms of *label* as above.
 
 ### Results
 
 **--dump** *ZONE*
-:   Memory zone printed at the end of the run, one line per catena: address, label, the 24
-    bits in hexadecimal, check key (read without checking it). *ZONE* is *address|label* [*n*]
+:   Memory zone printed at the end of the run, one line per catena: address, `LABEL+k`, the
+    24 bits in hexadecimal, check key (read without checking it). *ZONE* is *address|label* [*n*]
     (n catenae, default 1) or `all` (the whole program and its working memories). Repeatable.
 
 **--gantt**, **--gantt=elem**
@@ -294,7 +343,7 @@ Y          +41 7000|000000  = 7
 R          +41 3142|857142  = 3.14286
 memory 00267 - 00268:
       00267  R        413142  key 1
-      00268           857142  key 6
+      00268  R+1      857142  key 6
 ```
 
 `41` is the exponent (one digit before the point), `3142` and `857142` the 10 digits of the
@@ -419,11 +468,52 @@ A Data Distributor scenario: the drum is served before ARIT and never misses its
 $ python -m gamma60 dd tests/scenarios/drum_arit.yaml --trace --names fr
 ```
 
+Stop at a label, then step (`s`), continue (`c`) or quit (`q`):
+
+```
+$ python -m gamma60 run tests/programs/fibonacci.g60b --break BOUCLE+2
+break at 00271
+next:     650  00271 BOUCLE+2       ARIT   1111 00001101100000001011         25: ADD   N     - 0 1 2
+(g60)
+```
+
+The tool chain: a standard subprogram (`lib/somme.g60b`) implanted twice, linked by a code C
+sheet, distributed, run and disassembled:
+
+```
+$ python -m gamma60 assemble tests/programs/chaine/sommes/sommes.g60c.yaml --listing
+$ python -m gamma60 distribute tests/programs/chaine/sommes/sommes.g60c.yaml
+$ python -m gamma60 run tests/programs/chaine/sommes/sommes.ut.json --dump DON.RES1 2
+...
+memory 00294 - 00295:
+      00294  DON.RES1 00000A  key 1
+      00295  DON.RES2 00003C  key 0
+$ python -m gamma60 disasm tests/programs/chaine/sommes/sommes.ut.json
+00256  3E0103  principal.DEBUT:    31    SOMME_A.SOMME            ; DEBUT:  31    ?SOMME1
+00257  3E0111  principal.RET1:     31    SOMME_B.SOMME            ; RET1:   31    ?SOMME2
+00258  3E0128  principal.RET2:     31    FIN_UT                   ; RET2:   31    ?FIN
+00259  400001  SOMME_A.SOMME:      LOGI                           ; SOMME:  LOGI
+...
+```
+
+The tape drive of a program left to the distribution (code D2 gives 10, or 12):
+
+```
+$ python -m gamma60 distribute tests/programs/chaine/bande_continue/bande_continue.g60d.yaml
+$ python -m gamma60 run tests/programs/chaine/bande_continue/bande_continue.ut.json \
+      --tape 10=tests/media/fichier_6_blocs.yaml --dump TRAIT.TOTAL 2
+```
+
 ## FILES
 
 `tests/programs/*.g60b`
 :   Example programs in code B, described in `tests/programs/README.md`: `test-arith01-03`,
     `arit_logi`, `fibonacci`, `pi`, `parallele`, `forkjoin_tumlin`…
+
+`tests/programs/lib/*.g60b`, `tests/programs/chaine/*/`
+:   Library subprograms (with `REP` and `?NAME`) and code C / code D2 sheets of the tool chain
+    (J6). The files made by the chain (`*.g60a.json`, `*.g60pa.json`, `*.ut.json`) are not
+    versioned.
 
 `tests/scenarios/*.yaml`
 :   Data Distributor scenarios for the **dd** command.
@@ -438,14 +528,16 @@ $ python -m gamma60 dd tests/scenarios/drum_arit.yaml --trace --names fr
 ## EXIT STATUS
 
 **0**
-:   The program halted normally (`status: halted`); **asm** and **dd** succeeded.
+:   The program halted normally (`status: halted`); the other commands succeeded.
 
 **1**
 :   The run ended with an incident (`status: incident`, e.g. an exponent overflow), was
-    `blocked`, or the debugger was quit (`status: quit`).
+    `blocked`, was cut by the event limit (`status: limit`, 5 million events: the program
+    probably loops), or the debugger was quit (`status: quit`).
 
 **2**
-:   Invalid program (`error: …`), code not supported yet (`not assembled yet`, `not supported
+:   Invalid program, sheet or file of the chain (`error: …`, e.g. an unknown with no value),
+    code not supported yet (`not assembled yet`, `not supported
     yet`), invalid `--dump` zone, `--gantt` with `--seq`, or a drive or drum missing from the
     configuration.
 
@@ -459,7 +551,9 @@ $ python -m gamma60 dd tests/scenarios/drum_arit.yaml --trace --names fr
   address, default 256, after the table of the recall chain registers).
 - Pseudo-instructions of the assembler, not of the period: `VIERGE [m]` (blank catena after a
   cut; `m`: join count in COURS notation), `NUM ±d` (semi-logarithmic number, 2 catenae),
-  `BIN n` (24-bit binary integer), `ZONE n` (n catenae at 0).
+  `BIN n` (24-bit binary integer), `ZONE n` (n catenae at 0), and for subprograms (J6)
+  `REP LABEL…` (repères visible to code C) and `?NAME` (unknown in a free variable, or
+  `BIN ?NAME`).
 - Unicode is used only in a few messages (`µs`); traces and timelines are plain ASCII.
 
 ## SEE ALSO

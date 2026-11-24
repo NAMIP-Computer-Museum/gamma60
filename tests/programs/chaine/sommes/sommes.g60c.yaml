@@ -1,0 +1,24 @@
+# Code C (J6, format moderne : U-53) : le sous-programme standard lib/somme.g60b implanté deux
+# fois (articles 2 et 3), chacun avec ses liaisons [MAIT §Assemblage & code C ; COURS p.44].
+# Lancer : python -m gamma60 distribute tests/programs/chaine/sommes/sommes.g60c.yaml
+#          python -m gamma60 run tests/programs/chaine/sommes/sommes.ut.json --dump DON.RES1 2
+articles:
+  1: {sp: principal.g60b}
+  2: {sp: ../../lib/somme.g60b, nom: SOMME_A}
+  3: {sp: ../../lib/somme.g60b, nom: SOMME_B}
+  4: {sp: donnees.g60b, nom: DON}
+assembl:
+  - principal.?SOMME1 = SOMME_A.R1
+  - principal.?SOMME2 = SOMME_B.R1
+  - SOMME_A.?ZONE = DON.T1
+  - SOMME_A.?N = 4
+  - SOMME_A.?RES = DON.RES1
+  - SOMME_A.?RETOUR = principal.RET1
+  - SOMME_B.?ZONE = DON.T2
+  - SOMME_B.?N = 3
+  - SOMME_B.?RES = DON.RES2
+  - SOMME_B.?RETOUR = principal.RET2
+distr:
+  implantation: {1: 256}
+  entree: principal.DEBUT
+  sortie: principal.?FIN

@@ -14,7 +14,7 @@ dtd:
     status: hypothesis
     unknown: U-41
 dti:
-  source: "B61 p.24 ; MAI : classes à priorité décroissante"
+  source: "B61 p.24 ; MAIT : classes à priorité décroissante"
   status: hypothesis
   unknown: U-04
   by_class: [0, 1, 2, 3, 4]

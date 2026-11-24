@@ -14,7 +14,7 @@ J1 sont pures : les jalons suivants les appellent sans les réécrire.
 | **J3** ✅ | **DP** : file des DI, matrices RAI (+ indice d'occupation) et RAC, registres RNE, RAPA, RAPP, REDP, RSDP, A, B ; décodage du code A par préfixe TK ; coupures, adresses, branchements, directives centrales, STOP ; le DP lit le programme **par des DTQ** [BAT72 p.102] ; assembleur minimal code B → code A (codage reconstruit, U-01) ; ARIT et LOGI branchés comme éléments avec les durées de `timings.yaml`. **Débogage** : registres du DP (`enr`/RNE, `cpar`/RAPA, `ipar`/RAPP, `pdir`/REDP, `pdor`/RSDP, A, B), RAI et indice d'occupation de chaque élément ; pas à pas par instruction du DP ou par événement ; affichage du code A décodé à côté du code B | Programmes de test exécutés sur le moteur ; temps d'ARIT conformes (200 / 350 / 550 µs en B61) ; le pas à pas montre le cycle RAPA → REDP → RAPP de COURS p.14-15 |
 | **J4** ✅ | **Simultanéité** : chaînes de reprise (I1/I2 et catène vierge, U-30), SIMU (branche extraordinaire d'abord), JOIN (bits 19-18), PROT/LIBE (bit 24 de l'image), coupures spéciales du profil COURS, ordre d'exploitation de la coupure (COURS p.38). **Débogage** : chaînes de reprise (`i1`, `i2` / B, C et maillons des catènes vierges), chaîne propre du DP et registre de mise en réserve du SIMU, compteurs de JOIN ; vue de l'état de chaque élément (repos, attente DI, opération) ; points d'arrêt sur une coupure, un JOIN ou un élément | Deux séquences concurrentes sur ARIT sérialisées ; JOIN à 3 branches ; `forkjoin_tumlin` en parallèle ; la file d'attente d'ARIT est visible pas à pas |
 | **J5** ✅ | Classe 2 (tambour, unisélecteurs et dérouleurs), COMP ; règles d'E/S (une opération, UT unique). **Débogage** : registres de COMP (opérandes, longueur), RAE du tambour, registre de longueur de bloc ; position du tambour et du ruban dans le temps simulé | `lecture_bande` ; `namip_classement` (extrait encadré par un test) ; recouvrement tambour ∥ ARIT (`tambour_arit`) ; `facture` reporté au J8 (TRAN) ; marche continue des bandes : J5b ✅ (`bande_continue`) |
-| **J6** | Chaîne d'outils complète : transposition code B → code A, assemblage code C, distribution code D → UT. **Débogage symbolique** : table des étiquettes et des lignes du code B produite par l'assembleur ; trace et pas à pas affichent l'étiquette et la ligne source ; points d'arrêt par étiquette | Tous les programmes de `tests/programs/` passent par la chaîne complète ; un point d'arrêt posé sur une étiquette du code B s'arrête à la bonne adresse |
+| **J6** ✅ | Chaîne d'outils complète : transposition code B → code A, assemblage code C, distribution code D → UT. **Débogage symbolique** : table des étiquettes et des lignes du code B produite par l'assembleur ; trace et pas à pas affichent l'étiquette et la ligne source ; points d'arrêt par étiquette | Tous les programmes de `tests/programs/` passent par la chaîne complète ; un point d'arrêt posé sur une étiquette du code B s'arrête à la bonne adresse |
 | **J7** | GGZ minimal : chargement d'UT, attribution des E/S, plusieurs UT simultanées. **Débogage** : filtre de trace par UT, vue des zones mémoire et des éléments attribués à chaque UT ; statistiques d'occupation (éléments, DP, canaux) | 2 UT indépendantes en parallèle ; mesures d'occupation |
 | **J8** | Classes 3-4 (multiplexeur, cartes, imprimante, bande perforée), TRAN (MIC, phases, clichés), pupitre ; visualisation (8 × 8 voyants). **Débogage** : registres de TRAN (entrée, sortie, cliché, index, décomptage, MIC), mémoire de ligne et compteurs d'interlignes de l'imprimante ; les voyants du pupitre comme vue d'époque, à côté de la vue registres | Conversion cartes → impression d'un petit fichier ; `facture` (TAMB / TRAN / ARIT + JOIN) |
 
@@ -104,6 +104,24 @@ l'attente du circuit. `bande_continue` transcrit la séquence de lancement de CO
 la lecture du suivant, sans traiter le bloc lu après la marque. `--gantt=seq` : les séquences
 de même étiquette ne remplissent leur ligne que tant que l'une d'elles vit. Documentation :
 `docs/TAPE.md`. 740 tests.
+
+**J6 terminé** : chaîne d'outils complète, d'après COURS p.44-45, B61 p.28-29, DR-E p.178 et
+MAIT (formats modernes, U-52 à U-54 ; `docs/TOOLCHAIN.md`). Sources mises à jour au préalable :
+MAIT et LEC archivés en HTML (`tools/html2txt.py`), sigle `MAI` → `MAIT`, U-55 à U-59 (master
+program, macro-instructions, priorités modifiables, assemblage à la trieuse, GGZ / GGU).
+Transposition (`transpose`) : sous-programme assemblable `.g60a.json`, code A avec vides,
+inconnues `?NOM` (variable libre ou `BIN ?NOM`), repères `REP`, relocation, mémoires de manœuvre
+comptées dans la taille. Assemblage (`assemble`) par feuille de code C `.g60c.yaml` : articles
+(sous-programmes et zones), liaisons, constantes, implantation, entrée, sortie → FIN_UT,
+symboles de distribution. Distribution (`distribute`) par code D2 `.g60d.yaml` → U.T.
+`.ut.json`. `run x.g60b` passe par toute la chaîne ; `run x.ut.json` exécute une U.T. ; la
+trace, la mémoire et le statut sont identiques à l'assemblage seul pour tous les programmes
+(`facture` : TRAN, J8). Débogage symbolique : `ETIQ+k` / `ARTICLE.ETIQ+k` et ligne source dans
+la trace et le pas à pas, `--break ETIQ[+k]`, `--dump ETIQ+k`, désassembleur `disasm` (code A →
+code B, `en` / `fr`). Exemples `tests/programs/lib/` et `tests/programs/chaine/` (un sous-répertoire par chaîne) :
+`bande_continue_task` découpé (même résultat, +20 µs de sortie), dérouleur choisi par D2,
+`lib/somme` implanté deux fois. Reportés au J7 : phases, D1, D3, table des éléments requis,
+modification des paramètres au pupitre. 831 tests.
 
 **Débogage, fil rouge** : le mode débogage est construit au J2 puis enrichi à chaque jalon
 avec les registres que ce jalon introduit. Les libellés viennent de `data/registers.yaml`

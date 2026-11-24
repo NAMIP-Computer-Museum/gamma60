@@ -1,0 +1,6 @@
+# Code D2 : le même programme assemblé, distribué pour le dérouleur 12 (même unisélecteur,
+# câblage B61 p.54). Seule la distribution change : « tout est figé » dans l'U.T. [MAIT §G.G.Z.].
+# Lancer : python -m gamma60 run tests/programs/chaine/bande_continue/bande_continue_d12.ut.json --tape 12=tests/media/fichier_6_blocs.yaml
+programme: bande_continue.g60c.yaml
+valeurs:
+  DEROULEUR: 12

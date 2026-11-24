@@ -1,0 +1,5 @@
+# Code D2 (J6, format moderne : U-54) : le fichier est monté sur le dérouleur 10.
+# Lancer : python -m gamma60 run tests/programs/chaine/bande_continue/bande_continue.ut.json --tape 10=tests/media/fichier_6_blocs.yaml
+programme: bande_continue.g60c.yaml
+valeurs:
+  DEROULEUR: 10

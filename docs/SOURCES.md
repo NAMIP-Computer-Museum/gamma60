@@ -1,6 +1,6 @@
 # Sources
 
-PDF dans `archives/docs/` ; texte extrait dans `refs/txt/<même nom>.txt` (non versionné, voir `tools/fetch_refs.sh`) ;
+PDF et pages HTML dans `archives/docs/` ; texte extrait dans `refs/txt/<même nom>.txt` (non versionné, voir `tools/fetch_refs.sh`) ;
 photos de pages dans `archives/photos/`.
 
 | Clé | Référence | Fichier (`archives/docs/` sauf mention)                       | En ligne |
@@ -17,10 +17,11 @@ photos de pages dans `archives/photos/`.
 | TS | T.J. Tumlin, M. Smotherman, « An Evaluation of the Design of the Gamma 60 » | `Tumlin-Histoire-Info-1993-Eval-Design-Gamma60.pdf`           | https://db.aconit.org/dbmedia_0/pdf_10/10174.pdf |
 | RYLE | B.L. Ryle, « Multiple programming data processing », CACM 4(2), 1961, p.99-101 | `Ryle-CommACM-1961-Multiprogramming.pdf`                      | https://dl.acm.org/doi/10.1145/366105.366132 |
 | NEK | M.R. Nekora, « Comment on a paper on parallel processing », CACM 4(2), 1961, p.103 | `Nekora-CommACM-Note-Parallel-Processing.pdf`                 | https://dl.acm.org/doi/10.1145/366105.366139 |
-| MAI | A. Maître, « Histoire du G 60 — Le logiciel » (1997), site FEB | —                                                             | http://www.feb-patrimoine.com/projet/gamma60/histoire_du_gamma_60_logiciel_maitre.htm |
+| MAIT | A. Maître, « Histoire du G 60 — Aspects techniques — Le logiciel » (1997), site FEB : codes B / C / D, assemblage, distribution, GGZ, GGU. Citée par section (§) | `Maitre-1997-Histoire-Gamma60.htm` (copie de la page) | http://www.feb-patrimoine.com/projet/gamma60/histoire_du_gamma_60_logiciel_maitre.htm |
+| LEC | B. Leclerc, « Le Gamma 60 : une aventure humaine et technologique », *Actes du Colloque sur l'histoire de l'informatique en France*, Grenoble, 1988, vol. 1, p.293-308 (date et pages : référence web, absentes du fichier ; texte rétrospectif, au conditionnel pour la conception). Cité par section (§) | `Leclerc-1988-Gamma60.htm` (copie HTML) | — |
 | MAS | C. Massuard, « Petite synthèse… » (1997), site FEB | —                                                             | http://www.feb-patrimoine.com/histoire/systemes_ord/g6002.htm |
 | AVG | J. Bourboulon (dir.), *L'Aventure Gamma 60*, Hermès/Lavoisier, 2005 (photos de pages) | `archives/photos/aventure-gamma60-*.jpg/png`                  | — (ouvrage) |
-| NAM | NAM-IP Infos 2018/1-3, « Préservation : l'ordinateur Bull Gamma 60 » (dont un programme de classement en code B : `archives/photos/namip-2018-programme-classement.jpg`) | —                                                             | http://pionnier.nam-ip.be/NAM-ip-Info201801-Pres1.html |
+| NAM | G. Natan, NAM-IP Infos 2018/1-3, « Préservation : l'ordinateur Bull Gamma 60 » (source secondaire ; 2018/3 : système opératoire GGZ / GGU, environ quinze clients, https://namip-computer-museum.github.io/blog/posts/2018/2018-03-pres1/) (dont un programme de classement en code B : `archives/photos/namip-2018-programme-classement.jpg`) | —                                                             | http://pionnier.nam-ip.be/NAM-ip-Info201801-Pres1.html |
 | RTT | G. Natan / histoireinform, « Gamma 60 Bull à RTT » | —                                                             | http://www.histoireinform.com/Histoire/+infos2/chr4rtt.htm |
 | SMO | M. Smotherman, « Bull Gamma 60 (1958) » | —                                                             | https://people.computing.clemson.edu/~mark/g60.html |
 | EPOCH | « Bull Gamma 60 », fosse.fr | —                                                             | https://fosse.fr/en/1960/bull-gamma-60.html |

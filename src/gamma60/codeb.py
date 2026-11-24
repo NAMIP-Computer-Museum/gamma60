@@ -2,7 +2,8 @@
 
 Layout (docs/TOOLCHAIN.md): optional 3-digit line number, optional ``LABEL:``, T.O., then the
 fields. ARIT directives: ``[C.C.] V O1 O2 R`` (``-`` = empty); LOGI directives: ``V R``.
-Pseudo-instructions: ``VIERGE [m]``, ``NUM ±d``, ``BIN n``, ``ZONE n``. Header comments ``; langue:``,
+Pseudo-instructions: ``VIERGE [m]``, ``NUM ±d``, ``BIN n``, ``ZONE n``; ``REP LABEL...`` declares
+the repères of a subprogram (no catena; J6, U-52). Header comments ``; langue:``,
 ``; profil:`` and ``; origine:`` (load address; default after the table of the recall chain
 registers B / C, ``program_origin_default`` of behavior.yaml, U-30).
 """
@@ -11,7 +12,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from gamma60 import data
 
@@ -46,6 +47,7 @@ class Program:
     profile: str | None
     end: int  # first address after the program: base of the working memories
     origin: int = 0
+    reperes: list[str] = field(default_factory=list)  # REP: labels visible to code C (U-52)
 
     def at(self, address: int) -> Line:
         for line in self.lines:
@@ -69,6 +71,7 @@ def parse(text: str) -> Program:
             origin = int(m.group(1))
     lines: list[Line] = []
     labels: dict[str, int] = {}
+    reperes: list[str] = []
     address = origin
     for number, raw in enumerate(text.splitlines(), 1):
         if m := re.match(r";\s*langue:\s*(\w+)", raw):
@@ -90,6 +93,11 @@ def parse(text: str) -> Program:
         if not tokens:
             raise ProgramError(f"line {number}: label without instruction")
         to, args = tokens[0], tokens[1:]
+        if to == "REP":  # repères of a subprogram: no catena [U-52]
+            if label or not args:
+                raise ProgramError(f"line {number}: REP LABEL... (no label before REP)")
+            reperes += [a for a in args if a not in reperes]
+            continue
         size = 1
         if to == "NUM":
             size = 2
@@ -100,7 +108,10 @@ def parse(text: str) -> Program:
     if language not in data.languages():
         raise ProgramError(f"unknown language {language!r}")
     end = max((ln.address + ln.size for ln in lines), default=origin)
-    return Program(lines, labels, language, profile, end, origin)
+    for name in reperes:
+        if name not in labels:
+            raise ProgramError(f"REP {name}: unknown label")
+    return Program(lines, labels, language, profile, end, origin, reperes)
 
 
 def split_af(args: Sequence[str], fields: int) -> tuple[list[str], str]:

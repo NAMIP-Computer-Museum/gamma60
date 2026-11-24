@@ -1,0 +1,12 @@
+; langue: fr
+; Article de données de l'exemple « sommes » (J6) : deux tables et deux résultats.
+        REP   T1     T2     RES1   RES2
+T1:     BIN   1
+        BIN   2
+        BIN   3
+        BIN   4
+T2:     BIN   10
+        BIN   20
+        BIN   30
+RES1:   BIN   0                        ; 1 + 2 + 3 + 4 = 10
+RES2:   BIN   0                        ; 10 + 20 + 30 = 60

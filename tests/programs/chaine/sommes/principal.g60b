@@ -1,0 +1,7 @@
+; langue: fr
+; Programme principal de l'exemple « sommes » (J6) : appelle deux implantations du même
+; sous-programme standard lib/somme.g60b, l'une après l'autre, puis sort.
+        REP   DEBUT  RET1   RET2
+DEBUT:  31    ?SOMME1                  ; première implantation
+RET1:   31    ?SOMME2                  ; seconde implantation
+RET2:   31    ?FIN                     ; sortie → FIN_UT

@@ -12,6 +12,11 @@ then each line becomes one catena (``NUM``: two, ``ZONE n``: n; ``BIN n``: a bin
 
 The join count of a cut is taken from its C.C. [B61 p.31] or from the X of its blank catena
 [COURS p.52] (U-20). Sub-codes and element directive layouts are reconstructed (U-01).
+
+Subprograms (J6, U-52): a free variable ``?NAME`` (or ``BIN ?NAME``) is an *unknown*, left
+blank and recorded in :attr:`Image.fixups`; every X that holds an absolute address of the
+program itself is recorded in :attr:`Image.relocations`, so the code A can be moved
+[DR-E p.178 ; MAIT §Sous-programmes].
 """
 
 from __future__ import annotations
@@ -42,6 +47,22 @@ class Listing:
     note: str = ""
 
 
+@dataclass(frozen=True)
+class Fixup:
+    """A blank of the code A to be filled by code C or code D (U-52).
+
+    ``field``: ``x`` (free variable, bits 15-1) or ``word`` (whole catena, ``BIN ?NAME``);
+    ``mode``: ``abs`` (value as is), ``diff`` (R: value minus the address of the catena),
+    ``unit:<cut>`` (unit number converted to an element number, U-44), ``drum`` (continuous
+    drum address converted to track × 256 + position).
+    """
+
+    address: int
+    name: str
+    field: str = "x"
+    mode: str = "abs"
+
+
 @dataclass
 class Image:
     """Assembled program: catenae by address, symbols and listing."""
@@ -52,6 +73,14 @@ class Image:
     elements: dict[int, str] = field(default_factory=dict)  # directive address → element kind
     joins: dict[int, int] = field(default_factory=dict)  # cut address → join count m
     entry: int = 0
+    fixups: list[Fixup] = field(default_factory=list)  # unknowns ?NAME, in order (J6)
+    relocations: list[int] = field(default_factory=list)  # X = absolute internal address
+    working: int = 0  # working memories used after the program (M0, M1...: count)
+
+    @property
+    def unknowns(self) -> list[str]:
+        """Names of the unknowns, in order of first appearance (X1, X2...)."""
+        return list(dict.fromkeys(f.name for f in self.fixups))
 
     @property
     def labels(self) -> dict[str, int]:
@@ -81,16 +110,25 @@ class Assembler:
         numbers = data.resolve(data.load("topology")["element_numbers"])
         self.element_numbers = {k: v for k, v in numbers.items()}
         self.unit_numbers = data.resolve(data.load("topology")["unit_numbers"])
+        self.fixups: list[Fixup] = []
+        self.relocations: list[int] = []
+        self.working = 0
 
     # -- operands ---------------------------------------------------------------------------
 
     def _x(self, token: str, af: str, here: int, where: str) -> tuple[int, bool, bool]:
         """X field, d bit and s bit of a free variable."""
         labels = self.program.labels
+        if token.startswith("?"):  # unknown: blank, filled by code C or code D (U-52)
+            if "M" in af or not re.fullmatch(r"\?[A-Za-z_]\w*", token):
+                raise ProgramError(f"{where}invalid unknown {token!r}")
+            self.fixups.append(Fixup(here, token[1:], "x", "diff" if "R" in af else "abs"))
+            return 0, "R" in af, "S" in af
         if "M" in af:
             if not token.isdigit():
                 raise ProgramError(f"{where}working memory number expected, got {token!r}")
             target, d = self.program.end + int(token), True
+            self.working = max(self.working, int(token) + 1)
         elif token in labels:
             target, d = labels[token], "R" in af
         elif re.fullmatch(r"\d+", token):
@@ -101,6 +139,8 @@ class Assembler:
         else:
             raise ProgramError(f"{where}unknown label or value {token!r}")
         x = (target - here) & MASK15 if d else target
+        if not d and token in labels:  # absolute address of the program: moves with it
+            self.relocations.append(here)
         if not d and not 0 <= x <= MASK15:
             raise ProgramError(f"{where}X {x} outside 0-32767")
         return x, d, "S" in af
@@ -120,7 +160,14 @@ class Assembler:
                     self._put(image, here + j, value, line if j == 0 else None, "data")
                 continue
             if to == "BIN":
-                self._put(image, here, binary_value(line.args[0], where), line, "data")
+                token = line.args[0]
+                if token.startswith("?"):  # unknown catena, e.g. an address for RS (U-52)
+                    if not re.fullmatch(r"\?[A-Za-z_]\w*", token):
+                        raise ProgramError(f"{where}invalid unknown {token!r}")
+                    self.fixups.append(Fixup(here, token[1:], "word"))
+                    self._put(image, here, 0, line, "data")
+                else:
+                    self._put(image, here, binary_value(token, where), line, "data")
                 continue
             if to == "ZONE":
                 for j in range(line.size):
@@ -175,7 +222,16 @@ class Assembler:
                 image.elements[here] = element
             self._put(image, here, code_a.encode(word), line)
         image.entry = next((ln.address for ln in lines if ln.to not in DATA), self.program.origin)
+        image.fixups, image.relocations = self.fixups, self.relocations
+        image.working = self.working
         return image
+
+    def _set_mode(self, here: int, token: str, mode: str) -> None:
+        """Conversion applied when the unknown of the catena at ``here`` gets its value."""
+        if token.startswith("?"):
+            last = self.fixups[-1]
+            assert last.address == here
+            self.fixups[-1] = Fixup(here, last.name, last.field, mode)
 
     def _cut(self, line: Line, ident: str, blank: Line | None, where: str) -> Word:
         if ident == "end_of_sequence":
@@ -199,6 +255,8 @@ class Assembler:
             head, af = split_af(args, 1)
             x, d, s = self._x(head[0], af, line.address, where)
             unit = self.unit_numbers.get(ident)
+            if unit and not af:
+                self._set_mode(line.address, head[0], f"unit:{ident}")
             if unit and not af and head[0].isdigit():  # unit k → element number (U-44)
                 if int(head[0]) < 1:
                     raise ProgramError(f"{where}unit number {head[0]} (from 1)")
@@ -231,6 +289,7 @@ class Assembler:
         if element == "comparator" and not af and x > 255:
             raise ProgramError(f"{where}length {x} > 255 [COURS p.75]")
         if element == "drum" and op == "set_drum_origin" and not af:
+            self._set_mode(here, head[0], "drum")
             # continuous drum address of code B → track × 256 + position in code A [COURS p.154]
             track, position = divmod(x, DRUM_POSITIONS)
             if track > 127:

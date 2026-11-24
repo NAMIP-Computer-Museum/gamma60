@@ -1,0 +1,51 @@
+; langue: fr
+; Sous-programme de bibliothèque (J6) : lecture d'un fichier en MARCHE CONTINUE sur l'élément
+; double DERU 1 / DERU 2, avec double tampon. C'est la partie lecture de bande_continue_task.g60b,
+; rendue assemblable : les zones, le traitement et la sortie sont des inconnues, liées par le
+; code C ; le dérouleur est laissé à la distribution (code D2) [MAIT §Assemblage & code C, §G.G.Z.].
+; Séquence de lancement : COURS p.148-149, avec les mêmes reconstitutions (U-51).
+; Inconnues :
+;   ?ZA, ?ZB   les deux zones de blocs (articles « zone » du code C) ;
+;   ?ZTR       catène où ranger l'adresse de la zone qu'on vient de remplir ;
+;   ?TRAIT     entrée du traitement d'un bloc, lancé par SIMU pendant la lecture du suivant ;
+;   ?DEROUL    numéro du dérouleur (distribution) ;
+;   ?FIN       sortie, après le regroupement des deux éléments.
+        REP   DEBUT
+DEBUT:  GB    ?ZA                      ; PTR <- ZA
+        RB    PTR
+        AB    ?ZB                      ; SOMZ <- ZA + ZB
+        RB    SOMZ
+L1:     DERU  1                        ; 1.  établit la liaison
+        VIERGE
+        LAV   ?DEROUL                  ; 2.  lecture avant, dérouleur donné par le code D2
+        SIMU  L4                       ; 3.  lance deux fois la séquence 4
+        VIERGE
+L4:     FI    L5                       ; 4.  inverse l'aiguillage 5
+L5:     31    L8                       ; 5.  31 / 00
+        DERU  1                        ; 6.
+        VIERGE
+        31    L9                       ; 7.
+L8:     DERU  2                        ; 8.
+        VIERGE
+L9:     SIMU  L14                      ; 9.  TRA d'abord, bascule ensuite
+        VIERGE
+        GB    SOMZ   S                 ; 10.-13. bascule de zones (reconstituée)
+        SB    PTR    S
+        RB    PTR
+        STOP
+L14:    G     0      PTR    S          ; 14. RAC 0 <- zone
+        TRA                            ; 15. lire un bloc
+        19    MARQ                     ; bloc-marque : fin du fichier
+FINSW:  00    FIN                      ; bloc lu après la marque : hors fichier, pas traité
+        GB    PTR    S                 ; ZTR <- zone qu'on vient de remplir
+        RB    ?ZTR
+        SIMU  ?TRAIT                   ; traiter ce bloc sur une branche à part...
+        VIERGE
+        31    L4                       ; 16. ...pendant que la séquence relance l'élément
+MARQ:   FT    FINSW                    ; les deux éléments iront en FIN
+        31    FIN
+FIN:    ARIT  1                        ; regroupement des deux éléments
+        VIERGE
+        31    ?FIN                     ; sortie du sous-programme
+PTR:    ZONE  1
+SOMZ:   ZONE  1

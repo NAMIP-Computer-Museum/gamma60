@@ -29,6 +29,7 @@ from gamma60.engine import Engine
 from gamma60.memory import Memory
 from gamma60.number import Number
 from gamma60.program_distributor import ProgramDistributor
+from gamma60.toolchain import chain
 from gamma60.toolchain.assembler import Image, assemble
 
 SINGLE_ELEMENTS = {"arithmetic": Arithmetic, "logical": Logical, "comparator": Comparator}
@@ -48,7 +49,7 @@ def uniselector_wiring(config: str, unit: int) -> list[int]:
 
 @dataclass
 class Result:
-    status: str  # halted | blocked | incident
+    status: str  # halted | blocked | incident | limit
     message: str
     machine: Machine
     image: Image
@@ -132,7 +133,13 @@ class Machine:
     def run(self, max_events: int = 5_000_000) -> Result:
         self.dp.start(self.image.entry)
         self.engine.run(max_events=max_events)
-        if self.status == "running":
+        if self.status == "running" and self.engine.pending():  # cut by the event limit
+            self.status = "limit"
+            self.message = (
+                f"event limit reached ({max_events} events) at {self.engine.now} µs:"
+                " the program probably loops"
+            )
+        elif self.status == "running":
             active = [e.name for e in self.elements.values() if e.state != IDLE]
             if active or self.dp.busy or self.dp.pd_b:
                 self.status = "blocked"
@@ -161,10 +168,16 @@ def build(
     mode: str = "faithful",
     observer=None,
     config: str = DEFAULT_CONFIG,
+    through_chain: bool = True,
 ) -> Machine:
+    """Machine loaded with ``text`` through the whole chain of J6 (``through_chain=False``: assembly
+    only)."""
     program = codeb.parse(text)
     prof = data.get_profile(profile or program.profile)
-    return Machine(assemble(program, prof), prof, mode, observer, config)
+    if not through_chain:  # plain assembly (reference of the regression test of J6)
+        return Machine(assemble(program, prof), prof, mode, observer, config)
+    ut, source = chain.processing_unit(program, prof)
+    return Machine(chain.machine_image(ut, source), prof, mode, observer, config)
 
 
 def run_text(text: str, profile: str | None = None, **kwargs) -> Result:

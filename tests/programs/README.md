@@ -28,3 +28,18 @@ Colonnes : `T.O.  C.C.  X  A.F.` ; pour les directives ARIT, X = `dp O1 O2 R`
 | `test-arith01.g60b` | ARIT seul : DIV en virgule normalisée | R = 22 / 7 = 3,142857142 (10 chiffres, tronqué) |
 | `test-arith02-overflow.g60b` | MUL normalisé : 10^20 × 10^19, exposant 80 > 79 | incident ligne 9 (U-35), R inchangé |
 | `test-arith03-underflow.g60b` | MUL normalisé : 10^-21 × 10^-21, exposant −1 < 0 | incident ligne 10 par défaut ; R = +0 avec `exponent_underflow: zero` (U-35) |
+
+## Chaîne d'outils (J6)
+
+Sous-programmes avec repères (`REP`) et inconnues (`?NOM`), liés par une feuille de code C
+(`.g60c.yaml`) et distribués par une feuille de code D2 (`.g60d.yaml`) ; formats modernes
+(U-52 à U-54), voir `docs/TOOLCHAIN.md`. `distribute` écrit l'U.T. (`.ut.json`, non versionnée)
+à côté de la feuille : `python -m gamma60 distribute <feuille>` puis `python -m gamma60 run <u.t.>`.
+
+| Fichier | Ce qu'il teste | Résultat attendu |
+|---|---|---|
+| `lib/lecture_continue.g60b` | sous-programme de bibliothèque : la lecture en marche continue de `bande_continue_task`, zones, traitement, sortie et dérouleur en inconnues | (non exécutable seul : `run` refuse ses inconnues) |
+| `lib/somme.g60b` | sous-programme standard : somme LOGI de N catènes ; zone, N, résultat et retour en inconnues | (idem) |
+| `chaine/bande_continue/bande_continue.g60c.yaml` + `.g60d.yaml` | `bande_continue_task` découpé : `lib/lecture_continue` + `chaine/bande_continue/traitement_bloc.g60b` + zones ZA, ZB, ZTR en articles ; dérouleur 10 donné par D2 ; `--tape 10=tests/media/fichier_6_blocs.yaml` | TRAIT.TOTAL = 1 057 350, TRAIT.NBLOC = 6, comme le programme d'un seul tenant ; 20 µs de plus (la sortie `31 ?FIN` vers FIN_UT) |
+| `chaine/bande_continue/bande_continue_d12.g60d.yaml` | le même programme assemblé, distribué pour le dérouleur 12 ; `--tape 12=…` | même résultat ; les deux U.T. ne diffèrent que par la catène de `LAV ?DEROUL` |
+| `chaine/sommes/sommes.g60c.yaml` | `lib/somme.g60b` implanté deux fois (SOMME_A, SOMME_B), avec `chaine/sommes/principal.g60b` et `chaine/sommes/donnees.g60b` | DON.RES1 = 10, DON.RES2 = 60 |

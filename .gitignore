@@ -6,3 +6,8 @@ __pycache__/
 .ruff_cache/
 .idea/
 *.egg-info/
+
+# fichiers produits par la chaîne d'outils (J6)
+*.g60a.json
+*.g60pa.json
+*.ut.json

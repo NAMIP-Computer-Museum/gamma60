@@ -274,13 +274,28 @@ MACHINE_LEGEND = [
 ]
 
 
+def symbolic(program, address: int) -> str:
+    """``LABEL`` or ``LABEL+k``: nearest label at or before ``address``, inside the program
+    (J6: ``ARTICLE.LABEL`` for a processing unit of several articles)."""
+    if not program.origin <= address < program.end:
+        return ""
+    best = None
+    for label, a in program.labels.items():
+        if a <= address and (best is None or a > best[1]):
+            best = (label, a)
+    if best is None:
+        return ""
+    return best[0] if address == best[1] else f"{best[0]}+{address - best[1]}"
+
+
 def describe(machine, dp, names: Names) -> str:
-    """``time  address  element  code A  code B`` of the instruction the PD has just read."""
+    """``time  address  symbol  element  code A  line: code B`` of the instruction just read."""
     line = machine.image.line_at(dp.instr_address)
     unit = unit_name(dp.element, names) if dp.element is not None else "-"
-    source = line.text if line else ""
+    source = f"{line.source_line:4d}: {line.text}" if line else ""
+    where = symbolic(machine.image.program, dp.instr_address)
     return (
-        f"{machine.engine.now:7d}  {dp.instr_address:05d}  {unit:<5}  "
+        f"{machine.engine.now:7d}  {dp.instr_address:05d} {where:<14} {unit:<5}  "
         f"{code_a.text(dp.regs.redp):<31} {source}"
     )
 
@@ -421,12 +436,10 @@ class Stepper:
         self._prompt(machine)
 
     def _address(self, token: str) -> int:
-        labels = self._interp.program.labels
-        if token in labels:
-            return labels[token]
-        if re.fullmatch(r"\d+", token):
-            return int(token) & MASK15
-        raise ValueError(f"{self.names.say('unknown')} {token!r}")
+        try:
+            return resolve_address(self._interp.program, token) & MASK15
+        except ValueError:
+            raise ValueError(f"{self.names.say('unknown')} {token!r}") from None
 
     def _memory(self, start: int, count: int) -> None:
         for text in dump_lines(self._interp.program, self._interp.memory, start, count):
@@ -506,11 +519,20 @@ class Stepper:
 
 
 def resolve_address(program, token: str) -> int:
-    """An address given as a label of the program or as a decimal number."""
-    if token in program.labels:
-        return program.labels[token]
-    if re.fullmatch(r"\d+", token):
-        return int(token)
+    """An address given as a decimal number, or as ``LABEL[+k|-k]``. With several articles
+    (J6), ``ARTICLE.LABEL``; a bare ``LABEL`` is accepted when only one article has it."""
+    m = re.fullmatch(r"(.+?)([+-]\d+)?", token)
+    name, offset = m.group(1), int(m.group(2) or 0)
+    labels = program.labels
+    if re.fullmatch(r"\d+", name):
+        return int(name) + offset
+    if name in labels:
+        return labels[name] + offset
+    found = [a for label, a in labels.items() if label.endswith("." + name)]
+    if len(found) == 1:
+        return found[0] + offset
+    if found:
+        raise ValueError(f"ambiguous label {name!r}: give ARTICLE.{name}")
     raise ValueError(f"unknown address or label {token!r}")
 
 
@@ -525,14 +547,13 @@ def dump_zone(program, spec: list[str]) -> tuple[int, int]:
 
 def dump_lines(program, memory, start: int, count: int) -> list[str]:
     """One line per catena: address, label, 24 bits in hexadecimal, check key (raw, unchecked)."""
-    by_address = {a: name for name, a in program.labels.items()}
     lines = []
     for address in range(start, start + count):
         if not 0 <= address < memory.size:
             lines.append(f"      {address:05d}  outside the store ({memory.size} catenae)")
             break
         cat = memory.raw(address)
-        label = by_address.get(address, "")
+        label = symbolic(program, address)
         lines.append(f"      {address:05d}  {label:<8} {cat.value:06X}  key {cat.key}")
     return lines
 

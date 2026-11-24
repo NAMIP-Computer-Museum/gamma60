@@ -1,0 +1,425 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>HISTOIRE DU G 60</title>
+</head>
+
+<body>
+
+<h2 align="center">HISTOIRE DU G 60</h2>
+<h2 align="center">ASPECTS TECHNIQUES</h2>
+<h2 align="center">LE LOGICIEL</h2>
+<p align="center">par André Maitre (1997)</p>
+<h3>Brève introduction</h3>
+<p>a/ Le G 60 est fondamentalement un système à multiprogrammation</p>
+<p>Le central peut demander par une coupure la mise au travail de l’un des
+nombreux éléments qui lui sont connectés (entrée-sortie, mémorisation,
+calcul ) , garnir les registres d’adresse de cet élément et lui envoyer une
+directive d’exécution puis se libérer à la recherche d’un autre travail.
+Pendant ce temps, l’élément exécute sa directive en accédant directement
+à la mémoire centrale; puis à la fin, fournit un mot qualitatif de 24 bits
+analysable en central par des branchements.</p>
+<p>Plusieurs programmes (ou branches de programmes lancées par des coupures spéciales:
+SIMU ) peuvent se dérouler en même temps et, le cas échéant, provoquer au
+niveau du central, de chaque élément concerné et aussi de séquences protégées
+( éléments virtuels ), la gestion de files d’attente matérialisées par les
+chaînes de reprise.</p>
+<p>Les instructions correspondant aux 4 fonctions ci-dessus sont codées en
+machine ( code A ) dans un mot de 24 bits avec la structure suivante:</p>
+<ul>
+  <li>- T.O. 2 bits</li>
+  <li>- TOC 5 bits</li>
+  <li>- FA &nbsp; 2 bits</li>
+  <li>- Adresse 15 bits</li>
+</ul>
+<p>L’adresse autorise pour la mémoire centrale une capacité maximale de
+32768 mots soit environ 98 K octets. Cycle mémoire = 10 ms</p>
+<p>b/ Les éléments connectés, regroupés en 5 classes correspondant à des
+niveaux de priorité décroissants, sont les suivants:</p>
+<p># Classe 0 : Le pupitre (voir plus loin le paragraphe d )</p>
+<p># Classe 1 : Les 4 éléments de traitement, originalités du Gamma 60, et
+particulièrement le traducteur qui transforme&nbsp;» les données d’un
+format à un autre grâce à des clichés, sortes de micro-instructions.</p>
+<p># Classe 2 : Les éléments de mémorisation, à savoir:<br>
+&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Les unisélecteurs ( jusqu’à 10 ) regroupant jusqu’à 48 dérouleurs de
+bande magnétique ( ruban ), avec lecture dans les 2 sens.<br>
+</p>
+<div align="center">
+  <center>
+  <table cellpadding="2" align="center">
+    <tbody>
+      <tr>
+        <td>Longueur :</td>
+        <td>730 m</td>
+        <td>Durée:</td>
+        <td>6 mn 20 s</td>
+        <td>Capac.:</td>
+        <td>1,6 M mots</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>1100m</td>
+        <td></td>
+        <td>9 mn 30s</td>
+        <td></td>
+        <td>2,4M mots</td>
+      </tr>
+    </tbody>
+  </table>
+  </center>
+</div>
+<p>&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Les tambours ( jusqu’à 4 ) adressables temps d’accès moyen : 10 ms capacité.:
+26 K mots</p>
+<p># Classe 3 : Les éléments d’entrée-sortie ( jusqu’à 20 ), connectés
+à un multiplexeur ( 2 maximum ), à savoir:</p>
+<p>Les lecteurs &amp; lecteurs-perforateurs de cartes ( jusqu’à 4 ) :300
+cartes / m<br>
+Les imprimantes ( jusqu’à 8 ), avec simple ou double entraînement : 300 ou
+600 lignes / m<br>
+Les lecteurs-perforateurs de bande<br>
+Les machines à écrire, etc..</p>
+<p>c/ Compte tenu<br>
+-de la nouveauté et de l’originalité de son architecture,<br>
+-des nouvelles technologies utilisées ( logique à transistors, mémoire à
+tores, dérouleurs de bandes )<br>
+-du facteur d’échelle important à partir du Gamma 3 Tambour</p>
+<p>il était naturel d’insister sur la sécurité.</p>
+<p>Sans parler de tous les contrôles statiques et ajustements technologiques
+dans les armoires et les appareils et éléments, qui rendront les mises au
+point lourdes, on insistera sur la présence de contrôles dynamiques sur les
+transferts et les traitements, matérialisés par des bits supplémentaires dans
+les mémoires, les registres et les canaux, et nécessitant des dispositifs de
+correction généralement programmés.</p>
+<p>En particulier, le mot mémoire M compte 27 bits M ( 27 ) = mot ( 24 ) + clé
+( 3 )</p>
+<p>les canaux mémoire utilisent un bit de plus en contrôle d’imparité.</p>
+<p>Les contrôles sont faits après chaque transfert et chaque directive, et après
+une relecture pour les éléments de classe 2 et 3.</p>
+<p>d/ Un composant essentiel du Gamma 60 est le pupitre, interface obligé de
+l’ensemble Gamma 60 avec son utilisateur durant son exploitation -- sans négliger
+les visualisations sur les armoires et appareils et les manipulations des
+fichiers amovibles ( cartes, bandes, liasses, bobines ) -- .</p>
+<p>Le pupitre physique comporte 4 zones:</p>
+<p>La zone 1 assure la mise sous tension et hors tension du central et des éléments
+( poussoirs et visualisations ).</p>
+<p>La zone 2, en plus de la visualisation des incidents «&nbsp;clé », permet
+la gestion manuelle du central: <br>
+-- choix d’un type de marche ( normal, arrêt sur chaque instruction, arrêt
+sur profil instruction, pupitre )<br>
+-- en marche pupitre, utilisation de poussoirs permettant la lecture et l’écriture
+d’un profil mot dans les registres centraux ou en mémoire à une adresse
+choisie, adresse et profil étant affichés en binaire par des commutateurs.<br>
+-- visualisation de tous les registres du central, y compris ceux qui concernent
+la mémoire et les éléments connectés.<br>
+-- présence de 6 commutateurs testables par programme.</p>
+<p>La zone 3, en face du pupitreur, est la zone d’exploitation normale du
+Gamma 60. Elle comporte: <br>
+-- un bloc de 8 fois 8 voyants, allumés ou éteints par des directives pour
+suivre ll'évolution de 8 programmes !<br>
+-- un ensemble machine à écrire - lecteur-perforateur de bande auquel sont
+associés clavier de commande et visualisations, ensemble pouvant fonctionner:<br>
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - soit en autonome
+avec les commandes du clavier,<br>
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - soit en tant
+qu’élément du Gamma 60 -- un poussoir «&nbsp;Intervention opérateur&nbsp;»
+qui permet<br>
+&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+- le lancement initial du Gamma 60<br>
+&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+- ultérieurement, le lancement d’un programme de gestion recevant puis exécutant
+des ordres issus du pupitreur via le clavier de la machine à écrire.<br>
+&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+- réciproquement, le programme peut envoyer une directive à l’opérateur
+particulièrement pour demander une manipulation sur un appareil ou une action
+sur détection d’incident grave.</p>
+<p>La zone 4 regroupe la visualisation de l’état de fonctionnement de tous
+les éléments et appareils connectés.</p>
+<p>Le pupitre est le seul élément capable d’effectuer une interruption de
+programme prioritaire, les autres éléments devant se contenter de répondre à
+une sollicitation du central par programme.</p>
+<h3>Logiciel de programmation</h3>
+<h4>Principes</h4>
+<p>Le calcul scientifique utilisait depuis quelque temps les concepts de
+programme, de sous-programme, ceux de langages (langage machine binaire, langage
+machine symbolique, et langage synthétique: Fortran en préparation ). Ainsi étaient
+apparues, sur cartes ou sur bande perforée et ensuite sur support magnétique,
+des bibliothèques:</p>
+<p>-- de sous-programmes standards virgule flottante, double précision,
+fonctions trigonométriques,...</p>
+<p>-- de programmes scientifiques standards calcul matriciel, équations linéaires,...</p>
+<p>-- de programmes utilisateurs</p>
+<p>-- de programmes de base, auxiliaires des programmes utilisateurs :
+chargement, traduction, assemblage, vidage ( perforation, listings )</p>
+<p>-- des programmes et sous-programmes,...</p>
+<p>Le Gamma 3 Tambour ( comme ses concurrents ) a utilisé la même approche
+pour les problèmes de gestion, comme le feront tous ses successeurs jusqu’à
+aujourd’hui.</p>
+<p>Il faut noter que pour une nouvelle famille d’ordinateurs et donc le Gamma
+60, il est nécessaire de recréer et éventuellement de compléter toutes ces
+bibliothèques de base.</p>
+<h4>Évolution du logiciel de base du G 60</h4>
+<p>Sorti du néant, ce logiciel allait se construire à partir du code
+d’instruction (code A) et des performances physiques des différentes parties,
+et en profitant des expériences acquises surtout sur le Gamma 3 Tambour -- ce
+dernier étant utilisé d’ailleurs pour créer sous forme adéquate ( code A,
+nombres,... ) des supports lisibles sur Gamma 60 ( bandes, cartes ) .</p>
+<p>Pour simplifier, on distinguera 3 phases de développement:</p>
+<p>1° -- Création progressive d’un logiciel de base élémentaire mais
+complet matérialisé sur bandes programmes</p>
+<p>2° -- Exploitation du précédent et création d’un logiciel plus élaboré</p>
+<p>3° -- Exploitation et extension du logiciel précédent</p>
+<p>Ce logiciel sera subdivisé d’après les différentes fonctions réalisées:</p>
+<p>a -- Contrôle et réception du Gamma 60 physique<br>
+b -- Exploitation du Gamma 60<br>
+c -- Programmation du Gamma 60<br>
+d -- Programmes standards<br>
+e -- Contrôle et réception du logiciel de base</p>
+<p>Le logiciel de base fourni au client avec le matériel est b + c + d ;</p>
+<p>les divisions a et e , malgré leur importance, ne seront pas analysées dans
+cette brève histoire du temps.</p>
+<p>.</p>
+<h4>Langage de base &amp; code B</h4>
+<p>Le premier langage de programmation, nommé code B, est la traduction
+instruction par instruction du code machine ( code A ); il utilise une structure
+fixe, favorable à la perforation des cartes et à leur contrôle visuel.</p>
+<p>-- colonnes complémentaires pour les commentaires du programmeur</p>
+<p>-- adjonction d’un numéro de ligne, nécessaire pour les renvois.</p>
+<p>-- valeurs symboliques parlantes pour T.O., C.C., F.A.:</p>
+<p>exemples: ARIT, PUPI, SIMU, STOP, ADD, CMP,...</p>
+<p>-- adresses (et longueurs, constantes,... ) en décimal</p>
+<p>Une précision sur la fonction d’adresse ( FA )</p>
+<p>- s pour substitution</p>
+<p>- r : relatif (instruction) ou m : mémoire (donnée )</p>
+<p>au lieu de la différentielle du code A</p>
+<p>.Le transcodage ou traduction en code machine d’un programme ainsi écrit
+est élémentaire; mais à moins de créer un programme monolithique en
+adressage différentiel, il est plus commode pour le programmeur de découper
+son programme en fractions de fonctions spécifiques; il procède alors en 3 étapes:</p>
+<p>-- écriture de chaque fraction sans définir les liaisons entre elles</p>
+<p>-- implantation du programme en mémoire</p>
+<p>-- ajout des paramètres de liaison ( adresse mémoire ).</p>
+<p>L’exécution des 2 dernières étapes peut être confiée à un programme
+(assemblage), à condition dans la première étape de donner pour chaque
+fraction ( sous-programme ) une valeur symbolique à chaque entrée et sortie.</p>
+<h4>Sous-programmes</h4>
+<p>Le sous-programme s’écrit instruction par instruction en code B , mais
+avec des extensions qui ont demandé une nouvelle feuille de programmation, qui
+rajoute quelques facilités telles que la possibilité d’introduire les
+constantes ( clichés, nombres,...) sous une forme pratique codée en colonne T.</p>
+<p>Le sous-programme est alors transposé, vérifié, au besoin corrigé, listé
+et rangé dans une bibliothèque - généralement sur bande - sous forme d’un
+sous-programme assemblable, comportant des instructions et mémoires en code A (
+avec des vides ) et une table d’inconnues et de repères destinée à
+l’assemblage.</p>
+<p>Chaque Gamma 60 possède plusieurs bibliothèques de sous-programmes dont
+celle fournie par C.M.B. comportait début 61 plus de 300 composants concernant
+principalement des fonctions dérouleur, lecteur, imprimante et mathématiques.</p>
+<h4>Assemblage &amp; code C</h4>
+<p>Un programme est obtenu par la liaison de sous-programmes (et de zones ) par
+le programme d’assemblage, exploitant:</p>
+<p>-- une bibliothèque de sous-programmes</p>
+<p>-- une feuille descriptive écrite en code C.</p>
+<p>Le programmeur liste et numérote les sous-programmes - y compris les zones
+de manoeuvre ( tampon, zone de tri,...) - avec pour chacun la liste de ses
+inconnues ( X ). Il effectue alors pour chacune la liaison SPy.Xn = SPz.Rm ou
+l’affectation SPy.Xn = constante dans les colonnes assembl.; il affecte au
+moins au premier sous-programme dans les colonnes distr une adresse
+d’implantation en mémoire .</p>
+<p>Si toutes les inconnues sont affectées, le programme après assemblage sera
+exécutable, à condition d’avoir, dans les colonnes distr., indiqué le repère
+entrée du programme. et lié l’inconnue sortie du programme à un repère
+symbolique.</p>
+<p>Mais la plupart du temps, un certain nombre d’affectations ne pourront pas
+être faites à l’assemblage, comme par exemple un numéro d’appareil, un
+nombre d’articles,...ou même une liaison vers un sous-programme résident du
+superviseur. Les inconnues correspondantes recevront dans les colonnes distr. un
+symbole approprié.</p>
+<p>Si le programme est divisé en phases, chacune sera implantée et leur
+chargement prévu par une liaison au symbole de distribution approprié.</p>
+<p>Le programme d’assemblage, en tenant compte des implantations prévues,
+condensera les sous-programmes et les zones, effectuera les liaisons et les
+affectations validées et constituera une table des inconnues avec leurs
+symboles.</p>
+<p>L’étape suivante consiste, en fournissant au programme les valeurs
+manquantes (distribution), à le transformer en U.T. ( unité de traitement ) exécutable
+en machine.[ voir plus loin l’exploitation].</p>
+<h4>Autres langages</h4>
+<p>Pour le développement des applications de gestion, il n’y eut pas
+d’autre langage que celui d’assemblage, pour les raisons suivantes :</p>
+<p>-- les utilisateurs durent utiliser le code B à l’origine</p>
+<p>-- la vie du Gamma 60 fut courte</p>
+<p>-- le développement du logiciel de base se concentra sur l’exploitation</p>
+<p>-- la définition d’un langage de haut niveau comme COBOL en était à ses
+balbutiements</p>
+<p>-- un tel langage s’adaptait mal, surtout à l’époque, à
+l’architecture matérielle et logicielle du Gamma 60.</p>
+<p>Par contre, pour les applications scientifiques, fut développé et exploité
+en</p>
+<p>première mondiale l’ALGOL 60, lointain ancêtre de PASCAL. Le développement
+d’un langage plus sophistiqué, destiné à surclasser FORTRAN d’I.B.M., dut
+être abandonné en cours, en raison de sa complexité et de sa nouveauté, mais
+surtout faute d’utilisateurs.</p>
+<h3>Logiciel d’exploitation</h3>
+<p>L’exploitation du Gamma 60 est fondée sur sa gestion par l’opérateur
+pupitre ou pupitreur au moyen d’ordres</p>
+<p>Après l’intervention opérateur ( I.O. ) et la réponse « Que désirez-vous?&nbsp;»,les
+ordres codés sur 4 lettres, sont entrés avec les paramètres adéquats; ils
+sont contrôlés puis exécutés si corrects et terminés par le message
+«&nbsp;Ordre exécuté&nbsp;».</p>
+<p>Ces ordres sont tout à fait similaires aux commandes MSDOS de MICROSOFT.</p>
+<h4>Étape préliminaire</h4>
+<p>Pour l’histoire, on signalera les premiers pas du logiciel sur le prototype
+en début 1960.</p>
+<p>-- sur la zone 2 du pupitre ( voir ci-dessus ), introduction en binaire, exécution
+en pas-à-pas, visualisations de contrôle de miniprogrammes tels que:</p>
+<p>- introduction par le lecteur de bande du pupitre</p>
+<p>- mise en service de la machine à écrire pour remplacer progressivement les
+fonctions matérielles ( lancement, visualisations, incidents ) par l’ébauche
+d’un superviseur-moniteur et obtenir un journal de bord.</p>
+<p>-- introduit par bande, miniprogramme lecteur de cartes binaires et
+impression sans édition</p>
+<p>-- entrée par cartes binaires, créées en Gamma 3 Tambour, du programme
+initial de transposition code B-code A, avec contrôle de vraisemblance, listing
+et utilisation du traducteur.</p>
+<p>-- mise en service du tambour</p>
+<p>-- mise en service des dérouleurs</p>
+<p>-- création de bibliothèques de programmes sur tambour et sur bande</p>
+<p>-- introduction et exploitation du programme d’assemblage</p>
+<p>-- création d’un programme de transcodage inverse code A-code B
+permettant, en fonctionnement pas-à-pas, d’extraire sur imprimante sous forme
+plus lisible chaque instruction avec ses registres et ses opérandes, en suivant
+la logique du central ( simus, chaînes de reprise ).</p>
+<p>-- pendant ces dernières étapes, mise en oeuvre progressive des fonctions
+du superviseur-moniteur qui sera nommé G.G.Z.</p>
+<h4>Gestion générale Zéro ou G.G.Z.</h4>
+<p>La gestion G.G.Z. est fournie sur la bande programme dite ruban Z; elle</p>
+<p>comporte plusieurs parties découpées en segments:</p>
+<p>-- un superviseur devant résider en début mémoire, soit:</p>
+<p>- la table des appareils et éléments et</p>
+<p>- la table des unités de traitement ( U.T.) en cours ( voir ci-dessous )</p>
+<p>- l’intervention opérateur avec retour vers l’opérateur:« Que désirez-vous?&nbsp;»</p>
+<p>A la mise sous tension, l’intervention opérateur lance l’initialisation,
+modulable par le positionnement de commutateurs testables.</p>
+<p>- l’initialisation ( tests appareils-éléments, effacements mémoires,...)</p>
+<p>- le chargement en mémoire des segments de programme</p>
+<p>- les zones-tampons appropriées</p>
+<p>- la tête du programme incidents appelée par la détection dans un mot
+qualitatif, du bit 24 regroupant les incidents graves nécessitant en principe
+l’intervention du pupitreur.</p>
+<p>- une amorce&nbsp;pour le lancement et le retour des U.T.</p>
+<p>- des sous-programmes de gestion et de correction bande, très utilisés</p>
+<p>-- un programme d’analyse et de réparation d’incidents, dialoguant avec
+le pupitreur; celui-ci peut suivant le cas:</p>
+<p>- faire faire une manipulation ( manque de cartes ou de papier, fin de bande
+)</p>
+<p>- lancer, avec ou sans manipulation, un sous-programme de réparation situé
+soit dans l’U.T. en cours, soit dans un segment du superviseur</p>
+<p>- bloquer le système en cas d’incident très grave et après intervention,
+relancer les U.T. interrompues.</p>
+<p>-- un moniteur, situé sur le ruban Z, chargé d’exécuter les ordres frappés
+au clavier par le pupitreur. Leur nombre a varié de 30 en 1960 à 46 en 1962</p>
+<p>Fonctions réalisées:</p>
+<p>- fonctions de la zone 2 du pupitre ( visualisation, forçage d’adresse,
+d’instruction ou de donnée, vidage ,...)</p>
+<p>- fonctions élémentaires sur les appareils</p>
+<p>- lancement d’un programme</p>
+<p>Le logiciel de programmation ( voir plus haut ) comportant transposition,
+assemblage et programmes annexes ( introduction des cartes code B et C, états
+sur imprimante, rangement des résultats sur bande,...) est un constituant
+fondamental du logiciel G.G.Z.; il est complété par la distribution, chargée
+de transformer un programme issu de l’assemblage en programme personnalisé exécutable
+appelé unité de traitement ( U.T.); ce logiciel est chargé de distribuer au
+programme assemblé, les valeurs numériques prévues pour les inconnues y ayant
+reçu un code symbolique.</p>
+<p>Ces paramètres, de différents types ( adresse mémoire, adresse tambour,
+numéro d’appareil ou d’élément, longueur de zone,... ), sont introduits
+soit par des ordres du pupitre, soit sous forme de cartes en code D2.</p>
+<p>On constitue ainsi une bibliothèque d‘U.T. exploitables directement, en
+remarquant que tout est figé; en cas d’indisponibilité d’un appareil, il
+sera possible de modifier certains paramètres par ordre pupitre au moment du
+lancement.</p>
+<p>La G.G.Z. est fournie avec :</p>
+<p>-- une bibliothèque de sous-programmes standards ( fonctions dérouleurs,
+entrée cartes, vidages sur imprimante,..., et fonctions mathématiques )</p>
+<p>-- une bibliothèque de programmes standards ( tris, interclassement,
+conversions bande - imprimante,...., et programmes scientifiques classiques ).</p>
+<h4>Gestion Générale Un ou G.G.U.</h4>
+<p>La G.G.U., destinée à remplacer la G.G.Z., a été conçue en recherchant
+à privilégier les aspects suivants:</p>
+<p>-- Prolongement sans rupture des fonctionnalités de la G.G.Z..</p>
+<p>-- Sécurité d’exploitation de la mémoire et des appareils utilisés dans
+chaque programme.</p>
+<p>-- Tenue d’un journal d’exploitation complet et lisible, avec le minimum
+d’interventions de l’opérateur pupitre.</p>
+<p>-- Planification des travaux ( enchaînement des phases dans une U.T., enchaînement
+des U.T. dans un job ).</p>
+<p>-- Amélioration de la facilité et de la durée de création des travaux, grâce
+à d’importantes bibliothèques de sous-programmes et de programmes standards.</p>
+<p>-- Amélioration de la gestion des incidents et mise en oeuvre de points de
+reprise.</p>
+<p>-- Possibilité d’extensions ultérieures sans bouleversement.</p>
+<p>-- Accélération de la vitesse d’exécution, possible par stockage sur
+tambour des ordres les plus fréquents.</p>
+<p>Les fonctions du noyau résident du superviseur restent pratiquement les mêmes
+qu’en G.G.Z.; ( s’y ajoutent surtout les topogrammes de la mémoire et des
+appareils ). Sa capacité est de 3800 Mots, soit moins de 12 KOctets.</p>
+<p>Le traitement des incidents a été perfectionné; on peut citer par exemple
+la possibilité de reprise incorporée dans les programmes de tri sur bandes.</p>
+<p>La gestion des ordres s’est gonflée ( 91 ordres en fin 1963 ); sont
+introduits par exemple 10 ordres dérouleurs, 10 ordres de vidage bande sur
+imprimante et surtout 18 ordres de lancement, arrêt et reprise des programmes.;
+par exemple un ordre permettant avec 10 sous-ordres, de positionner, de lire,
+d’écrire, de rebobiner,... la bande</p>
+<p>La gestion de l’exploitation des U.T., devient plus sophistiquée:</p>
+<p>-- implantation fixe ou variable</p>
+<p>-- lancement avec paramétrage en code D1 et mise en attente en cas
+d’indisponibilité de mémoire ou d’appareils</p>
+<p>-- alimentation de programme interne à l’U.T. ( phase ) par un
+sous-programme standard incorporé</p>
+<p>-- mise en oeuvre d’une gestion de bandes complète (contrôle, rebobinage,...
+)</p>
+<p>-- possibilité d’incorporer dans une U.T. - généralement bande-bande -
+des points de reprise prévus par l’utilisateur; le rangement et le
+relancement éventuel par un ordre étant à la charge de la G.G.U.</p>
+<p>La G.G.U. introduit l’unité de planification ( U.P. ) -- ou job --
+correspondant à un ensemble d’U.T. -- ou job-steps -- effectuant un travail
+complet, comptable ou scientifique, depuis des données externes (cartes)
+jusqu’à des résultats imprimés exploitables par l’utilisateur.</p>
+<p>Ce job peut être représenté par un graphe, dont les mailles orientées
+représentent les U.T. et les noeuds effectuent des regroupements et des
+lancements d’U.T. en simultanéité et/ou en alternative avec critères de
+validation.</p>
+<p>La description de ce job s’effectue à l’aide du code D3.</p>
+<p>L’ensemble des cartes D relatives à un job constitue une sorte de J.C.L.</p>
+<p>Après la distribution, l’U.P., comme l’U.T., est stockée en bibliothèque
+de programmes exécutables, d’où elle pourra être exploitée par un des
+ordres de lancement.</p>
+<p>A un niveau supérieur, le G.G.U. prévoit l’exploitation automatique des
+U.P..Ce logiciel procède en 3 étapes:</p>
+<p>-- introduction du J.C.L. associé ( cartes B, C, D, E,....), contrôles,
+planification du travail en fonction de la disponibilité des appareils</p>
+<p>et listing du planning proposé y compris les montages et démontages de
+bandes sur les dérouleurs.</p>
+<p>-- exploitation de l’U.P. avec les paramètres introduits,</p>
+<p>- soit en fonctionnement normal</p>
+<p>- soit en mise au point, prévue à l’étape précédente par
+l’introduction de jalons et de vidages variés</p>
+<p>. -- impression des résultats de l’étape précédente.</p>
+<p>Un niveau ultime est la planification des travaux qui, à partir d’une
+bande programme contenant tous les travaux d’une application sous forme d’U.T.
+encore implantables et paramétrables, optimise l’exploitation de ces travaux
+pour un Gamma 60 particulier.</p>
+<p>Ce niveau n’a certainement pas été exploité, ni même réalisé.</p>
+
+
+
+
+</body></html>

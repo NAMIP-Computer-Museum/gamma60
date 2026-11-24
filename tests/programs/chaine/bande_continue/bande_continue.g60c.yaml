@@ -1,0 +1,21 @@
+# Code C (J6, format moderne : U-53) : bande_continue_task.g60b découpé en articles.
+# Lecture en marche continue (sous-programme de bibliothèque), traitement d'un bloc, et les
+# zones de manœuvre comme articles numérotés [MAIT §Assemblage & code C].
+articles:
+  1: {sp: ../../lib/lecture_continue.g60b, nom: LECT}
+  2: {sp: traitement_bloc.g60b, nom: TRAIT}
+  3: {zone: 50, nom: ZA}
+  4: {zone: 50, nom: ZB}
+  5: {zone: 1, nom: ZTR}
+assembl:                       # colonnes « assembl. » : liaisons SPy.Xn = SPz.Rm
+  - LECT.?ZA = ZA.R1
+  - LECT.?ZB = ZB.R1
+  - LECT.?ZTR = ZTR.R1
+  - LECT.?TRAIT = TRAIT.R1
+  - TRAIT.?ZTR = ZTR.R1
+distr:                         # colonnes « distr. »
+  implantation: {1: 256}
+  entree: LECT.R1
+  sortie: LECT.?FIN            # → FIN_UT
+  symboles:
+    LECT.?DEROUL: DEROULEUR

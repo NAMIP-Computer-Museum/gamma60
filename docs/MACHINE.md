@@ -211,12 +211,12 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
   la transmet, exploite sa chaîne, puis sert les priorités ; l'élément redemande ensuite.
 - Opératoire : lance le travail autonome ; RAI ← RAPP ; termine l'instruction complète.
 
-### 6.3 Classes et raccordement [ONDE §2.1, §4.1 ; MAI]
+### 6.3 Classes et raccordement [ONDE §2.1, §4.1 ; MAIT]
 - 5 ensembles de circuits d'armoire : c0, c1, 2 × c2, c3+c4 ; multiplexeur pour c3-c4
   (≤ 20 éléments, 2 au plus) ; 8 voies dans l'UC, 5 utilisées en standard.
 - BAT72 parle de « 6 special circuits » de raccordement (c0, c1, c2 « 2 circuits », c3, c4) ;
   sa figure 1 montre 4 blocs (c0, c1, c2, c3-4) ; comptes divergents (U-32). [BAT72 p.100]
-- c0 : pupitre (et LOGI selon ONDE et BAT72 ; c1 selon MAI ?) ; c1 : ARIT, COMP, TRAN ; c2 : tambours,
+- c0 : pupitre (et LOGI selon ONDE et BAT72 ; c1 selon MAIT ?) ; c1 : ARIT, COMP, TRAN ; c2 : tambours,
   unisélecteurs ; c3 : cartes, imprimantes ; c4 : bande perforée, machines à écrire.
 - BAT72 : ARIT en décimal codé binaire, chiffres de 4 bits, contrôle mod 7 ; tambour 25 600
   catènes, 200 par piste. [BAT72 p.104]
@@ -472,17 +472,28 @@ imprimante 1 [COURS p.134]. Lecteur de cartes, bande perforée et pupitre : non 
 - Lecteur photoélectrique 5/8 pistes, 300 car/s, 2 sens, 3 caractères par catène, contrôle
   d'imparité (8 pistes) ; perforateur 25 car/s non contrôlé.
 
-### Pupitre [B61 p.47-48 ; ONDE ; MAI]
+### Pupitre [B61 p.47-48 ; ONDE ; MAIT]
 - Machine à écrire (10 car/s) ; programme résident de « gestion de la machine à écrire » ;
   lancement d'un programme si les éléments et la zone mémoire sont disponibles ; lecteur et
   perforateur de bande pour le journal. Seule source d'interruption prioritaire. Statut
   d'élément discuté (?) : « pas un élément d'E/S » [B61 p.47] mais coupure DESK.
 
-## 9. Logiciel système et mémoire [MAI ; B61 p.48]
-- GGZ : superviseur résident en début de mémoire (tables, opérateur, chargement, tampons,
-  incidents) ; GGU : noyau ≈ 3 800 mots, topogrammes, implantation fixe ou variable, mise en
-  attente des UT, jobs (D3).
-- UT = programme assemblé (code C) puis distribué (D2), valeurs figées ; phases (overlays).
+## 9. Logiciel système et mémoire [MAIT ; B61 p.48]
+- GGZ (Gestion Générale Zéro), fournie sur la bande « ruban Z » [MAIT §G.G.Z.] :
+  - superviseur résident en début de mémoire : table des appareils et éléments, table des U.T.
+    en cours, intervention opérateur (« Que désirez-vous ? »), initialisation, chargement des
+    segments de programme, zones-tampons, tête du programme incidents (appelée quand le bit 24
+    d'un qualitatif signale un incident grave), amorce de lancement et de retour des U.T.,
+    sous-programmes de gestion et de correction bande ;
+  - programme d'analyse et de réparation d'incidents, en dialogue avec le pupitreur ;
+  - moniteur (sur le ruban Z) qui exécute les ordres de 4 lettres frappés au clavier : 30 en
+    1960, 46 en 1962 ; 91 fin 1963 avec la GGU [MAIT §G.G.Z., §G.G.U.].
+- GGU (Gestion Générale Un) : noyau ≈ 3 800 mots, topogrammes de la mémoire et des appareils,
+  implantation fixe ou variable, lancement paramétré (D1), mise en attente des UT, jobs (D3),
+  points de reprise [MAIT §G.G.U.]. Selon LEC, « on ne dépassa jamais » la GGZ, et chaque
+  utilisateur bâtit son propre système d'exploitation autour (U-59).
+- UT = programme assemblé (code C) puis distribué (D2), valeurs figées ; phases (overlays)
+  [MAIT §Assemblage & code C, §G.G.Z.]. Chaîne détaillée et hypothèses : `TOOLCHAIN.md`.
 - Contenu de la MC : outre les programmes et données, les registres I1/I2 (B/C) de chaque
   élément « en Mémoire Centrale à des adresses spécialisées » [ONDE §2] (adresses : U-30) ;
   les catènes-image des éléments virtuels, à des adresses choisies par le programmeur (ex. 1 000
@@ -508,7 +519,9 @@ décodage des directives (COMP position 22).
 | Tambour | 100 / 98 µs par catène | B61 / COURS |
 | MIC | 256 / 128×20 / 128×21 | B61 / COURS / ONDE |
 | RNE | 7 / 15 bits | COURS p.53 / p.14 |
-| Classe de LOGI | 0 / 1 | ONDE / MAI |
+| Classe de LOGI | 0 / 1 | ONDE, LEC / MAIT |
+| GGU en service | décrite en détail (91 ordres fin 1963) / « jamais dépassé » la GGZ | MAIT / LEC |
+| Nombre de machines | 20 exemplaires / une quinzaine de clients | LEC / NAM 2018/3 |
 | Pupitre | élément / pas un élément d'E/S | ONDE, table B61 / texte B61 |
 | Coquilles B61 | accès tambour « 10 µs » (10 ms) ; « 37 768 » (32 768) ; « nine » phases (11) | B61 p.12, 29, 38 |
 
@@ -523,4 +536,4 @@ code B (`fr` / `en`, `data/directives.yaml`).
 ## Clés des sources
 Voir `SOURCES.md`. B61 = Bull 1961 ; COURS = Bull, *Cours de programmation Gamma 60* ;
 BPD = *Preliminary Description* ; ONDE = *L'Onde électrique* 1960 ; DR-W/DR-E = P. Dreyfus
-1958 ; BAT72 ; TS ; MAI ; MAS ; AVG ; NAM.
+1958 ; BAT72 ; TS ; MAIT ; LEC ; MAS ; AVG ; NAM.
