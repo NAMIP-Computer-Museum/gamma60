@@ -50,11 +50,13 @@ The [wiki](wiki/) presents the machine in English:
 - [Registers](wiki/REGISTERS.md) — the registers of the central unit, of the Program Distributor and of each
   element, with their sizes.
 - [Instructions](wiki/INSTRUCTIONS.md) — codes A, B, C, D and every instruction, in English and French forms.
-- [Known installations](wiki/INSTALLATIONS.md) — the 16 customers, the deployment calendar and photos.
+- [Installations](wiki/INSTALLATIONS.md) — the 16 customers, the deployment calendar and photos.
 - [Facts and anecdotes](wiki/TRIVIA.md) — the stories around the machine, from its name to *Alphaville*.
 - [Command line](wiki/MAN.md) — the `gamma60` man page: running, assembling and observing programs
   (traces, step-by-step debugger, memory dumps, ASCII timelines).
 - [References](wiki/REFERENCES.md) — Bull publications, related work and later analyses.
+- [AI in this project](wiki/AI.md) — how an AI assistant was used: OCR correction, source study,
+  emulator by milestones.
 
 ## For contributors
 

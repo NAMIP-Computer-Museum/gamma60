@@ -1,4 +1,4 @@
-# Known installations
+# Installations
 
 Where the Gamma 60 machines ran. Derived from [`docs/HISTORY.md`](../docs/HISTORY.md)
 ("Installations clients"), which prevails.
@@ -56,28 +56,33 @@ to be documented.*
 ## 3. Customers
 
 ### AGVie
+- **Full name / location**: not on the FEB customer page [FEB-CLI].
 - **Dates**: ordered 1957 (AVG associates the date 26 June 1957 with AGVie), available 1960,
-  returned 1962.
-- TODO: country, company, processing, photo.
+  end of life 1962.
+- TODO: full name, location, processing, photo.
 
-### EDF
-- **Country**: France (Paris).
-- **Dates**: ordered 1957; **first Gamma 60 delivered**, 1960 [FEB]; returned 1964.
+### EDF — EDF Études et Recherches
+- **Location**: France, Paris, place des États-Unis [FEB-CLI].
+- **Dates**: ordered 1957; **first Gamma 60 delivered**, 1960 [FEB]; end of life 1964.
 - TODO: processing, photo.
 
-### CNEP
-- **Dates**: ordered 1957, available 1962, returned 1969.
-- TODO: country, company, processing, photo.
+### CNEP — Comptoir National d'Escompte de Paris
+- **Location**: France (deduced, see §1); city unknown.
+- **Dates**: ordered 1957, delivered 1961, available 1962, end of life 1969.
+- TODO: city, processing, photo.
 
-### UNION I
-- **Dates**: ordered 1957, available 1963, returned 1969.
-- TODO: country, company, processing, photo.
+### UNION I — L'Union
+- **Location**: France (deduced, see §1); city unknown.
+- **Dates**: ordered 1957, delivered 1961, available 1963, end of life 1969.
+- TODO: city, processing, photo.
 
-### SNCF
-- **Country**: France; computer room at the **Gare d'Auteuil**, Paris.
+### SNCF — Société nationale des chemins de fer français
+- **Location**: France, Paris; computer room at the **Gare d'Auteuil** [FEB-CLI].
 - **Company**: the French national railways; chose the Gamma 60 in 1957 [FEB].
-- **Processing**: **payroll**, in service from 15 April 1961 [FEB].
-- **Dates**: delivered November 1960 [FEB], returned 1966.
+- **Processing**: staff management, **payroll**, in service from 15 April 1961 [FEB ;
+  FEB-SNCF]; payroll of about 300,000 employees, pensions, freight traffic [LEC].
+- **Dates**: ordered 1958, delivered November 1960 [FEB], end of life 1966 ("in service from
+  1960 to 1966" [FEB-CLI]).
 
 ![The Gamma 60 room at the Gare d'Auteuil](../archives/images/G60-CUST-SNCF-Auteuil-2.jpg)
 
@@ -91,8 +96,8 @@ to be documented.*
 
 *General view of the Gamma 60 room of the SNCF, shown under the SNCF entry of the FEB customer page [FEB-CLI].*
 
-### RTT I
-- **Country**: Belgium (Brussels, rue Lebeau).
+### RTT I — Régie des Télégraphes et Téléphones
+- **Location**: Belgium, Brussels, rue Lebeau.
 - **Company**: the "Régie des T.T." [La Meuse] (RTT).
 - **Processing**: **telephone billing**: preparing and collecting the accounts of about
   600,000 telephone subscribers, for 850,000 calls a month. The press called it the most
@@ -119,65 +124,79 @@ TODO: source).*
 
 *"Gamma 60 of the RTT. The desk can be seen; one of its drawers holds a paper tape reader, and the rows of magnetic tape drives are in the background" (original caption, © G. Natan) [FEB-CLI].*
 
-### URBAINE SEINE
-- **Dates**: ordered 1959, available 1961, returned 1970.
-- TODO: country, company, processing, photo.
+### URBAINE SEINE — L'Urbaine et la Seine
+- **Location**: France (deduced, see §1); city unknown.
+- **Dates**: ordered 1959, delivered 1961, available 1961, end of life 1970 (?).
+- TODO: city, processing, photo.
 
-### GMF
-- **Dates**: ordered 1960, available 1962, returned 1973.
-- TODO: country, company, processing.
+### GMF — Garantie Mutuelle des Fonctionnaires
+- **Location**: France (deduced, see §1); city unknown.
+- **Processing**: insurance: updating the contract files (policies, amendments, renewal
+  notices), then accounting and claims [FEB-GMF].
+- **Dates**: ordered 1960, delivered 1962, available 1962, end of life 1973.
+- TODO: city.
 
 ![Gamma 60 of the GMF](../archives/images/G60-CUST-GMF.jpg)
 
 *Gamma 60 room of the GMF: cabinets on the left, tape drives at the back, an operator at the desk; shown under the GMF entry of the FEB customer page [FEB-CLI].*
 
-### CREDITO ITALIANO
-- **Dates**: ordered 1960, available 1961; return date unknown.
-- TODO: country, company, processing.
+### CREDITO ITALIANO — Credito Italiano
+- **Location**: Italy, Milan [FEB-CLI].
+- **Company**: bank; machine sold by Olivetti-Bull [FEB-CLI].
+- **Dates**: ordered 1960, delivered 1961, available 1961; end of life unknown (≈ 1971?).
+- TODO: processing.
 
 ![Gamma 60 of the Credito Italiano](../archives/images/G60-CUST-Credito.jpg)
 
 *Gamma 60 room of the Credito Italiano, Milan; shown under its entry of the FEB customer page, file name `g60_credito_natan.jpg` there [FEB-CLI].*
 
-### CEA
-- **Dates**: ordered 1960, available 1962, returned 1964.
-- TODO: country, company, processing, photo.
+### CEA — Commissariat à l'Énergie Atomique, CEA/DAM
+- **Location**: France, Vaujours [FEB-CLI].
+- **Dates**: ordered 1960, delivered 1961, available 1962, end of life 1964.
+- TODO: processing, photo.
 
-### BANCA LAVORO
-- **Country**: Italy (Rome).
-- **Dates**: order date unknown, available 1963; return date unknown.
-- TODO: company, processing.
+### BANCA LAVORO — Banca Nazionale del Lavoro
+- **Location**: Italy, Rome [FEB-CLI].
+- **Dates**: order date unknown, delivered 1962, available 1963; end of life unknown (≈ 1971?).
+- TODO: processing.
 
 ![Installation at the Banca del Lavoro, Rome](../archives/images/G60-CUST-Banca.jpg)
 
 *Left: an open cabinet. Right: "Installation at the Banca del Lavoro in Rome" (original
 captions).*
 
-### PRINTEMPS
-- **Dates**: ordered 1961, available 1962, returned 1965.
-- TODO: country, company, processing, photo.
+### PRINTEMPS — Le Printemps
+- **Location**: France, Paris [FEB-CLI].
+- **Dates**: ordered 1961, available 1962, end of life 1965.
+- TODO: processing, photo.
 
-### HBNPC
-- **Dates**: ordered 1961, available 1963, returned 1970.
-- TODO: country, company, processing.
+### HBNPC — Houillères du Bassin du Nord et du Pas-de-Calais
+- **Location**: France, Douai [FEB-CLI].
+- **Dates**: ordered 1961, delivered 1962, available 1963, end of life 1970.
+- TODO: processing.
 
 ![Gamma 60 of the HBNPC](../archives/images/G60-CUST-HBNPC.jpg)
 
 *Gamma 60 of the HBNPC, Douai, apparently during installation or maintenance (open cabinets, technicians); shown under the HBNPC entry of the FEB customer page [FEB-CLI].*
 
-### TLF
-- **Dates**: ordered 1962, available 1964, returned 1972.
-- TODO: country, company, processing, photo.
+### TLF — CNRS, Trésor de la Langue Française
+- **Location**: France, Nancy [FEB-CLI].
+- **Processing**: lexicography: text indexing and concordances for the TLF dictionary, about
+  100,000 words a day [FEB-TLF].
+- **Dates**: ordered 1962, delivered 1963, available 1964, end of life 1972 (end of 1971 per
+  FEB-TLF).
+- TODO: photo.
 
-### MITSUBISHI
-- **Dates**: ordered 1963, available 1965, returned 1972.
-- TODO: country, company, processing.
+### MITSUBISHI — Mitsubishi Shoji Kaisha
+- **Location**: Japan, Tokyo [FEB-CLI].
+- **Dates**: ordered 1963, delivered 1965, available 1965, end of life 1972.
+- TODO: processing.
 
 ![Gamma 60 initiation ceremony at Mitsubishi](../archives/images/G60-CUST-Mitsubishi.jpg)
 
 *"GAMMA 60 INITIATION CEREMONY" at Mitsubishi, Tokyo; "inauguration du Gamma 60 de Mitsubishi" (caption of the FEB customer page) [FEB-CLI].*
 
-### RTT II
-- **Country**: Belgium. Second machine of the RTT (see RTT I).
+### RTT II — Régie des Télégraphes et Téléphones
+- **Location**: Belgium, Brussels [FEB-CLI]. Second machine of the RTT (see RTT I).
 - **Dates**: ordered 1964, available 1966, in service until 1974.
 - TODO: processing, photo.
