@@ -7,14 +7,14 @@
 ## The machine
 
 The **Bull Gamma 60** was a large French computer designed by Compagnie des Machines Bull from
-1955 and first delivered in 1960; the last machines were taken out of service in 1974. About
-16 to 20 were built, for customers such as EDF, the SNCF and the Belgian RTT.
-([docs/HISTORY.md](docs/HISTORY.md))
+1955 and first delivered in 1960. The last machines were taken out of service in 1974. 
+Only 16 documented installations were delivered for customers mainly in France (EDF, SNCF...),
+Belgium (RTT), Italy and Japan ([docs/HISTORY.md](docs/HISTORY.md))
 
-It was one of the first computers designed from the start to do **several things at once**.
+It was one of the very first computers designed from the start to perform  **several tasks at once**.
 Instead of one processor doing everything, it had a set of specialised, autonomous units
-(arithmetic, logic, comparison, transcoding, drums, tapes, card readers, printers…) sharing one
-memory, and a central unit that only handed out work to them. Its instruction set already
+(arithmetic, logic, comparison, transcoding, drums, tapes, card readers, printers,...) sharing one
+memory, and a central "distributor" unit that only handed out work to them. Its instruction set already
 contained what we now call **fork and join**, **wait queues** and **locks**, years before
 these ideas were named and became standard.
 
@@ -34,12 +34,20 @@ these ideas were named and became standard.
 3. **Provide an emulator** built only on the available data. Every assumption and every
    unknown is made **explicit and adjustable** (in [`data/`](data/) and
    [docs/UNKNOWNS.md](docs/UNKNOWNS.md)), so that it can easily be completed or corrected when
-   new sources turn up. The emulator is under construction.
+   new sources turn up.
 
 The project is also an experiment in **AI-assisted work**: an AI assistant (Claude) helps with
 the analysis of the documents and with the code, under human direction and review.
 
-## Read more
+## Current status
+
+All known documentation is currently consolidated inside this repository and also published 
+on Internet Archive https://archive.org/details/bull-gamma-60
+
+The emulator is still work in progress but is already quite advanced: all instructions and peripherals 
+are supported including parallel operation. Only the first basic OS layer (GGZ) is currently supported.
+
+## More detailed information:
 
 The [wiki](wiki/) presents the machine in English:
 
