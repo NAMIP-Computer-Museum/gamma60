@@ -28,27 +28,32 @@ documents d'époque.
 
 ## Installations clients
 
-Source principale : graphique « Calendrier des installations clients »
+Sources : graphique « Calendrier des installations clients »
 (`archives/images/Gamma60-calendrier.jpg`, origine à documenter — probablement AVG, qui
-répertorie 16 machines). Années **lues sur le graphique** (précision ≈ ½ an) ; « ? » = marqué
-inconnu sur le graphique. Noms tels qu'écrits sur le graphique (développement des sigles non
-sourcé).
+répertorie 16 machines) pour les années de commande, livraison, disponibilité et fin de vie,
+**lues sur le graphique** (précision ≈ ½ an ; « ? » = marqué inconnu sur le graphique) ; noms
+complets et lieux [FEB-CLI] ; utilisations [FEB-SNCF ; FEB-GMF ; FEB-TLF ; LEC ; *La Meuse*].
+Lieu « France (déduit) » : FEB-CLI répartit ses clients entre France, Italie, Belgique et Japon
+et nomme les clients des trois derniers pays. « — » : non documenté.
 
-| Client | Commande | Livraison | Disponibilité | Retour | Autres sources |
-|---|---|---|---|---|---|
-| AGVie | 1957 | — | 1960 | 1962 | « 26 juin 1957 » associé à AGVie [AVG] |
-| EDF | 1957 | 1960 | 1960 | 1964 | première livraison, EDF Paris [FEB] |
-| CNEP | 1957 | 1961 | 1962 | 1969 | |
-| UNION I | 1957 | 1961 | 1963 | 1969 | |
-| SNCF | 1958 | 1960 | 1960 | 1966 | livrée en nov. 1960, paie en service le 15 avr. 1961 [FEB] ; salle à la gare d'Auteuil (`Gamma60-SNCF-Auteuil-2.jpg`, légende) |
-| RTT I | 1958 | 1960 | 1961 | 1974 | contrat déc. 1958, fin de service 1974 [RTT] ; inauguration à la Régie des T.T., rue Lebeau, Bruxelles, par le ministre des P.T.T. M. Busieau : facturation des abonnés du téléphone (≈ 600 000 comptes, 850 000 communications par mois) [*La Meuse*, 6 juil. 1961, `Gamma60-RTT-1961.jpg`] |
-| URBAINE SEINE | 1959 | 1961 | 1961 | 1970 | |
-| GMF | 1960 | 1962 | 1962 | 1973 | |
-| CREDITO ITALIANO | 1960 | 1961 | 1961 | ? (≈ 1971) | |
-| CEA | 1960 | 1961 | 1962 | 1964 | |
-| BANCA LAVORO | ? | 1962 | 1963 | ? (≈ 1971) | installation à Rome (`Gamma60-Rome.jpg`, légende « Banca del Lavoro à Rome ») |
-| PRINTEMPS | 1961 | — | 1962 | 1965 | |
-| HBNPC | 1961 | 1962 | 1963 | 1970 | |
-| TLF | 1962 | 1963 | 1964 | 1972 | |
-| MITSUBISHI | 1963 | 1965 | 1965 | 1972 | |
-| RTT II | 1964 | — | 1966 | 1974 | |
+| Client | Nom complet [FEB-CLI] | Lieu | Commande | Livraison | Disponibilité | Fin de vie | Utilisation | Autres sources |
+|---|---|---|---|---|---|---|---|---|
+| AGVie | — (absent de FEB-CLI) | — | 1957 | — | 1960 | 1962 | — | « 26 juin 1957 » associé à AGVie [AVG] |
+| EDF | EDF Études et Recherches | Paris, place des États-Unis [FEB-CLI] | 1957 | 1960 | 1960 | 1964 | — | première livraison, EDF Paris [FEB] |
+| CNEP | Comptoir National d'Escompte de Paris | France (déduit) | 1957 | 1961 | 1962 | 1969 | — | |
+| UNION I | L'Union | France (déduit) | 1957 | 1961 | 1963 | 1969 | — | |
+| SNCF | SNCF | Paris, gare d'Auteuil [FEB-CLI] | 1958 | 1960 | 1960 | 1966 | gestion du personnel : paie [FEB ; FEB-SNCF] ; paie d'environ 300 000 agents, pensions des retraités, trafic marchandises [LEC] | livrée en nov. 1960, paie en service le 15 avr. 1961 [FEB] ; « en service de 1960 à 1966 » [FEB-CLI] ; « pendant près de dix ans » selon LEC (divergence) ; salle à la gare d'Auteuil (`G60-CUST-SNCF-Auteuil-2.jpg`, légende) |
+| RTT I | Régie des Télégraphes et Téléphones | Bruxelles, rue Lebeau (Belgique) [*La Meuse*] | 1958 | 1960 | 1961 | 1974 | facturation du téléphone : comptes d'environ 600 000 abonnés, 850 000 communications par mois [*La Meuse*] | contrat déc. 1958, fin de service 1974 [RTT] ; « livrés en 1961 et 1966 […] en service jusque 1974 » (2 systèmes) [FEB-CLI] ; inauguration par le ministre des P.T.T. M. Busieau [*La Meuse*, 6 juil. 1961, `G60-CUST-RTT-1961.jpg`] |
+| URBAINE SEINE | L'Urbaine et la Seine | France (déduit) | 1959 | 1961 | 1961 | 1970 | — | « livré en 1961 en service jusque 1970 (?) » [FEB-CLI] |
+| GMF | Garantie Mutuelle des Fonctionnaires | France (déduit) | 1960 | 1962 | 1962 | 1973 | assurance : mise à jour du fichier des contrats (polices, avenants, avis d'échéance), puis comptabilité et sinistres [FEB-GMF] | Gamma 60 retenu en 1960, mises à jour dès début 1962, arrêté en 1973 [FEB-GMF] |
+| CREDITO ITALIANO | Credito Italiano | Milan (Italie) [FEB-CLI] | 1960 | 1961 | 1961 | ? (≈ 1971) | — | vendu par Olivetti-Bull, « livré en 1961 » [FEB-CLI] |
+| CEA | Commissariat à l'Énergie Atomique, CEA/DAM | Vaujours (France) [FEB-CLI] | 1960 | 1961 | 1962 | 1964 | — | « installé à Vaujours en 1961, opérationnel jusqu'en 1964 » [FEB-CLI] |
+| BANCA LAVORO | Banca Nazionale del Lavoro | Rome (Italie) [FEB-CLI] | ? | 1962 | 1963 | ? (≈ 1971) | — | « installé à Rome en 1962 » [FEB-CLI] ; `G60-CUST-Banca.jpg` (légende « Banca del Lavoro à Rome ») |
+| PRINTEMPS | Le Printemps | Paris [FEB-CLI] | 1961 | — | 1962 | 1965 | — | « fin d'utilisation en 1965 » [FEB-CLI] |
+| HBNPC | Houillères du Bassin du Nord et du Pas-de-Calais | Douai (France) [FEB-CLI] | 1961 | 1962 | 1963 | 1970 | — | |
+| TLF | CNRS, Trésor de la Langue Française | Nancy (France) [FEB-CLI] | 1962 | 1963 | 1964 | 1972 (fin 1971 selon FEB-TLF) | lexicographie : saisie et dépouillement de textes, concordances pour le dictionnaire TLF, environ 100 000 mots par jour [FEB-TLF] | mis à disposition à partir de 1963, a fonctionné « jusqu'à fin 1971 » [FEB-TLF] |
+| MITSUBISHI | Mitsubishi Shoji Kaisha | Tokyo (Japon) [FEB-CLI] | 1963 | 1965 | 1965 | 1972 | — | « livré en 1965, fin d'utilisation en 1972 » [FEB-CLI] |
+| RTT II | Régie des Télégraphes et Téléphones | Bruxelles (Belgique) [FEB-CLI] | 1964 | — | 1966 | 1974 | — | voir RTT I |
+
+FEB-CLI liste 14 clients et 15 systèmes (2 à la RTT) ; AGVie n'y figure pas (le graphique en
+compte 16). Nombre total : voir MACHINE.md §11.

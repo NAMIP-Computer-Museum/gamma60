@@ -53,6 +53,10 @@ Looking back at the Gamma 60: assessments, histories, testimonies, museum pages.
 | MAS | C. Massuard, "Petite synthèse…", FEB site. French. | 1997 | [online](http://www.feb-patrimoine.com/histoire/systemes_ord/g6002.htm) |
 | AVG | J. Bourboulon (ed.), *L'Aventure Gamma 60*, Hermès/Lavoisier (page photos only). French. | 2005 | `archives/photos/aventure-gamma60-*` |
 | NAM | G. Natan, NAM-IP Infos 2018/1-3, "Préservation : l'ordinateur Bull Gamma 60" (includes a sort program in code B; part 3: GGZ / GGU). French. | 2018 | [online](http://pionnier.nam-ip.be/NAM-ip-Info201801-Pres1.html) · [part 3](https://namip-computer-museum.github.io/blog/posts/2018/2018-03-pres1/) · [photo](../archives/photos/namip-2018-programme-classement.jpg) |
+| FEB-CLI | FEB, "clients Gamma 60, 1960-1967": customers, locations, delivery and end-of-service years. French. | — | [HTML](../archives/docs/FEB-Gamma60-clients.htm) · [online](http://www.feb-patrimoine.com/projet/gamma60/gamma_60_clients.htm) |
+| FEB-SNCF | J.-M. Casadevall, "La SNCF et le Gamma 60", FEB site. French. | — | [HTML](../archives/docs/Casadevall-FEB-Gamma60-SNCF.htm) |
+| FEB-GMF | J.-J. Vial, "Le Gamma 60 de la GMF", FEB site. French. | — | [HTML](../archives/docs/Vial-FEB-Gamma60-GMF.htm) |
+| FEB-TLF | G. Papelier, "Le Trésor de la Langue Française" (Gamma 60, non-numeric processing), FEB site. French. | — | [HTML](../archives/docs/Papelier-FEB-Gamma60-TLF.htm) |
 | FEB-CHR | FEB, chronology "The dawn of electronics 1949-1964". | — | [online](http://www.feb-patrimoine.com/histoire/english/chronoa4.htm) |
 | RTT | G. Natan / histoireinform, "Gamma 60 Bull à RTT". French. | — | [online](http://www.histoireinform.com/Histoire/+infos2/chr4rtt.htm) |
 | SMO | M. Smotherman, "Bull Gamma 60 (1958)". | — | [online](https://people.computing.clemson.edu/~mark/g60.html) |
