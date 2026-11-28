@@ -7,11 +7,11 @@
 ## The machine
 
 The **Bull Gamma 60** was a large French computer designed by Compagnie des Machines Bull from
-1955 and first delivered in 1960. The last machines were taken out of service in 1974. 
+1955 and first delivered in 1960. The last machines were taken out of service in 1974.
 Only 16 documented installations were delivered for customers mainly in France (EDF, SNCF...),
-Belgium (RTT), Italy and Japan ([docs/HISTORY.md](docs/HISTORY.md))
+Belgium (RTT), Italy and Japan ([docs/HISTORY.md](docs/HISTORY.md)).
 
-It was one of the very first computers designed from the start to perform  **several tasks at once**.
+It was one of the very first computers designed from the start to perform **several tasks at once**.
 Instead of one processor doing everything, it had a set of specialised, autonomous units
 (arithmetic, logic, comparison, transcoding, drums, tapes, card readers, printers,...) sharing one
 memory, and a central "distributor" unit that only handed out work to them. Its instruction set already
@@ -41,13 +41,13 @@ the analysis of the documents and with the code, under human direction and revie
 
 ## Current status
 
-All known documentation is currently consolidated inside this repository and also published 
+All known documentation is currently consolidated inside this repository and also published
 on Internet Archive https://archive.org/details/bull-gamma-60
 
-The emulator is still work in progress but is already quite advanced: all instructions and peripherals 
-are supported including parallel operation. Only the first basic OS layer (GGZ) is currently supported.
+The emulator is still work in progress but is already quite advanced: all core instructions and peripherals
+are supported including parallel operation. The whole toolchain is present. The OS layer is in analysis phase.
 
-## More detailed information:
+## More detailed information
 
 The [wiki](wiki/) presents the machine in English:
 
